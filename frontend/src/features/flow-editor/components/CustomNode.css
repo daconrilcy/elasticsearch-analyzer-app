@@ -1,0 +1,43 @@
+/* frontend/src/features/flow-editor/components/CustomNode.css */
+.custom-node {
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: white;
+    min-width: 150px;
+    text-align: center;
+    font-family: system-ui, sans-serif;
+    border: 2px solid #222;
+  }
+  
+  /* Couleurs inspirées de la maquette */
+  .custom-node-input {
+    background-color: #8b5cf6; /* Violet */
+  }
+  .custom-node-output {
+    background-color: #ec4899; /* Rose/Orange */
+  }
+  .custom-node-char_filter,
+  .custom-node-token_filter {
+    background-color: #10b981; /* Vert/Turquoise */
+  }
+  .custom-node-tokenizer {
+    background-color: #3b82f6; /* Bleu */
+  }
+  
+  .node-content strong {
+    font-weight: 500;
+    font-size: 1.1em;
+  }
+
+  .input-textarea {
+    margin-top: 10px;
+    width: 90%;
+    height: 80px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    background-color: #f8f8f8;
+    color: #333;
+  }

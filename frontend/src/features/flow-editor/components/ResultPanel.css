@@ -1,0 +1,32 @@
+/* frontend/src/components/ResultPanel.css */
+.result-panel {
+    padding: 15px;
+    background-color: #f7f7f7;
+    width: 20%;
+    max-width: 250px;
+    border-left: 1px solid #eee;
+  }
+  
+  .result-panel h3 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .tokens-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .token {
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    color: #333;
+    font-family: monospace;
+  }
+  
+  .loading {
+    color: #888;
+  }

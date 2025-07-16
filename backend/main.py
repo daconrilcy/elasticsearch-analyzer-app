@@ -2,20 +2,40 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.api import analyzer, projects
 from app.core.db import engine, Base
+from dotenv import load_dotenv
+
+# 👇 1. Importez le middleware CORS
+from fastapi.middleware.cors import CORSMiddleware
+
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- Startup ---
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("✅ Tables checked/created (lifespan startup)")
     yield
-    # --- Shutdown ---
-    # Optionnel : clean up resources
+    # ...
 
 app = FastAPI(lifespan=lifespan)
 
-# Ne préfixe pas deux fois ! Les routes doivent être "/convert", pas "/api/v1/analyzer/convert"
+# 👇 2. Définissez les origines autorisées
+origins = [
+    "http://localhost:5173", # L'adresse de votre frontend Vite
+    "http://localhost:3000", # Au cas où vous utiliseriez un autre port
+]
+
+# 👇 3. Ajoutez le middleware à votre application
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Autorise toutes les méthodes (GET, POST, etc.)
+    allow_headers=["*"], # Autorise tous les en-têtes
+)
+
+
+# Le reste de votre fichier main.py
 app.include_router(analyzer.router, prefix="/api/v1/analyzer")
 app.include_router(projects.router, prefix="/api/v1/projects")
 

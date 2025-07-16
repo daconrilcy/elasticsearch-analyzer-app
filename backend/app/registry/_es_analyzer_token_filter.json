@@ -1,0 +1,2540 @@
+{
+  "token_filters": [
+    {
+      "category": "normalization",
+      "name": "lowercase",
+      "label": "Lowercase",
+      "description": "Convertit tous les tokens en minuscules.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_lowercase": {
+            "type": "lowercase"
+          }
+        },
+        "analyzer": {
+          "custom_lowercase": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_lowercase"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "Bonjour LE MONDE",
+        "output": [
+          "bonjour",
+          "le",
+          "monde"
+        ]
+      }
+    },
+    {
+      "category": "normalization",
+      "name": "Uppercase",
+      "label": "Lettres majuscules",
+      "description": "Convertit tous les tokens en majuscules.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_uppercase": {
+            "type": "uppercase"
+          }
+        },
+        "analyzer": {
+          "custom_uppercase": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_uppercase"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "bonjour le monde",
+        "output": [
+          "BONJOUR",
+          "LE",
+          "MONDE"
+        ]
+      }
+    },
+    {
+      "category": "normalization",
+      "name": "asciifolding",
+      "label": "ASCII Folding",
+      "description": "Remplace les caractères accentués par leurs équivalents ASCII.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_ascii": {
+            "type": "asciifolding"
+          }
+        },
+        "analyzer": {
+          "custom_ascii": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_ascii"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "Éléphant café Noël",
+        "output": [
+          "Elephant",
+          "cafe",
+          "Noel"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "stop",
+      "label": "Stopwords",
+      "description": "Supprime les stopwords (liste par langue ou personnalisée).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "builtin",
+            "name": "stopwords_builtin",
+            "mandatory": true,
+            "field": {
+              "label": "Liste prédéfinie",
+              "type": "select",
+              "multiple": false,
+              "choices": [
+                {
+                  "label": "Arabic",
+                  "value": "_arabic_"
+                },
+                {
+                  "label": "Armenian",
+                  "value": "_armenian_"
+                },
+                {
+                  "label": "Basque",
+                  "value": "_basque_"
+                },
+                {
+                  "label": "Bengali",
+                  "value": "_bengali_"
+                },
+                {
+                  "label": "Brazilian Portuguese",
+                  "value": "_brazilian_"
+                },
+                {
+                  "label": "Bulgarian",
+                  "value": "_bulgarian_"
+                },
+                {
+                  "label": "Catalan",
+                  "value": "_catalan_"
+                },
+                {
+                  "label": "Czech",
+                  "value": "_czech_"
+                },
+                {
+                  "label": "Danish",
+                  "value": "_danish_"
+                },
+                {
+                  "label": "Dutch",
+                  "value": "_dutch_"
+                },
+                {
+                  "label": "English",
+                  "value": "_english_"
+                },
+                {
+                  "label": "Estonian",
+                  "value": "_estonian_"
+                },
+                {
+                  "label": "Finnish",
+                  "value": "_finnish_"
+                },
+                {
+                  "label": "French",
+                  "value": "_french_"
+                },
+                {
+                  "label": "Galician",
+                  "value": "_galician_"
+                },
+                {
+                  "label": "German",
+                  "value": "_german_"
+                },
+                {
+                  "label": "Greek",
+                  "value": "_greek_"
+                },
+                {
+                  "label": "Hindi",
+                  "value": "_hindi_"
+                },
+                {
+                  "label": "Hungarian",
+                  "value": "_hungarian_"
+                },
+                {
+                  "label": "Indonesian",
+                  "value": "_indonesian_"
+                },
+                {
+                  "label": "Irish",
+                  "value": "_irish_"
+                },
+                {
+                  "label": "Italian",
+                  "value": "_italian_"
+                },
+                {
+                  "label": "Latvian",
+                  "value": "_latvian_"
+                },
+                {
+                  "label": "Lithuanian",
+                  "value": "_lithuanian_"
+                },
+                {
+                  "label": "Norwegian",
+                  "value": "_norwegian_"
+                },
+                {
+                  "label": "Persian",
+                  "value": "_persian_"
+                },
+                {
+                  "label": "Portuguese",
+                  "value": "_portuguese_"
+                },
+                {
+                  "label": "Romanian",
+                  "value": "_romanian_"
+                },
+                {
+                  "label": "Russian",
+                  "value": "_russian_"
+                },
+                {
+                  "label": "Sorani Kurdish",
+                  "value": "_sorani_"
+                },
+                {
+                  "label": "Spanish",
+                  "value": "_spanish_"
+                },
+                {
+                  "label": "Swedish",
+                  "value": "_swedish_"
+                },
+                {
+                  "label": "Thai",
+                  "value": "_thai_"
+                },
+                {
+                  "label": "Turkish",
+                  "value": "_turkish_"
+                }
+              ],
+              "description": "Liste prédéfinie de mots à supprimer",
+              "return": "list"
+            }
+          },
+          {
+            "type": "custom",
+            "name": "stopwords_custom",
+            "mandatory": true,
+            "field": {
+              "label": "Liste personnalisée",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Mots à supprimer",
+              "description": "une liste de mots à supprimer en les séparant par une virgule…"
+            }
+          },
+          {
+            "type": "file",
+            "name": "stopwords_file",
+            "mandatory": true,
+            "field": {
+              "label": "Fichier de stopwords",
+              "type": "file",
+              "accept": ".txt",
+              "description": "Un mot par ligne. Le fichier doit être présent sur le serveur Elasticsearch."
+            }
+          }
+        ],
+        "exclusive": true
+      },
+      "script_example": {
+        "filter": {
+          "french_stop": {
+            "type": "stop",
+            "stopwords": "_french_"
+          }
+        },
+        "analyzer": {
+          "custom_french_stop": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "french_stop"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "Ceci est un exemple de phrase",
+        "output": [
+          "exemple",
+          "phrase"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "elision",
+      "label": "Elision",
+      "description": "Supprime les élisions (ex. l', d', qu') pour certaines langues.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "custom",
+            "name": "articles",
+            "mandatory": true,
+            "label": "Liste personnalisée",
+            "field": {
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Ajoutez une liste d'article à élider en les séparant par une virgule…"
+            }
+          }
+        ],
+        "exclusive": true
+      },
+      "script_example": {
+        "filter": {
+          "french_elision": {
+            "type": "elision",
+            "articles_case": true,
+            "articles": [
+              "l",
+              "d",
+              "m",
+              "t",
+              "qu"
+            ]
+          }
+        },
+        "analyzer": {
+          "custom_french_elision": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "french_elision"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "l'homme d'art qu'elle",
+        "output": [
+          "homme",
+          "art",
+          "elle"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "stemmer",
+      "label": "Stemmer",
+      "description": "Applique un algorithme de stemming (langue paramétrable, ex. light_french).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "builtin",
+            "name": "language",
+            "mandatory": true,
+            "field": {
+              "label": "Liste prédéfinie",
+              "type": "select",
+              "multiple": false,
+              "choices": [
+                {
+                  "label": "Arabic",
+                  "value": "arabic"
+                },
+                {
+                  "label": "Armenian",
+                  "value": "armenian"
+                },
+                {
+                  "label": "Basque",
+                  "value": "basque"
+                },
+                {
+                  "label": "Bengali",
+                  "value": "bengali"
+                },
+                {
+                  "label": "Brazilian Portuguese",
+                  "value": "brazilian"
+                },
+                {
+                  "label": "Bulgarian",
+                  "value": "bulgarian"
+                },
+                {
+                  "label": "Catalan",
+                  "value": "catalan"
+                },
+                {
+                  "label": "Czech",
+                  "value": "czech"
+                },
+                {
+                  "label": "Danish",
+                  "value": "danish"
+                },
+                {
+                  "label": "Dutch",
+                  "value": "dutch"
+                },
+                {
+                  "label": "Dutch (Kraaij & Pohlmann)",
+                  "value": "dutch_kp"
+                },
+                {
+                  "label": "English",
+                  "value": "english"
+                },
+                {
+                  "label": "English (light)",
+                  "value": "light_english"
+                },
+                {
+                  "label": "English (minimal)",
+                  "value": "minimal_english"
+                },
+                {
+                  "label": "English (Porter2)",
+                  "value": "porter2"
+                },
+                {
+                  "label": "English (possessive)",
+                  "value": "possessive_english"
+                },
+                {
+                  "label": "Estonian",
+                  "value": "estonian"
+                },
+                {
+                  "label": "Finnish",
+                  "value": "finnish"
+                },
+                {
+                  "label": "Finnish (light)",
+                  "value": "light_finnish"
+                },
+                {
+                  "label": "French (light)",
+                  "value": "light_french"
+                },
+                {
+                  "label": "French",
+                  "value": "french"
+                },
+                {
+                  "label": "French (minimal)",
+                  "value": "minimal_french"
+                },
+                {
+                  "label": "Galician",
+                  "value": "galician"
+                },
+                {
+                  "label": "Galician (minimal)",
+                  "value": "minimal_galician"
+                },
+                {
+                  "label": "German (light)",
+                  "value": "light_german"
+                },
+                {
+                  "label": "German",
+                  "value": "german"
+                },
+                {
+                  "label": "German (minimal)",
+                  "value": "minimal_german"
+                },
+                {
+                  "label": "Greek",
+                  "value": "greek"
+                },
+                {
+                  "label": "Hindi",
+                  "value": "hindi"
+                },
+                {
+                  "label": "Hungarian",
+                  "value": "hungarian"
+                },
+                {
+                  "label": "Hungarian (light)",
+                  "value": "light_hungarian"
+                },
+                {
+                  "label": "Indonesian",
+                  "value": "indonesian"
+                },
+                {
+                  "label": "Irish",
+                  "value": "irish"
+                },
+                {
+                  "label": "Italian (light)",
+                  "value": "light_italian"
+                },
+                {
+                  "label": "Italian",
+                  "value": "italian"
+                },
+                {
+                  "label": "Kurdish (Sorani)",
+                  "value": "sorani"
+                },
+                {
+                  "label": "Latvian",
+                  "value": "latvian"
+                },
+                {
+                  "label": "Lithuanian",
+                  "value": "lithuanian"
+                },
+                {
+                  "label": "Norwegian Bokmål",
+                  "value": "norwegian"
+                },
+                {
+                  "label": "Norwegian Bokmål (light)",
+                  "value": "light_norwegian"
+                },
+                {
+                  "label": "Norwegian Bokmål (minimal)",
+                  "value": "minimal_norwegian"
+                },
+                {
+                  "label": "Norwegian Nynorsk (light)",
+                  "value": "light_nynorsk"
+                },
+                {
+                  "label": "Norwegian Nynorsk (minimal)",
+                  "value": "minimal_nynorsk"
+                },
+                {
+                  "label": "Persian",
+                  "value": "persian"
+                },
+                {
+                  "label": "Portuguese (light)",
+                  "value": "light_portuguese"
+                },
+                {
+                  "label": "Portuguese (minimal)",
+                  "value": "minimal_portuguese"
+                },
+                {
+                  "label": "Portuguese",
+                  "value": "portuguese"
+                },
+                {
+                  "label": "Portuguese (RSLP)",
+                  "value": "portuguese_rslp"
+                },
+                {
+                  "label": "Romanian",
+                  "value": "romanian"
+                },
+                {
+                  "label": "Russian",
+                  "value": "russian"
+                },
+                {
+                  "label": "Russian (light)",
+                  "value": "light_russian"
+                },
+                {
+                  "label": "Serbian",
+                  "value": "serbian"
+                },
+                {
+                  "label": "Spanish (light)",
+                  "value": "light_spanish"
+                },
+                {
+                  "label": "Spanish",
+                  "value": "spanish"
+                },
+                {
+                  "label": "Spanish (plural)",
+                  "value": "spanish_plural"
+                },
+                {
+                  "label": "Swedish",
+                  "value": "swedish"
+                },
+                {
+                  "label": "Swedish (light)",
+                  "value": "light_swedish"
+                },
+                {
+                  "label": "Turkish",
+                  "value": "turkish"
+                }
+              ],
+              "description": "Liste prédéfinie de langues.",
+              "return": "list"
+            }
+          }
+        ],
+        "exclusive": true
+      },
+      "script_example": {
+        "filter": {
+          "french_stemmer": {
+            "type": "stemmer",
+            "language": "light_french"
+          }
+        },
+        "analyzer": {
+          "custom_french_stem": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "french_stemmer"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "Manger mangeons mangé",
+        "output": [
+          "mang",
+          "mang",
+          "mang"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "kstem",
+      "label": "KStem",
+      "description": "Stemming léger pour l’anglais (KStem).",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_kstem": {
+            "type": "kstem"
+          }
+        },
+        "analyzer": {
+          "custom_kstem": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "my_kstem"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "running runners run",
+        "output": [
+          "run",
+          "runner",
+          "run"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "stemmer_override",
+      "label": "Stemmer Override",
+      "description": "Surcharge les règles de stemming via fichier/liste personnalisée.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "custom",
+            "name": "rules",
+            "mandatory": true,
+            "field": {
+              "label": "Liste personnalisée",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Liste mot=>racine",
+              "description": "Ajoutez une liste de mots à surcharger (mot=>racine) en les séparant par une virgule…",
+              "return": "list"
+            }
+          },
+          {
+            "type": "file",
+            "name": "rules_path",
+            "mandatory": true,
+            "field": {
+              "label": "Fichier de stemmer override",
+              "type": "file",
+              "accept": ".txt",
+              "description": "Un mot=>racine par ligne. Le fichier doit être présent sur le serveur Elasticsearch."
+            }
+          }
+        ],
+        "exclusive": true
+      },
+      "script_example": {
+        "filter": {
+          "my_override": {
+            "type": "stemmer_override",
+            "rules_path": "analysis/stemmer_override.txt"
+          }
+        },
+        "analyzer": {
+          "custom_override": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_override"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "ran",
+        "output": [
+          "run"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "hunspell",
+      "label": "Hunspell",
+      "description": "Stemming avancé via dictionnaire Hunspell (nécessite fichiers).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "file",
+            "name": "dictionary_path",
+            "mandatory": true,
+            "field": {
+              "label": "Dictionnaire Hunspell",
+              "type": "file",
+              "accept": ".dic",
+              "description": "Fichier de dictionnaire Hunspell. Le fichier doit être présent sur le serveur Elasticsearch."
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "dedup",
+            "mandatory": false,
+            "field": {
+              "label": "Deduplication",
+              "type": "input",
+              "itemType": "checkbox",
+              "description": "Deduplication des tokens"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "recursion_level",
+            "mandatory": false,
+            "field": {
+              "label": "Niveau de recursion",
+              "type": "input",
+              "itemType": "number",
+              "default": 2,
+              "description": "Niveau de recursion"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "fr_hunspell": {
+            "type": "hunspell",
+            "locale": "fr_FR",
+            "dedup": true,
+            "recursion_level": 2
+          }
+        },
+        "analyzer": {
+          "hunspell_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "fr_hunspell"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "allées allée allé",
+        "output": [
+          "aller",
+          "aller",
+          "aller"
+        ]
+      }
+    },
+    {
+      "category": "ngrams",
+      "name": "ngram",
+      "label": "Ngram",
+      "description": "Génère des n‑grammes fixes (caractères) à partir des tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "min_gram",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "itemType": "number",
+              "default": 2,
+              "description": "Longueur minimale de ngram"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "max_gram",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "itemType": "number",
+              "default": 3,
+              "description": "Longueur maximale de ngram"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_ngram": {
+            "type": "ngram",
+            "min_gram": 2,
+            "max_gram": 3
+          }
+        },
+        "analyzer": {
+          "ngram_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_ngram"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "token",
+        "output": [
+          "to",
+          "tok",
+          "ok",
+          "oke",
+          "ke",
+          "ken"
+        ]
+      }
+    },
+    {
+      "category": "ngrams",
+      "name": "edge_ngram",
+      "label": "Edge Ngram",
+      "description": "Génère des n‑grammes depuis le début de chaque token.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "min_gram",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "itemType": "number",
+              "default": 2,
+              "description": "Longueur minimale de edge ngram"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "max_gram",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "itemType": "number",
+              "default": 3,
+              "description": "Longueur maximale de edge ngram"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_edge_ngram": {
+            "type": "edge_ngram",
+            "min_gram": 2,
+            "max_gram": 5
+          }
+        },
+        "analyzer": {
+          "edge_ngram_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_edge_ngram"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "search",
+        "output": [
+          "se",
+          "sea",
+          "sear",
+          "searc"
+        ]
+      }
+    },
+    {
+      "category": "ngrams",
+      "name": "shingle",
+      "label": "Shingle",
+      "description": "Crée des combinaisons de mots adjacents (ngrams de mots).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "min_shingle_size",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "itemType": "number",
+              "default": 2,
+              "description": "Longueur minimale de shingle"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "max_shingle_size",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "itemType": "number",
+              "default": 3,
+              "description": "Longueur maximale de shingle"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "output_unigrams",
+            "mandatory": false,
+            "field": {
+              "label": "include unigrams",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": false,
+              "description": "Inclure les unigrams (optionnel)"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_shingle": {
+            "type": "shingle",
+            "min_shingle_size": 2,
+            "max_shingle_size": 3,
+            "output_unigrams": true
+          }
+        },
+        "analyzer": {
+          "shingle_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_shingle"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "le chat noir",
+        "output": [
+          "le",
+          "le chat",
+          "le chat noir",
+          "chat",
+          "chat noir",
+          "noir"
+        ]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "word_delimiter",
+      "label": "Word Delimiter",
+      "description": "Sépare les mots selon casse ou chiffres, enlève possessif anglais.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "boolean",
+            "name": "generate_word_parts",
+            "mandatory": true,
+            "field": {
+              "label": "Sous-mots",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Générer des sous-mots"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "generate_number_parts",
+            "mandatory": true,
+            "field": {
+              "label": "Parties numériques",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Générer les parties numériques"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "catenate_words",
+            "mandatory": true,
+            "field": {
+              "label": "Concaténer les mots",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Concaténer les mots"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "catenate_numbers",
+            "mandatory": true,
+            "field": {
+              "label": "Concaténer les nombres",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Concaténer les nombres"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "split_on_case_change",
+            "mandatory": true,
+            "field": {
+              "label": "Split casse",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Split sur changement de casse"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_delim": {
+            "type": "word_delimiter",
+            "generate_word_parts": true,
+            "split_on_case_change": true
+          }
+        },
+        "analyzer": {
+          "delim_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_delim"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "PowerShot100_IS",
+        "output": [
+          "Power",
+          "Shot",
+          "100",
+          "IS"
+        ]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "word_delimiter_graph",
+      "label": "Word Delimiter Graph",
+      "description": "Version avancée pour la gestion des graphes de tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "boolean",
+            "name": "generate_word_parts",
+            "mandatory": true,
+            "field": {
+              "label": "Sous-mots",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Générer des sous-mots"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "generate_number_parts",
+            "mandatory": true,
+            "field": {
+              "label": "Parties numériques",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Générer les parties numériques"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "catenate_words",
+            "mandatory": true,
+            "field": {
+              "label": "Concaténer les mots",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Concaténer les mots"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "catenate_numbers",
+            "mandatory": true,
+            "field": {
+              "label": "Concaténer les nombres",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Concaténer les nombres"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "split_on_case_change",
+            "mandatory": true,
+            "field": {
+              "label": "Split casse",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Split sur changement de casse"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_delim_graph": {
+            "type": "word_delimiter_graph",
+            "generate_word_parts": true,
+            "split_on_case_change": true
+          }
+        },
+        "analyzer": {
+          "delim_graph_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_delim_graph"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "CamelCase123_test",
+        "output": [
+          "Camel",
+          "Case",
+          "123",
+          "test"
+        ]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "classic",
+      "label": "Classic",
+      "description": "Supprime ’s et points dans les acronymes (filtre classique).",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_classic": {
+            "type": "classic"
+          }
+        },
+        "analyzer": {
+          "classic_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_classic"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "can't, U.S.A.",
+        "output": [
+          "cant",
+          "usa"
+        ]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "dictionary_decompounder",
+      "label": "Dictionary Decompounder",
+      "description": "Sépare mots composés via un dictionnaire.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "word_list",
+            "mandatory": true,
+            "field": {
+              "label": "Dictionnaire",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Mots du dictionnaire",
+              "description": "Liste de mots du dictionnaire, séparés par une virgule.",
+              "return": "list"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_decomp": {
+            "type": "dictionary_decompounder",
+            "word_list": [
+              "table",
+              "cloth"
+            ]
+          }
+        },
+        "analyzer": {
+          "decomp_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_decomp"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "tablecloth",
+        "output": [
+          "table",
+          "cloth"
+        ]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "hyphenation_decompounder",
+      "label": "Hyphenation Decompounder",
+      "description": "Sépare mots composés sur traits d’union.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "word_list",
+            "mandatory": true,
+            "field": {
+              "label": "Dictionnaire",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Mots composés",
+              "description": "Liste de mots composés séparés par une virgule.",
+              "return": "list"
+            }
+          },
+          {
+            "type": "file",
+            "name": "hyphenation_patterns_path",
+            "mandatory": true,
+            "field": {
+              "label": "Fichier de patterns",
+              "type": "file",
+              "accept": ".xml",
+              "placeholder": "hyph_patterns.xml",
+              "description": "Le fichier doit être présent sur le serveur Elasticsearch."
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_hyph_decomp": {
+            "type": "hyphenation_decompounder",
+            "word_list": [
+              "back",
+              "ground"
+            ],
+            "hyphenation_patterns_path": "analysis/hyph_patterns.xml"
+          }
+        },
+        "analyzer": {
+          "hyph_decomp_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_hyph_decomp"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "background",
+        "output": [
+          "back",
+          "ground"
+        ]
+      }
+    },
+    {
+      "category": "synonym",
+      "name": "synonym",
+      "label": "Synonymes",
+      "description": "Ajoute des synonymes depuis fichier ou liste.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "synonyms",
+            "mandatory": true,
+            "field": {
+              "label": "Synonymes",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Mots synonymes",
+              "description": "Liste de mots synonymes en les séparant par une virgule.",
+              "return": "list"
+            }
+          },
+          {
+            "type": "file",
+            "name": "synonyms_path",
+            "mandatory": true,
+            "field": {
+              "label": "Fichier de synonymes",
+              "type": "file",
+              "accept": ".txt",
+              "placeholder": "synonyms.txt",
+              "description": "Le fichier doit être présent sur le serveur Elasticsearch."
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "expand",
+            "mandatory": false,
+            "field": {
+              "label": "Expansion des synonymes",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": false,
+              "description": "Expansion des synonymes (optionnel)"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_synonym": {
+            "type": "synonym",
+            "synonyms": [
+              "voiture, auto, véhicule"
+            ]
+          }
+        },
+        "analyzer": {
+          "synonym_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_synonym"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "voiture auto véhicule",
+        "output": [
+          "voiture",
+          "voiture",
+          "voiture"
+        ]
+      }
+    },
+    {
+      "category": "synonym",
+      "name": "synonym_graph",
+      "label": "Synonymes Graphe",
+      "description": "Version graphe du filtre de synonymes, cohérente avec graph tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "synonyms",
+            "mandatory": true,
+            "field": {
+              "label": "Synonymes",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Mots synonymes",
+              "description": "Liste de mots synonymes en les séparant par une virgule.",
+              "return": "list"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "expand",
+            "mandatory": false,
+            "field": {
+              "label": "Expansion des synonymes",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": false,
+              "description": "Expansion des synonymes (optionnel)"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_synonym_graph": {
+            "type": "synonym_graph",
+            "synonyms": [
+              "USA, Etats-Unis"
+            ]
+          }
+        },
+        "analyzer": {
+          "synonym_graph_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_synonym_graph"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "USA",
+        "output": [
+          "Etats-Unis"
+        ]
+      }
+    },
+    {
+      "category": "multi",
+      "name": "multiplexer",
+      "label": "Multiplexer",
+      "description": "Applique plusieurs pipelines en parallèle sur les tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "filters",
+            "mandatory": true,
+            "field": {
+              "label": "Filtres",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Filtres (séparés par une virgule)",
+              "description": "Liste des filters à appliquer en parallèle",
+              "return": "list"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_multi": {
+            "type": "multiplexer",
+            "filters": [
+              "lowercase",
+              "asciifolding"
+            ]
+          }
+        },
+        "analyzer": {
+          "multi_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_multi"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "Éléphant",
+        "output": [
+          "éléphant",
+          "elephant"
+        ]
+      }
+    },
+    {
+      "category": "predicate",
+      "name": "condition",
+      "label": "Condition",
+      "description": "Applique des token filters uniquement si une condition (Painless) est vraie.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "manual_list",
+            "name": "filter",
+            "mandatory": true,
+            "field": {
+              "label": "Token filters",
+              "type": "select",
+              "multiple": false,
+              "choices": [
+                {
+                  "label": "Lowercase",
+                  "value": "lowercase"
+                },
+                {
+                  "label": "Uppercase",
+                  "value": "uppercase"
+                },
+                {
+                  "label": "ASCIIFolding",
+                  "value": "asciifolding"
+                },
+                {
+                  "label": "Stopwords",
+                  "value": "stop"
+                },
+                {
+                  "label": "Elision",
+                  "value": "elision"
+                },
+                {
+                  "label": "Stemmer",
+                  "value": "stemmer"
+                },
+                {
+                  "label": "Snowball",
+                  "value": "snowball"
+                },
+                {
+                  "label": "KStem (light English)",
+                  "value": "kstem"
+                },
+                {
+                  "label": "Stemmer Override",
+                  "value": "stemmer_override"
+                },
+                {
+                  "label": "Hunspell",
+                  "value": "hunspell"
+                },
+                {
+                  "label": "NGram",
+                  "value": "ngram"
+                },
+                {
+                  "label": "Edge NGram",
+                  "value": "edge_ngram"
+                },
+                {
+                  "label": "Shingle (multi-word ngrams)",
+                  "value": "shingle"
+                },
+                {
+                  "label": "Word Delimiter",
+                  "value": "word_delimiter"
+                },
+                {
+                  "label": "Word Delimiter Graph",
+                  "value": "word_delimiter_graph"
+                },
+                {
+                  "label": "Classic (Lucene)",
+                  "value": "classic"
+                },
+                {
+                  "label": "Dictionary Decompounder",
+                  "value": "dictionary_decompounder"
+                },
+                {
+                  "label": "Hyphenation Decompounder",
+                  "value": "hyphenation_decompounder"
+                },
+                {
+                  "label": "Synonym",
+                  "value": "synonym"
+                },
+                {
+                  "label": "Synonym Graph",
+                  "value": "synonym_graph"
+                },
+                {
+                  "label": "Multiplexer",
+                  "value": "multiplexer"
+                },
+                {
+                  "label": "Condition (scripted)",
+                  "value": "condition"
+                },
+                {
+                  "label": "Predicate Token Filter",
+                  "value": "predicate_token_filter"
+                },
+                {
+                  "label": "Length",
+                  "value": "length"
+                },
+                {
+                  "label": "Truncate",
+                  "value": "truncate"
+                },
+                {
+                  "label": "Unique",
+                  "value": "unique"
+                },
+                {
+                  "label": "Reverse",
+                  "value": "reverse"
+                },
+                {
+                  "label": "Pattern Replace",
+                  "value": "pattern_replace"
+                },
+                {
+                  "label": "Pattern Capture",
+                  "value": "pattern_capture"
+                },
+                {
+                  "label": "Min Hash",
+                  "value": "min_hash"
+                },
+                {
+                  "label": "Keep Types",
+                  "value": "keep_types"
+                }
+              ],
+              "description": "Choisissez une token filter prédéfinie",
+              "return": "string"
+            }
+          },
+          {
+            "type": "script",
+            "name": "condition_script",
+            "mandatory": true,
+            "field": {
+              "label": "Condition",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Condition (script Painless)",
+              "description": "Script Painless de condition",
+              "return": "script"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_cond": {
+            "type": "condition",
+            "filter": "lowercase",
+            "script": "token.getTerm().length() > 3"
+          }
+        },
+        "analyzer": {
+          "cond_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_cond"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "ABCD ef GHIJK",
+        "output": [
+          "abcd",
+          "ef",
+          "ghijk"
+        ]
+      }
+    },
+    {
+      "category": "predicate",
+      "label": "Predicate",
+      "name": "predicate_token_filter",
+      "description": "Filtre les tokens selon un script conditionnel.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "script",
+            "name": "script",
+            "mandatory": true,
+            "field": {
+              "label": "Condition",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Condition (script Painless)",
+              "description": "Script Painless de condition",
+              "return": "script"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_predicate": {
+            "type": "predicate_token_filter",
+            "script": "token.getTerm().length() > 2"
+          }
+        },
+        "analyzer": {
+          "pred_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_predicate"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "un deux trois quatre",
+        "output": [
+          "deux",
+          "trois",
+          "quatre"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "length",
+      "label": "Longueur",
+      "description": "Supprime les tokens trop courts ou trop longs.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "min",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "itemType": "number",
+              "default": 2,
+              "description": "Longueur minimale des tokens"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "max",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "itemType": "number",
+              "default": 4,
+              "description": "Longueur maximale des tokens"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "length_filter": {
+            "type": "length",
+            "min": 2,
+            "max": 4
+          }
+        },
+        "analyzer": {
+          "length_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "length_filter"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "a ab abc abcd abcde",
+        "output": [
+          "ab",
+          "abc",
+          "abcd"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "truncate",
+      "label": "Coupe",
+      "description": "Raccourcit les tokens à une longueur spécifiée.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "length",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "itemType": "number",
+              "default": 5,
+              "description": "Longueur maximale des tokens"
+            }
+          }
+        ],
+        "exclusive": true
+      },
+      "script_example": {
+        "filter": {
+          "my_truncate": {
+            "type": "truncate",
+            "length": 5
+          }
+        },
+        "analyzer": {
+          "truncate_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_truncate"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "extraordinaire",
+        "output": [
+          "extra"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "pattern_replace",
+      "label": "Regex Replace",
+      "description": "Remplace les motifs regex à l’intérieur des tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "string",
+            "name": "pattern",
+            "mandatory": true,
+            "field": {
+              "label": "Motif regex",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Motif regex",
+              "description": "Regex à rechercher",
+              "return": "string"
+            }
+          },
+          {
+            "type": "string",
+            "name": "replacement",
+            "mandatory": true,
+            "field": {
+              "label": "Chaîne de remplacement",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Chaîne de remplacement",
+              "description": "Chaîne de remplacement",
+              "return": "string"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_pattern_replace": {
+            "type": "pattern_replace",
+            "pattern": "\\d+",
+            "replacement": ""
+          }
+        },
+        "analyzer": {
+          "pattern_replace_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_pattern_replace"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "abc-123",
+        "output": [
+          "abc-"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "pattern_capture",
+      "label": "Regex Caputre",
+      "description": "Capture des motifs regex comme nouveaux tokens.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "patterns",
+            "mandatory": true,
+            "field": {
+              "label": "Regex à capturer",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "Regex à capturer",
+              "description": "Liste de regex à capturer (Java regexp)",
+              "return": "list"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "preserve_original",
+            "mandatory": false,
+            "field": {
+              "label": "Préserver le token original",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Si true, conserve également le token complet original"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_pattern_capture": {
+            "type": "pattern_capture",
+            "patterns": [
+              "(\\d+)",
+              "([a-z]+)"
+            ]
+          }
+        },
+        "analyzer": {
+          "pattern_capture_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_pattern_capture"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "abc-123",
+        "output": [
+          "abc",
+          "123"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "min_hash",
+      "label": "Min-hash",
+      "description": "Crée des signatures min‑hash pour la similarité de texte.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "hash_count",
+            "mandatory": true,
+            "field": {
+              "label": "Nombre de hash",
+              "type": "input",
+              "itemType": "number",
+              "default": 3,
+              "description": "Nombre de hash à générer"
+            }
+          },
+          {
+            "type": "integer",
+            "name": "bucket_count",
+            "mandatory": true,
+            "field": {
+              "label": "Nombre de buckets",
+              "type": "input",
+              "itemType": "number",
+              "default": 10,
+              "description": "Nombre de buckets"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_min_hash": {
+            "type": "min_hash",
+            "hash_count": 3,
+            "bucket_count": 10
+          }
+        },
+        "analyzer": {
+          "min_hash_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_min_hash"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "quick brown fox",
+        "output": [
+          "879cf9b9",
+          "1faae6f1",
+          "d70e3ae5"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "keep_types",
+      "label": "Garder les types",
+      "description": "Garde ou supprime des tokens selon leur type (« NUM, ALPHA… »).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "builtin",
+            "name": "types",
+            "mandatory": true,
+            "field": {
+              "label": "Tokens à garder",
+              "type": "select",
+              "multiple": true,
+              "choices": [
+                {
+                  "label": "ALPHANUM (lettres + chiffres)",
+                  "value": "<ALPHANUM>"
+                },
+                {
+                  "label": "NUM (chiffres uniquement)",
+                  "value": "<NUM>"
+                },
+                {
+                  "label": "HANGUL",
+                  "value": "<HANGUL>"
+                },
+                {
+                  "label": "HIRAGANA",
+                  "value": "<HIRAGANA>"
+                },
+                {
+                  "label": "KATAKANA",
+                  "value": "<KATAKANA>"
+                },
+                {
+                  "label": "IDEOGRAPHIC (caractères CJK)",
+                  "value": "<IDEOGRAPHIC>"
+                },
+                {
+                  "label": "SOUTHEAST_ASIAN",
+                  "value": "<SOUTHEAST_ASIAN>"
+                }
+              ],
+              "description": "Types de tokens à garder",
+              "return": "list"
+            }
+          },
+          {
+            "type": "builtin",
+            "name": "mode",
+            "mandatory": true,
+            "field": {
+              "label": "include / exclude",
+              "type": "select",
+              "multiple": false,
+              "default": "include",
+              "choices": [
+                {
+                  "label": "include",
+                  "value": "include"
+                },
+                {
+                  "label": "exclude",
+                  "value": "exclude"
+                }
+              ],
+              "description": "Choix du mode",
+              "return": "string"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "filter": {
+          "my_keep_types": {
+            "type": "keep_types",
+            "types": [
+              "<NUM>"
+            ]
+          }
+        },
+        "analyzer": {
+          "keep_types_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_keep_types"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "abc 123 def",
+        "output": [
+          "123"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "unique",
+      "label": "Unique",
+      "description": "Supprime les tokens dupliqués.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_unique": {
+            "type": "unique"
+          }
+        },
+        "analyzer": {
+          "unique_analyzer": {
+            "type": "custom",
+            "tokenizer": "whitespace",
+            "filter": [
+              "my_unique"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "mot mot autre mot",
+        "output": [
+          "mot",
+          "autre"
+        ]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "reverse",
+      "label": "Inverse",
+      "description": "Inverse les caractères de chaque token.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_reverse": {
+            "type": "reverse"
+          }
+        },
+        "analyzer": {
+          "reverse_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "my_reverse"
+            ]
+          }
+        }
+      },
+      "example": {
+        "input": "bonjour",
+        "output": [
+          "ruojnob"
+        ]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "snowball",
+      "label": "Snowball",
+      "description": "Stemming multi-langues basé sur l’algorithme Snowball.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "builtin",
+            "name": "language",
+            "mandatory": true,
+            "field": {
+              "label": "Langue",
+              "type": "select",
+              "multiple": false,
+              "choices": [
+                {"label": "English", "value": "English"},
+                {"label": "French", "value": "French"},
+                {"label": "German", "value": "German"},
+                {"label": "Italian", "value": "Italian"},
+                {"label": "Spanish", "value": "Spanish"},
+                {"label": "Dutch", "value": "Dutch"},
+                {"label": "Portuguese", "value": "Portuguese"},
+                {"label": "Russian", "value": "Russian"},
+                {"label": "Swedish", "value": "Swedish"}
+              ],
+              "description": "Langue à utiliser pour le stemming."
+            }
+          }
+        ]
+      },
+      "script_example": {
+        "filter": {
+          "my_snowball": {
+            "type": "snowball",
+            "language": "English"
+          }
+        }
+      },
+      "example": {
+        "input": "running runs runner",
+        "output": ["run", "run", "runner"]
+      }
+    },
+    {
+      "category": "linguistic",
+      "name": "porter_stem",
+      "label": "Porter Stem",
+      "description": "Stemming anglais simple basé sur Porter.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_porter_stem": {
+            "type": "porter_stem"
+          }
+        }
+      },
+      "example": {
+        "input": "running runs runner",
+        "output": ["run", "run", "runner"]
+      }
+    },
+    {
+      "category": "normalization",
+      "name": "uppercase",
+      "label": "Uppercase",
+      "description": "Convertit tous les tokens en majuscules.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_uppercase": {
+            "type": "uppercase"
+          }
+        }
+      },
+      "example": {
+        "input": "bonjour le monde",
+        "output": ["BONJOUR", "LE", "MONDE"]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "common_grams",
+      "label": "Common Grams",
+      "description": "Génère des bigrams sur les mots fréquents (stopwords).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "list",
+            "name": "common_words",
+            "mandatory": true,
+            "field": {
+              "label": "Common words",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "the,and,of...",
+              "description": "Liste de mots fréquents séparés par une virgule."
+            }
+          }
+        ]
+      },
+      "script_example": {
+        "filter": {
+          "my_common_grams": {
+            "type": "common_grams",
+            "common_words": ["the", "and", "of"]
+          }
+        }
+      },
+      "example": {
+        "input": "the quick brown fox",
+        "output": ["the", "quick", "brown", "fox", "the_quick"]
+      }
+    },
+    {
+      "category": "compound",
+      "name": "apostrophe",
+      "label": "Apostrophe",
+      "description": "Supprime les apostrophes anglaises (’s).",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_apostrophe": {
+            "type": "apostrophe"
+          }
+        }
+      },
+      "example": {
+        "input": "cat's dog's",
+        "output": ["cat", "dog"]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "limit",
+      "label": "Limit",
+      "description": "Limite le nombre de tokens produits.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "integer",
+            "name": "max_token_count",
+            "mandatory": true,
+            "field": {
+              "label": "Nombre max de tokens",
+              "type": "input",
+              "itemType": "number",
+              "default": 1,
+              "description": "Nombre maximum de tokens à conserver"
+            }
+          }
+        ]
+      },
+      "script_example": {
+        "filter": {
+          "my_limit": {
+            "type": "limit",
+            "max_token_count": 1
+          }
+        }
+      },
+      "example": {
+        "input": "un deux trois",
+        "output": ["un"]
+      }
+    },
+    {
+      "category": "cjk",
+      "name": "cjk_bigram",
+      "label": "CJK Bigram",
+      "description": "Génère des bigrams pour les caractères CJK.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_cjk_bigram": {
+            "type": "cjk_bigram"
+          }
+        }
+      },
+      "example": {
+        "input": "日本語",
+        "output": ["日本", "本語"]
+      }
+    },
+    {
+      "category": "cjk",
+      "name": "cjk_width",
+      "label": "CJK Width",
+      "description": "Normalise la largeur des caractères CJK.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_cjk_width": {
+            "type": "cjk_width"
+          }
+        }
+      },
+      "example": {
+        "input": "ａｂｃ",
+        "output": ["abc"]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "decimal_digit",
+      "label": "Decimal Digit",
+      "description": "Convertit tous les chiffres Unicode en chiffres occidentaux (0-9).",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_decimal_digit": {
+            "type": "decimal_digit"
+          }
+        }
+      },
+      "example": {
+        "input": "１２３",
+        "output": ["123"]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "remove_duplicates",
+      "label": "Remove Duplicates",
+      "description": "Supprime les tokens dupliqués (legacy Lucene).",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "filter": {
+          "my_remove_duplicates": {
+            "type": "remove_duplicates"
+          }
+        }
+      },
+      "example": {
+        "input": "foo foo bar foo",
+        "output": ["foo", "bar"]
+      }
+    },
+    {
+      "category": "utility",
+      "name": "fingerprint",
+      "label": "Fingerprint",
+      "description": "Crée une empreinte normalisée du champ (tri, unicité, concat, etc).",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "string",
+            "name": "separator",
+            "mandatory": false,
+            "field": {
+              "label": "Séparateur",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": " ",
+              "description": "Caractère séparateur"
+            }
+          }
+        ]
+      },
+      "script_example": {
+        "filter": {
+          "my_fingerprint": {
+            "type": "fingerprint",
+            "separator": " "
+          }
+        }
+      },
+      "example": {
+        "input": "foo bar foo baz",
+        "output": ["bar baz foo"]
+      }
+    }
+  ]
+}
+
+
