@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import type { DragEvent, MouseEvent } from 'react';
 import ReactFlow, {
   Controls,
@@ -6,19 +6,22 @@ import ReactFlow, {
   useReactFlow,
   ReactFlowProvider,
   type Node,
+  type Connection,
 } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
 
-// --- Import des composants avec des chemins relatifs ---
-import { useFlowEditorStore } from './features/flow-editor/store';
-import { CustomNode } from './features/flow-editor/components/CustomNode';
-import { Sidebar } from './features/flow-editor/components/Sidebar';
-import { ResultPanel } from './features/flow-editor/components/ResultPanel';
-import { ConfigurationPanel } from './features/flow-editor/components/ConfigurationPanel';
-import { Header } from './features/flow-editor/components/Header';
+// --- Import des composants et hooks ---
+import { useFlowEditorStore } from '@/features/flow-editor/store';
+import { useDebouncedAnalysis } from '@/hooks/useDebouncedAnalysis';
+import { CustomNode } from '@/features/flow-editor/components/CustomNode';
+import { Sidebar } from '@/features/flow-editor/components/Sidebar';
+// CORRECTION : Correction des chemins d'importation pour être cohérents
+import { ResultPanel } from '@/features/flow-editor/components/ResultPanel';
+import { ConfigurationPanel } from '@/features/flow-editor/components/ConfigurationPanel';
+import { Header } from '@/features/flow-editor/components/Header';
 
-// --- Import des types avec des chemins relatifs ---
-import { Kind, type NodeData, type CustomNode as CustomNodeType } from './shared/types/analyzer.d';
+// --- Import des types ---
+import { Kind, type NodeData, type CustomNode as CustomNodeType } from '@/shared/types/analyzer.d';
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
@@ -26,6 +29,24 @@ import './App.css';
 
 let id = 4;
 const getUniqueId = () => `${id++}`;
+
+// --- Logique de validation des connexions ---
+const NODE_ORDER: Record<string, number> = {
+  [Kind.Input]: 0,
+  [Kind.CharFilter]: 1,
+  [Kind.Tokenizer]: 2,
+  [Kind.TokenFilter]: 3,
+  [Kind.Output]: 4,
+};
+
+// On définit les nodeTypes en dehors du composant pour la performance.
+const nodeTypes = {
+  input: CustomNode,
+  output: CustomNode,
+  tokenizer: CustomNode,
+  char_filter: CustomNode,
+  token_filter: CustomNode,
+};
 
 /**
  * Le composant principal de l'éditeur qui contient toute la logique d'affichage.
@@ -37,22 +58,17 @@ function FlowEditor() {
     onEdgesChange, 
     onConnect, 
     addNode,
-    analysisResult,
+    analysisSteps,
     isLoading,
-    analyze,
     selectedNode,
     setSelectedNode,
+    deleteNode,
   } = useFlowEditorStore();
 
-  const reactFlowInstance = useReactFlow();
+  // On active l'analyse automatique en temps réel
+  useDebouncedAnalysis();
 
-  const nodeTypes = useMemo(() => ({
-    input: CustomNode,
-    output: CustomNode,
-    tokenizer: CustomNode,
-    char_filter: CustomNode,
-    token_filter: CustomNode,
-  }), []);
+  const reactFlowInstance = useReactFlow();
 
   const onDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
@@ -100,12 +116,33 @@ function FlowEditor() {
     setSelectedNode(null);
   }, [setSelectedNode]);
 
+  const onNodesDelete = useCallback(
+    (nodesToDelete: Node[]) => {
+      nodesToDelete.forEach(node => deleteNode(node.id));
+    },
+    [deleteNode]
+  );
+  
+  const isValidConnection = useCallback(
+    (connection: Connection) => {
+      const sourceNode = graph.nodes.find(node => node.id === connection.source);
+      const targetNode = graph.nodes.find(node => node.id === connection.target);
+
+      if (!sourceNode || !targetNode) return false;
+
+      const sourceOrder = NODE_ORDER[sourceNode.data.kind];
+      const targetOrder = NODE_ORDER[targetNode.data.kind];
+
+      return targetOrder >= sourceOrder;
+    },
+    [graph.nodes]
+  );
+
   return (
     <div className="app-container">
       <Header />
       <div className="dnd-flow">
         {selectedNode ? <ConfigurationPanel /> : <Sidebar />}
-        
         <div className="main-content">
           <div className="reactflow-wrapper" onDragOver={onDragOver} onDrop={onDrop}>
             <ReactFlow
@@ -117,17 +154,16 @@ function FlowEditor() {
               nodeTypes={nodeTypes}
               onNodeClick={onNodeClick}
               onPaneClick={onPaneClick}
+              onNodesDelete={onNodesDelete}
+              isValidConnection={isValidConnection}
               fitView
             >
               <Controls />
               <Background />
             </ReactFlow>
           </div>
-          <button className="analyze-button" onClick={analyze} disabled={isLoading}>
-            {isLoading ? 'Analyse en cours...' : 'Analyser le Texte'}
-          </button>
         </div>
-        <ResultPanel tokens={analysisResult.tokens} isLoading={isLoading} />
+        <ResultPanel steps={analysisSteps} isLoading={isLoading} />
       </div>
     </div>
   );

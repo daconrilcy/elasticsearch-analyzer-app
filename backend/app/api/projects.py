@@ -56,13 +56,9 @@ async def update_project(
     if not db_project:
         raise HTTPException(status_code=404, detail="Projet non trouvé")
 
-    # On récupère les données à mettre à jour, en excluant les champs non fournis
     update_data = project_in.model_dump(exclude_unset=True)
     
-    # On itère sur les données fournies pour mettre à jour le modèle
     for key, value in update_data.items():
-        # CORRECTION : On utilise setattr pour une mise à jour dynamique et on s'assure
-        # que le graphe est correctement sérialisé en JSON si il est présent.
         if key == "graph" and project_in.graph:
             setattr(db_project, key, project_in.graph.model_dump(mode='json'))
         else:
@@ -93,13 +89,10 @@ async def export_project_config(project_id: int, db: AsyncSession = Depends(get_
     if not project:
         raise HTTPException(status_code=404, detail="Projet non trouvé")
 
-    # On valide et on utilise le graphe stocké en base de données
     graph_data = AnalyzerGraph.model_validate(project.graph)
     
-    # On utilise notre service existant pour convertir le graphe
     analyzer_config = convert_graph_to_es_analyzer(graph_data)
     
-    # On formate la sortie pour qu'elle soit directement utilisable
     export_json = {
         "analysis": {
             "analyzer": {

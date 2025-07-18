@@ -1,43 +1,44 @@
-/* frontend/src/features/flow-editor/components/CustomNode.css */
-.custom-node {
-    border-radius: 8px;
-    padding: 10px 20px;
-    color: white;
-    min-width: 150px;
-    text-align: center;
-    font-family: system-ui, sans-serif;
-    border: 2px solid #222;
-  }
-  
-  /* Couleurs inspirées de la maquette */
-  .custom-node-input {
-    background-color: #8b5cf6; /* Violet */
-  }
-  .custom-node-output {
-    background-color: #ec4899; /* Rose/Orange */
-  }
-  .custom-node-char_filter,
-  .custom-node-token_filter {
-    background-color: #10b981; /* Vert/Turquoise */
-  }
-  .custom-node-tokenizer {
-    background-color: #3b82f6; /* Bleu */
-  }
-  
-  .node-content strong {
-    font-weight: 500;
-    font-size: 1.1em;
-  }
+/* ... (gardez les styles existants pour .custom-node, etc.) ... */
 
-  .input-textarea {
-    margin-top: 10px;
-    width: 90%;
-    height: 80px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 5px;
-    font-family: monospace;
-    font-size: 14px;
-    background-color: #f8f8f8;
-    color: #333;
-  }
+.custom-node {
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: white;
+  min-width: 150px;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  border: 2px solid #222;
+  transition: all 0.3s ease;
+  opacity: 0.7; /* Par défaut, les nœuds sont légèrement estompés */
+}
+
+/* NOUVEAU : Style pour les nœuds actifs dans le chemin d'analyse */
+.custom-node.active-path {
+  opacity: 1;
+  box-shadow: 0 0 15px rgba(88, 166, 255, 0.7);
+  border-color: #58a6ff;
+}
+
+.custom-node-input { background-color: #8b5cf6; }
+.custom-node-output { background-color: #ec4899; }
+.custom-node-char_filter,
+.custom-node-token_filter { background-color: #10b981; }
+.custom-node-tokenizer { background-color: #3b82f6; }
+
+.node-content strong {
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+.input-textarea {
+  margin-top: 10px;
+  width: 90%;
+  height: 80px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px;
+  font-family: monospace;
+  font-size: 14px;
+  background-color: #3a3a3a;
+  color: #f0f0f0;
+}

@@ -1,25 +1,26 @@
-// frontend/src/features/flow-editor/components/CustomNode.tsx
 import { Handle, Position, type NodeProps } from 'reactflow';
-import type { NodeData } from '../../../shared/types/analyzer.d';
 import { useFlowEditorStore } from '../store';
+import type { NodeData } from '../../../shared/types/analyzer.d';
 import './CustomNode.css';
 
 export function CustomNode({ data }: NodeProps<NodeData>) {
   const { kind, label, name } = data;
-  // 👇 Récupérez l'état et l'action du store
-  const { inputText, setInputText } = useFlowEditorStore();
+  const { inputText, setInputText, analysisPath } = useFlowEditorStore();
 
   const isInputNode = kind === 'input';
   const isOutputNode = kind === 'output';
+  
+  // Détermine si ce nœud fait partie du chemin d'analyse valide
+  const isActive = analysisPath?.nodes.includes(data.id);
 
   return (
-    <div className={`custom-node custom-node-${kind}`}>
+    // On ajoute la classe 'active-path' si le nœud est dans le chemin
+    <div className={`custom-node custom-node-${kind} ${isActive ? 'active-path' : ''}`}>
       {!isInputNode && <Handle type="target" position={Position.Left} />}
 
       <div className="node-content">
         <strong>{label || name}</strong>
-
-        {/* 👇 Affichez le textarea uniquement pour le noeud "input" */}
+        
         {isInputNode && (
           <textarea
             className="input-textarea"
