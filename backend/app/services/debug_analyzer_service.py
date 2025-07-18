@@ -7,7 +7,7 @@ async def debug_analyzer_step_by_step(
     graph: AnalyzerGraph, text: str, es_client: AsyncElasticsearch
 ) -> Tuple[List[Dict[str, Any]], Dict[str, List[str]]]:
     """
-    Analyse un texte pas à pas et retourne les résultats intermédiaires
+    Analyse un texte en suivant le graphe pas à pas et retourne les résultats intermédiaires
     ainsi que le chemin de graphe valide.
     """
     results: List[Dict[str, Any]] = []
@@ -66,14 +66,12 @@ async def debug_analyzer_step_by_step(
 
             # Si l'étape a réussi, on l'ajoute au chemin valide
             valid_path["nodes"].append(node.id)
-            # On trouve l'arête qui a mené à ce nœud
             edge_to_node = next((e for e in graph.edges if e.target == node.id), None)
             if edge_to_node and edge_to_node.id:
                 valid_path["edges"].append(edge_to_node.id)
 
         except Exception:
             results.append({"step_name": f"Error at '{node.name}'", "output": ["Analysis failed at this step."]})
-            # L'analyse a échoué, on arrête de construire le chemin valide
             break
             
     return results, valid_path

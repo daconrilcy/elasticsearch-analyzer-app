@@ -13,7 +13,7 @@ export type ComponentDef = {
   name: string; 
   label: string; 
   description: string; 
-  params: any;
+  params: any; // 'any' est utilisé ici car la structure des paramètres varie beaucoup
   [key: string]: any; 
 };
 
@@ -38,6 +38,9 @@ const compatibilityRules: CompatibilityRule[] = compatibilityData.compatibility;
 
 /**
  * Trouve la définition complète d'un composant par son type ('kind') et son nom.
+ * @param kind Le type de composant ('char_filter', 'token_filter', 'tokenizer').
+ * @param name Le nom technique du composant (ex: 'stop', 'standard').
+ * @returns La définition du composant trouvée, ou undefined si elle n'existe pas.
  */
 export function findComponentDefinition(kind: string, name: string): ComponentDef | undefined {
   switch (kind) {
@@ -53,25 +56,40 @@ export function findComponentDefinition(kind: string, name: string): ComponentDe
 }
 
 /**
- * Vérifie si un token filter est compatible avec un tokenizer donné.
+ * Vérifie si un token filter est compatible avec un tokenizer donné, en se basant
+ * sur les règles du fichier de compatibilité.
+ * @param tokenizerName Le nom du tokenizer présent dans le graphe.
+ * @param tokenFilterName Le nom du token filter à vérifier.
+ * @returns `true` si le filtre est compatible, `false` sinon.
  */
 export function isFilterCompatible(tokenizerName: string, tokenFilterName:string): boolean {
+  // Règle de base : si aucun tokenizer n'est présent, aucun filtre n'est compatible.
   if (!tokenizerName) {
     return false;
   }
+
   const rule = compatibilityRules.find(r => r.tokenizer === tokenizerName);
+
+  // Si aucune règle spécifique n'est trouvée pour ce tokenizer, on l'autorise par défaut.
   if (!rule) {
     return true;
   }
+
   const filters = rule.token_filters;
+
+  // 1. Vérification directe : le filtre est-il listé nommément dans la règle ?
   if (tokenFilterName in filters) {
     return filters[tokenFilterName as keyof typeof filters] === true;
   }
+
+  // 2. Gestion des cas génériques ('*')
   if (filters['*'] === true) {
     return true;
   }
   if (filters['*'] === false) {
     return false;
   }
+  
+  // 3. Cas "partial" : le filtre doit être listé explicitement. Si on arrive ici, il ne l'est pas.
   return false;
 }

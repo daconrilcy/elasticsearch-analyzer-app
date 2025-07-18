@@ -16,12 +16,11 @@ interface ProjectListItem { id: number; name: string; }
 export interface AnalysisStep { step_name: string; output: string | string[]; }
 interface AnalysisPath { nodes: string[]; edges: string[]; }
 
-// CORRECTED: The 'FlowEditorState' interface is now exported.
 export interface FlowEditorState {
   graph: AnalyzerD;
   inputText: string;
   analysisSteps: AnalysisStep[];
-  analysisPath: AnalysisPath | null;
+  analysisPath: AnalysisPath | null; // Pour le surlignage du chemin
   isLoading: boolean;
   selectedNode: CustomNode | null;
   projectList: ProjectListItem[];
@@ -127,6 +126,7 @@ export const useFlowEditorStore = create<FlowEditorState>((set, get) => ({
     }));
     toast.success("Nœud supprimé.");
   },
+
   analyze: async () => {
     set({ isLoading: true, analysisSteps: [], analysisPath: null });
     const { graph, inputText } = get();
@@ -152,6 +152,8 @@ export const useFlowEditorStore = create<FlowEditorState>((set, get) => ({
       set({ isLoading: false }); 
     }
   },
+
+  // --- Gestion des projets ---
   setCurrentProjectName: (name) => set(state => ({ currentProject: { ...state.currentProject, name } })),
   createNewProject: () => {
     set({ graph: initialGraph, currentProject: { id: null, name: "Nouveau Projet" }, selectedNode: null, analysisPath: null, analysisSteps: [] });

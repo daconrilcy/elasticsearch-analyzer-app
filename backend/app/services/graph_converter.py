@@ -85,6 +85,20 @@ def convert_graph_to_es_analyzer(graph: AnalyzerGraph) -> Dict:
         elif next_node.kind == Kind.token_filter:
             # Si le nœud a des paramètres personnalisés
             if next_node.params:
+                params = next_node.params.copy()
+
+                # --- CORRECTION : Conversion des types ---
+                # On s'assure que les paramètres numériques sont bien des entiers.
+                # On peut ajouter d'autres conversions ici si nécessaire pour d'autres filtres.
+                for key in ["min_gram", "max_gram", "min_shingle_size", "max_shingle_size", "min", "max", "length"]:
+                    if key in params and params[key] is not None:
+                        try:
+                            params[key] = int(params[key])
+                        except (ValueError, TypeError):
+                            # Gère le cas où la valeur n'est pas un nombre valide
+                            raise ValueError(f"Le paramètre '{key}' doit être un nombre entier.")
+                # --- FIN DE LA CORRECTION ---
+
                 # 1. On donne un nom unique à notre filtre personnalisé (ex: "stop_custom_1")
                 custom_filter_name = f"{next_node.name}_custom_{next_node.id}"
                 

@@ -11,17 +11,17 @@ import ReactFlow, {
 import { Toaster } from 'react-hot-toast';
 
 // --- Import des composants et hooks ---
-import { useFlowEditorStore } from '@/features/flow-editor/store';
-import { useDebouncedAnalysis } from '@/hooks/useDebouncedAnalysis';
-import { CustomNode } from '@/features/flow-editor/components/CustomNode';
-import { Sidebar } from '@/features/flow-editor/components/Sidebar';
-// CORRECTION : Correction des chemins d'importation pour être cohérents
-import { ResultPanel } from '@/features/flow-editor/components/ResultPanel';
-import { ConfigurationPanel } from '@/features/flow-editor/components/ConfigurationPanel';
-import { Header } from '@/features/flow-editor/components/Header';
+import { useFlowEditorStore } from './features/flow-editor/store';
+import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
+import { CustomNode } from './features/flow-editor/components/CustomNode';
+import { Sidebar } from './features/flow-editor/components/Sidebar';
+import { ResultPanel } from './features/flow-editor/components/ResultPanel';
+// CORRECTION : Le chemin d'importation était incorrect.
+import { ConfigurationPanel } from './features/flow-editor/components/ConfigurationPanel';
+import { Header } from './features/flow-editor/components/Header';
 
 // --- Import des types ---
-import { Kind, type NodeData, type CustomNode as CustomNodeType } from '@/shared/types/analyzer.d';
+import { Kind, type NodeData, type CustomNode as CustomNodeType } from './shared/types/analyzer.d';
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';

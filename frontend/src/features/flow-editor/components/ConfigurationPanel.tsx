@@ -8,78 +8,110 @@ import './ConfigurationPanel.css';
  */
 const FormField = ({ paramDef, nodeId }: { paramDef: any, nodeId: string }) => {
   const { selectedNode, updateNodeData } = useFlowEditorStore();
+  
+  const componentDef = findComponentDefinition(selectedNode!.data.kind, selectedNode!.data.name);
+  const isExclusive = componentDef?.params.exclusive;
+
   const currentValue = selectedNode?.data.params?.[paramDef.name] ?? paramDef.field.default ?? '';
 
   const handleChange = (value: any) => {
-    updateNodeData(nodeId, {
-      params: { ...selectedNode?.data.params, [paramDef.name]: value },
-    });
+    const newParams = isExclusive 
+      ? { [paramDef.name]: value } 
+      : { ...selectedNode?.data.params, [paramDef.name]: value };
+      
+    updateNodeData(nodeId, { params: newParams });
   };
 
   const field = paramDef.field;
 
-  // CORRECTED: Added return statements to each case.
-  switch (field.type) {
-    case 'input':
-      return (
-        <input
-          type={field.itemType || 'text'}
-          value={currentValue}
-          placeholder={field.placeholder}
-          onChange={(e) => handleChange(field.itemType === 'number' ? Number(e.target.value) : e.target.value)}
-        />
-      );
-    case 'checkbox':
-      return (
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={!!currentValue}
-            onChange={(e) => handleChange(e.target.checked)}
-          />
-          {paramDef.field.description}
-        </label>
-      );
-    case 'select':
-      return (
-        <select value={currentValue} onChange={(e) => handleChange(e.target.value)}>
-          <option value="" disabled>{field.description}</option>
-          {field.choices.map((choice: any) => (
-            <option key={choice.value} value={choice.value}>{choice.label}</option>
-          ))}
-        </select>
-      );
-    case 'textarea':
-      const textValue = Array.isArray(currentValue) ? currentValue.join('\n') : currentValue;
-      const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newValue = paramDef.type === 'list' ? e.target.value.split('\n').filter(Boolean) : e.target.value;
-        handleChange(newValue);
-      };
-      return (
-        <textarea
-          value={textValue}
-          placeholder={field.placeholder}
-          rows={5}
-          onChange={handleTextAreaChange}
-        />
-      );
-    default:
-      return <p>Unknown field type: {field.type}</p>;
+  if (field.type === 'input') {
+    return (
+      <input
+        type={field.itemType || 'text'}
+        value={currentValue}
+        placeholder={field.placeholder}
+        onChange={(e) => handleChange(field.itemType === 'number' ? Number(e.target.value) : e.target.value)}
+      />
+    );
   }
+  
+  if (field.type === 'checkbox' || field.itemType === 'checkbox') {
+    return (
+      <label className="checkbox-label">
+        <input
+          type="checkbox"
+          checked={!!currentValue}
+          onChange={(e) => handleChange(e.target.checked)}
+        />
+        {paramDef.field.description}
+      </label>
+    );
+  }
+    
+  if (field.type === 'select') {
+    const handleMultiSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
+        handleChange(selectedValues);
+    };
+
+    return (
+      <select 
+        value={currentValue} 
+        onChange={field.multiple ? handleMultiSelectChange : (e) => handleChange(e.target.value)}
+        multiple={field.multiple === true}
+        size={field.multiple ? 5 : 1}
+      >
+        {!field.multiple && <option value="" disabled>{field.description}</option>}
+        {field.choices.map((choice: any) => (
+          <option key={choice.value} value={choice.value}>{choice.label}</option>
+        ))}
+      </select>
+    );
+  }
+
+  if (paramDef.type === 'list' || field.type === 'textarea' || field.type === 'file') {
+    const textValue = Array.isArray(currentValue) ? currentValue.join('\n') : currentValue;
+    const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = (paramDef.type === 'list' || field.return === 'list') 
+            ? e.target.value.split('\n').filter(Boolean) 
+            : e.target.value;
+        handleChange(newValue);
+    }
+    return (
+      <textarea
+        value={textValue}
+        placeholder={field.placeholder}
+        rows={5}
+        onChange={handleTextAreaChange}
+      />
+    );
+  }
+
+  return <p>Type de champ inconnu : {field.type}</p>;
 };
+
 
 export function ConfigurationPanel() {
   const { selectedNode, setSelectedNode, updateNodeData, deleteNode } = useFlowEditorStore();
+  
   const [exclusiveOption, setExclusiveOption] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selectedNode?.data.params) {
-      const currentParam = Object.keys(selectedNode.data.params)[0];
-      setExclusiveOption(currentParam || null);
+    if (selectedNode) {
+      const componentDef = findComponentDefinition(selectedNode.data.kind, selectedNode.data.name);
+      const currentParam = componentDef?.params?.elements.find((p: any) => selectedNode.data.params?.[p.name] !== undefined);
+      
+      if (currentParam) {
+        setExclusiveOption(currentParam.name);
+      } else if (componentDef?.params?.exclusive && componentDef.params.elements.length > 0) {
+        setExclusiveOption(componentDef.params.elements[0].name);
+      } else {
+        setExclusiveOption(null);
+      }
     } else {
       setExclusiveOption(null);
     }
-  }, [selectedNode]);
+  }, [selectedNode?.id]);
 
   if (!selectedNode) return null;
 
@@ -90,7 +122,7 @@ export function ConfigurationPanel() {
   };
   
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete the node "${selectedNode.data.label}"?`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le nœud "${selectedNode.data.label}" ?`)) {
       deleteNode(selectedNode.id);
     }
   };
@@ -102,12 +134,15 @@ export function ConfigurationPanel() {
 
   const renderParamsForm = () => {
     if (!componentDef || !componentDef.params || !componentDef.params.elements) {
-      return <p className="no-params-message">No configurable parameters.</p>;
+      return <p className="no-params-message">Aucun paramètre configurable.</p>;
     }
+
     const isExclusive = componentDef.params.exclusive === true;
+
     if (isExclusive) {
       const elements = componentDef.params.elements;
       const selectedParamDef = elements.find((param: any) => param.name === exclusiveOption);
+
       return (
         <>
           <div className="exclusive-options">
@@ -133,6 +168,7 @@ export function ConfigurationPanel() {
         </>
       );
     }
+
     return componentDef.params.elements.map((param: any) => (
       <div className="form-group" key={param.name}>
         <label>{param.field.label}</label>
@@ -148,27 +184,31 @@ export function ConfigurationPanel() {
     <aside className="config-panel">
       <div className="panel-header">
         <button onClick={() => setSelectedNode(null)} className="back-button">
-          ← Back
+          ← Retour
         </button>
         <h3>Configuration</h3>
       </div>
+      
       <div className="panel-content">
         <div className="node-info">
           <span>Type: {selectedNode.data.kind}</span>
-          <span>Name: {selectedNode.data.name}</span>
+          <span>Nom: {selectedNode.data.name}</span>
         </div>
+        
         <div className="form-group">
-          <label>Node Label</label>
+          <label>Label du Nœud</label>
           <input type="text" value={selectedNode.data.label || ''} onChange={handleLabelChange} />
         </div>
+
         <div className="params-section">
-          <h4>Parameters</h4>
+          <h4>Paramètres</h4>
           {renderParamsForm()}
         </div>
       </div>
+
       {canBeDeleted && (
         <div className="panel-footer">
-          <button onClick={handleDelete} className="delete-button">Delete Node</button>
+          <button onClick={handleDelete} className="delete-button">Supprimer le Nœud</button>
         </div>
       )}
     </aside>
