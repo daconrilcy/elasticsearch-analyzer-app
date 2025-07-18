@@ -1,0 +1,57 @@
+.sidebar {
+  padding: 15px;
+  border-right: 1px solid #333;
+  background-color: #2a2a2a;
+  width: 20%;
+  max-width: 250px;
+  color: #e0e0e0;
+  overflow-y: auto;
+  font-family: system-ui, sans-serif;
+}
+
+.sidebar h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #c0c0c0;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  border-bottom: 1px solid #444;
+  padding-bottom: 5px;
+}
+
+.sidebar .description {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.sidebar-node {
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: grab;
+  font-weight: 500;
+  color: white;
+  border: 1px solid #444;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+}
+
+.sidebar-node:hover {
+    filter: brightness(1.2);
+}
+
+.sidebar-node.disabled {
+  background-color: #555 !important;
+  color: #999;
+  cursor: not-allowed;
+  filter: grayscale(80%);
+}
+
+.sidebar-node.disabled:hover {
+  filter: grayscale(80%) brightness(1);
+}
+
+.sidebar-node.token-filter { background-color: #10b981; }
+.sidebar-node.char-filter { background-color: #0ea5e9; } /* Nouvelle couleur pour la distinction */
+.sidebar-node.tokenizer  { background-color: #3b82f6; }

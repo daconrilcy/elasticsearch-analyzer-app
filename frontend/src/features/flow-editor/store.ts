@@ -14,27 +14,21 @@ import { Kind, type AnalyzerD, type CustomNode, type NodeData } from '../../shar
 
 // --- Définition des Types ---
 
-// Représente un projet dans la liste de chargement
 interface ProjectListItem {
   id: number;
   name: string;
 }
 
-// L'état complet de notre application géré par Zustand
 interface FlowEditorState {
-  // --- État du Graphe ---
   graph: AnalyzerD;
   inputText: string;
   analysisResult: { tokens: string[] };
   isLoading: boolean;
   selectedNode: CustomNode | null;
-  
-  // --- État des Projets ---
   projectList: ProjectListItem[];
   currentProject: { id: number | null; name: string; };
 
   // --- Actions ---
-  // Graphe
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
@@ -43,14 +37,30 @@ interface FlowEditorState {
   analyze: () => Promise<void>;
   setSelectedNode: (node: CustomNode | null) => void;
   updateNodeData: (nodeId: string, data: Partial<NodeData>) => void;
-
-  // Projets
   fetchProjects: () => Promise<void>;
   loadProject: (projectId: number) => Promise<void>;
   saveCurrentProject: () => Promise<void>;
   createNewProject: () => void;
   setCurrentProjectName: (name: string) => void;
   exportCurrentProject: () => Promise<void>;
+}
+
+// --- Logique de validation ---
+
+const NODE_ORDER: Record<string, number> = {
+  [Kind.Input]: 0,
+  [Kind.CharFilter]: 1,
+  [Kind.Tokenizer]: 2,
+  [Kind.TokenFilter]: 3,
+  [Kind.Output]: 4,
+};
+
+function isValidConnection(sourceNode: CustomNode, targetNode: CustomNode): boolean {
+  const sourceOrder = NODE_ORDER[sourceNode.data.kind];
+  const targetOrder = NODE_ORDER[targetNode.data.kind];
+
+  // Une connexion est valide si le nœud cible est du même type ou d'un type qui vient après dans l'ordre.
+  return targetOrder >= sourceOrder;
 }
 
 // --- État Initial ---
@@ -80,7 +90,24 @@ export const useFlowEditorStore = create<FlowEditorState>((set, get) => ({
   // --- Actions de Graphe ---
   onNodesChange: (changes) => set(state => ({ graph: { ...state.graph, nodes: applyNodeChanges(changes, state.graph.nodes) } })),
   onEdgesChange: (changes) => set(state => ({ graph: { ...state.graph, edges: applyEdgeChanges(changes, state.graph.edges) } })),
-  onConnect: (connection) => set(state => ({ graph: { ...state.graph, edges: addEdge(connection, state.graph.edges) } })),
+  
+  // ACTION onConnect MISE À JOUR AVEC LA LOGIQUE DE VALIDATION
+  onConnect: (connection) => {
+    const { graph } = get();
+    const sourceNode = graph.nodes.find(node => node.id === connection.source);
+    const targetNode = graph.nodes.find(node => node.id === connection.target);
+
+    if (!sourceNode || !targetNode) return;
+
+    if (isValidConnection(sourceNode, targetNode)) {
+      set(state => ({
+        graph: { ...state.graph, edges: addEdge(connection, state.graph.edges) },
+      }));
+    } else {
+      toast.error(`Connexion invalide : un '${sourceNode.data.kind}' ne peut pas précéder un '${targetNode.data.kind}'.`);
+    }
+  },
+
   addNode: (node) => set(state => ({ graph: { ...state.graph, nodes: [...state.graph.nodes, node] } })),
   setInputText: (text) => set({ inputText: text }),
   setSelectedNode: (node) => set({ selectedNode: node }),
