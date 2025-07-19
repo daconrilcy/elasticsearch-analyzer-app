@@ -1,0 +1,33 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.app-header {
+  @include glass-panel;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-unit $spacing-unit * 2;
+  width: 100%;
+  
+  .project-title input {
+    font-size: 1.1rem;
+    font-weight: $font-weight-bold;
+    border: none;
+    background: transparent;
+    color: $text-primary;
+    padding: $spacing-unit * 1.5;
+    border-radius: $border-radius-xl;
+    transition: background 0.2s ease;
+
+    &:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  .project-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit * 1.5;
+  }
+}

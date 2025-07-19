@@ -1,0 +1,9 @@
+@use '../abstracts/variables' as *;
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: $text-primary;
+  background-color: $bg-main;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

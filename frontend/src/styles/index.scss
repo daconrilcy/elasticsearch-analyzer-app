@@ -1,0 +1,36 @@
+// 1. Abstracts (Variables, Mixins) - Chargés mais pas directement émis 
+@use 'abstracts/variables' as *;
+@use 'abstracts/mixins' as *;
+// 2. Base Styles (Reset, Typography)
+@use 'base/reset' as *;
+@use 'base/typography' as *;
+// 3. Layout (Header, Sidebar, Panels)
+@use 'layout/app' as *;
+@use 'layout/header' as *;
+@use 'layout/sidebar' as *;
+@use 'layout/panels' as *;
+// 4. Components (Buttons, Nodes, Forms)
+@use 'components/button' as *;
+@use 'components/custom-node' as *;
+@use 'components/form' as *;
+@use 'components/reactflow' as *;
+@use 'components/input_output' as *;
+
+
+// --- Global Styles for React Flow ---
+.reactflow-wrapper {
+    flex-grow: 1;
+    background: $bg-main;
+}
+  
+.react-flow__handle {
+    background: $bg-panel;
+    border: 2px solid $border-color;
+    width: 12px;
+    height: 12px;
+}
+  
+.react-flow__edge-path {
+    stroke: $accent-glow;
+    stroke-width: 2;
+}

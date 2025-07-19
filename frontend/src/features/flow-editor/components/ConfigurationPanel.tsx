@@ -2,7 +2,22 @@ import React, { useMemo } from 'react';
 import { useFlowEditorStore } from '../store';
 import { findComponentDefinition } from '../../../registry/componentRegistry';
 import { FormField } from './FormField';
-import './ConfigurationPanel.css';
+// import './ConfigurationPanel.scss';
+
+// Icône SVG pour le bouton Retour
+const BackIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const DeleteIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 export function ConfigurationPanel() {
   const { selectedNode, setSelectedNode, updateNodeData, deleteNode } = useFlowEditorStore();
@@ -26,59 +41,23 @@ export function ConfigurationPanel() {
 
   const renderParamsForm = () => {
     if (!componentDef?.params?.elements) {
-      return <p className="no-params-message">Aucun paramètre configurable.</p>;
+      return <p className="no-params-message">Aucun paramètre n'est configurable pour ce nœud.</p>;
     }
-
-    const { elements, exclusive } = componentDef.params;
-
-    if (exclusive) {
-      // On se fie à `activeParamType` pour savoir quelle option est active.
-      // Si aucune n'est définie, on prend la première de la liste par défaut.
-      const activeParamDef =
-        elements.find((el: any) => el.type === selectedNode.data.activeParamType) || elements[0];
+    const { elements } = componentDef.params;
+    return elements.map((param: any) => {
+      const isCheckbox =
+        param.field.type === 'checkbox' ||
+        (param.field.type === 'input' && param.field.itemType === 'checkbox');
 
       return (
-        <>
-          <div className="exclusive-options">
-            {elements.map((param: any) => (
-              <label key={`${param.name}-${param.type}`}>
-                <input
-                  type="radio"
-                  name={`exclusive-option-${selectedNode.id}`}
-                  checked={activeParamDef.type === param.type}
-                  onChange={() => {
-                    // Au clic, on met à jour l'état global avec les DEUX informations :
-                    // 1. Les nouveaux `params` avec le bon nom et la valeur par défaut.
-                    // 2. Le `activeParamType` qui correspond à l'option cliquée.
-                    updateNodeData(selectedNode.id, {
-                      params: { [param.name]: param.field.default ?? '' },
-                      activeParamType: param.type,
-                    });
-                  }}
-                />
-                {param.field.label}
-              </label>
-            ))}
-          </div>
-          {activeParamDef && (
-            <div className="form-group exclusive-field">
-              <FormField paramDef={activeParamDef} nodeId={selectedNode.id} />
-              {activeParamDef.field.description && (
-                <p className="field-description">{activeParamDef.field.description}</p>
-              )}
-            </div>
-          )}
-        </>
+        <div className="form-group" key={param.name}>
+          {/* Affiche le label externe seulement si ce n'est pas un switch */}
+          {!isCheckbox && <label>{param.field.label}</label>}
+          <FormField paramDef={param} nodeId={selectedNode.id} />
+          {param.field.description && <p className="field-description">{param.field.description}</p>}
+        </div>
       );
-    }
-
-    return elements.map((param: any) => (
-      <div className="form-group" key={param.name}>
-        <label>{param.field.label}</label>
-        <FormField paramDef={param} nodeId={selectedNode.id} />
-        {param.field.description && <p className="field-description">{param.field.description}</p>}
-      </div>
-    ));
+    });
   };
 
   const canBeDeleted = selectedNode.data.kind !== 'input' && selectedNode.data.kind !== 'output';
@@ -87,32 +66,47 @@ export function ConfigurationPanel() {
     <aside className="config-panel">
       <div className="panel-header">
         <button onClick={() => setSelectedNode(null)} className="back-button">
-          ← Retour
+          <BackIcon />
+          <span>Retour</span>
         </button>
-        <h3>Configuration</h3>
+        <h2>Configuration</h2>
       </div>
+
       <div className="panel-content">
-        <div className="node-info">
-          <span>Type: {selectedNode.data.kind}</span>
-          <span>Nom: {selectedNode.data.name}</span>
-        </div>
-        <div className="form-group">
-          <label>Label du Nœud</label>
+        <section className="node-meta">
+          <div className="meta-item">
+            <span className="meta-label">Type:</span>
+            <span className="meta-value">{selectedNode.data.kind}</span>
+          </div>
+          <div className="meta-item">
+            <span className="meta-label">Nom:</span>
+            <span className="meta-value">{selectedNode.data.name}</span>
+          </div>
+        </section>
+
+        <section className="form-group">
+          <label htmlFor="nodeLabel">Label du Nœud</label>
           <input
+            id="nodeLabel"
             type="text"
             value={selectedNode.data.label || ''}
             onChange={handleLabelChange}
             placeholder="Ex: Filtre français"
           />
-        </div>
-        <div className="params-section">
-          <h4>Paramètres</h4>
+        </section>
+
+        <section className="params-section">
+          <h3>Paramètres</h3>
           {renderParamsForm()}
-        </div>
+        </section>
       </div>
+
       {canBeDeleted && (
         <div className="panel-footer">
-          <button onClick={handleDelete} className="delete-button">Supprimer le Nœud</button>
+          <button onClick={handleDelete} className="delete-button">
+            <DeleteIcon />
+            <span>Supprimer le Nœud</span>
+          </button>
         </div>
       )}
     </aside>

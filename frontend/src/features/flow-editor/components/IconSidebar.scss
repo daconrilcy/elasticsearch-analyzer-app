@@ -1,0 +1,65 @@
+@use '../../../styles/abstracts/variables' as *;
+@use '../../../styles/abstracts/mixins' as *;
+
+.icon-sidebar {
+  @include glass-panel;
+  padding: $spacing-unit * 2 $spacing-unit;
+  width: 68px;
+  flex-shrink: 0;
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-unit * 2;
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-xl;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+
+    svg {
+      width: 28px;
+      height: 28px;
+      fill: $text-secondary;
+      transition: fill 0.2s ease-in-out;
+    }
+
+    &:hover, &.active {
+      background: rgba($accent-glow, 0.15);
+      
+      svg {
+        fill: $text-primary;
+      }
+    }
+    
+    // Effet "Glow/Halo" pour le bouton actif
+    &.active::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: calc(#{$border-radius-xl} + 4px);
+      border: 2px solid rgba($accent-glow, 0.7);
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba($accent-glow, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba($accent-glow, 0); }
+  100% { box-shadow: 0 0 0 0 rgba($accent-glow, 0); }
+}

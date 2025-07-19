@@ -1,0 +1,42 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+
+.sidebar {
+  padding: $spacing-unit * 2;
+  @include glass-panel;
+  margin: $spacing-unit * 2;
+  width: 250px;
+  color: $text-primary;
+  overflow-y: auto;
+
+  .sidebar-node {
+    padding: 12px 18px;
+    border-radius: $border-radius-xl;
+    margin-bottom: $spacing-unit * 1.5;
+    cursor: grab;
+    font-weight: $font-weight-medium;
+    color: white;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    @include soft-shadow;
+
+    &:hover {
+      transform: translateY(-3px) scale(1.03);
+      filter: brightness(1.1);
+    }
+
+    &.char-filter { background: $gradient-char-filter; }
+    &.tokenizer { background: $gradient-tokenizer; }
+    &.token-filter { background: $gradient-token-filter; }
+
+    &.disabled {
+      background: #e0e0e0;
+      color: #a0a0a0;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
+  }
+}

@@ -30,6 +30,7 @@ export const FormField = ({ paramDef, nodeId }: FormFieldProps) => {
 
 
   const { field } = paramDef;
+  
 
   // --- CORRECTION ---
   // On identifie clairement si le champ est une checkbox en amont.
@@ -37,13 +38,14 @@ export const FormField = ({ paramDef, nodeId }: FormFieldProps) => {
 
   if (isCheckbox) {
     return (
-      <label className="checkbox-label">
+      <label className="switch-label">
         <input
           type="checkbox"
           checked={!!currentValue}
-          onChange={(e) => handleChange(e.target.checked)}
+          onChange={e => handleChange(e.target.checked)}
         />
-        {field.description || field.label}
+        <span className="switch-slider"></span>
+        <span className="switch-text">{field.description || field.label}</span>
       </label>
     );
   }

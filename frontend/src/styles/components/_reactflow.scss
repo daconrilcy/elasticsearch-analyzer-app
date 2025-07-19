@@ -1,0 +1,42 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// Style des contrôles (zoom, etc.)
+.react-flow__controls {
+  @include glass-panel;
+  padding: $spacing-unit;
+
+  button {
+    background: transparent;
+    border: none;
+    border-radius: $border-radius-lg;
+    
+    &:hover {
+      background: rgba($accent-glow, 0.15);
+    }
+
+    svg {
+      fill: $text-primary;
+    }
+  }
+}
+
+// Style du fond du canvas
+.react-flow__background {
+  background-color: $bg-main;
+}
+
+.react-flow__handle {
+    position: absolute !important;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 4px solid $accent-color;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+.react-flow__edge-path {
+    stroke: $accent-color-edge;
+    stroke-width: 4.5;
+    filter: drop-shadow(0 0 3px rgba($accent-color-edge, 0.7));
+}

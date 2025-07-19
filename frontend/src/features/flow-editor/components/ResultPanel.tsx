@@ -1,4 +1,4 @@
-import './ResultPanel.css';
+// import './ResultPanel.css';
 
 // Le type pour une étape d'analyse, importé ou défini ici
 interface AnalysisStep {
