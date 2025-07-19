@@ -55,6 +55,7 @@ export interface NodeData {
     name: string;
     label?: string;
     params?: { [key: string]: any }; 
+    activeParamType?: string;
 }
 
 /**

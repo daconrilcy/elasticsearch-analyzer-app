@@ -1,20 +1,24 @@
 // Ce fichier agit comme une base de données locale pour les composants Elasticsearch.
-// Il charge les fichiers JSON de configuration et fournit des fonctions pour y accéder.
+// Il charge les fichiers JSON de configuration depuis le répertoire partagé `shared-contract`
+// et fournit des fonctions pour accéder à ces définitions.
 
-import tokenizersData from './data/_es_analyzer_tokenizer.json';
-import tokenFiltersData from './data/_es_analyzer_token_filter.json';
-import charFiltersData from './data/_es_analyzer_char_filter.json';
-import compatibilityData from './data/_es_token_filter_compatibility.json';
+// Étape 1 : Importer le contenu brut des fichiers JSON en tant que chaînes de caractères.
+// L'alias `@shared` doit être configuré dans vite.config.ts et tsconfig.app.json.
+// L'suffixe `?raw` est une fonctionnalité de Vite qui importe le fichier comme du texte brut.
+import tokenizersJson from '@shared/registry/_es_analyzer_tokenizer.json?raw';
+import tokenFiltersJson from '@shared/registry/_es_analyzer_token_filter.json?raw';
+import charFiltersJson from '@shared/registry/_es_analyzer_char_filter.json?raw';
+import compatibilityJson from '@shared/registry/_es_token_filter_compatibility.json?raw';
 
 // --- Définition des Types ---
 
 // Un type générique pour décrire un composant (tokenizer, filtre, etc.)
-export type ComponentDef = { 
-  name: string; 
-  label: string; 
-  description: string; 
-  params: any; // 'any' est utilisé ici car la structure des paramètres varie beaucoup
-  [key: string]: any; 
+export type ComponentDef = {
+  name: string;
+  label: string;
+  description: string;
+  params: any; // 'any' est utilisé car la structure des paramètres varie beaucoup
+  [key: string]: any;
 };
 
 // Un type pour décrire une règle de compatibilité
@@ -25,9 +29,16 @@ type CompatibilityRule = {
   };
 };
 
+// Étape 2 : Parser les chaînes de caractères JSON en objets JavaScript.
+// Cela garantit que nous avons des objets valides à manipuler dans l'application.
+const tokenizersData = JSON.parse(tokenizersJson);
+const tokenFiltersData = JSON.parse(tokenFiltersJson);
+const charFiltersData = JSON.parse(charFiltersJson);
+const compatibilityData = JSON.parse(compatibilityJson);
+
 // --- Export des Données ---
 
-// On exporte les listes de composants directement depuis les fichiers JSON importés
+// On exporte les listes de composants directement depuis les objets parsés.
 export const availableTokenizers: ComponentDef[] = tokenizersData.tokenizers;
 export const availableTokenFilters: ComponentDef[] = tokenFiltersData.token_filters;
 export const availableCharFilters: ComponentDef[] = charFiltersData.char_filters;
@@ -62,7 +73,7 @@ export function findComponentDefinition(kind: string, name: string): ComponentDe
  * @param tokenFilterName Le nom du token filter à vérifier.
  * @returns `true` si le filtre est compatible, `false` sinon.
  */
-export function isFilterCompatible(tokenizerName: string, tokenFilterName:string): boolean {
+export function isFilterCompatible(tokenizerName: string, tokenFilterName: string): boolean {
   // Règle de base : si aucun tokenizer n'est présent, aucun filtre n'est compatible.
   if (!tokenizerName) {
     return false;

@@ -9,6 +9,7 @@ import ReactFlow, {
   type Connection,
 } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 // --- Import des composants et hooks ---
 import { useFlowEditorStore } from './features/flow-editor/store';
@@ -16,12 +17,12 @@ import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
 import { CustomNode } from './features/flow-editor/components/CustomNode';
 import { Sidebar } from './features/flow-editor/components/Sidebar';
 import { ResultPanel } from './features/flow-editor/components/ResultPanel';
-// CORRECTION : Le chemin d'importation était incorrect.
 import { ConfigurationPanel } from './features/flow-editor/components/ConfigurationPanel';
 import { Header } from './features/flow-editor/components/Header';
 
-// --- Import des types ---
+// --- Import des types et de la logique de validation ---
 import { Kind, type NodeData, type CustomNode as CustomNodeType } from './shared/types/analyzer.d';
+import { isFilterCompatible } from './registry/componentRegistry'; // <-- IMPORTATION AJOUTÉE
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
@@ -31,6 +32,7 @@ let id = 4;
 const getUniqueId = () => `${id++}`;
 
 // --- Logique de validation des connexions ---
+// L'ordre général est conservé pour la structure de base du pipeline
 const NODE_ORDER: Record<string, number> = {
   [Kind.Input]: 0,
   [Kind.CharFilter]: 1,
@@ -93,7 +95,7 @@ function FlowEditor() {
         id: newNodeId,
         kind: nodeInfo.type as Kind,
         name: nodeInfo.name,
-        label: nodeInfo.name.charAt(0).toUpperCase() + nodeInfo.name.slice(1),
+        label: nodeInfo.label || nodeInfo.name.charAt(0).toUpperCase() + nodeInfo.name.slice(1),
       };
 
       const newNode: CustomNodeType = {
@@ -123,6 +125,7 @@ function FlowEditor() {
     [deleteNode]
   );
   
+  // --- MISE À JOUR DE LA LOGIQUE DE VALIDATION ---
   const isValidConnection = useCallback(
     (connection: Connection) => {
       const sourceNode = graph.nodes.find(node => node.id === connection.source);
@@ -130,10 +133,34 @@ function FlowEditor() {
 
       if (!sourceNode || !targetNode) return false;
 
+      // 1. Validation de l'ordre général du pipeline (ex: un tokenizer ne peut pas précéder un char_filter)
       const sourceOrder = NODE_ORDER[sourceNode.data.kind];
       const targetOrder = NODE_ORDER[targetNode.data.kind];
+      if (targetOrder < sourceOrder) {
+        toast.error(`Connexion invalide : un '${sourceNode.data.kind}' doit précéder un '${targetNode.data.kind}'.`);
+        return false;
+      }
 
-      return targetOrder >= sourceOrder;
+      // 2. Validation de compatibilité spécifique basée sur le JSON
+      // On vérifie si on connecte un filtre à un pipeline qui a un tokenizer.
+      if (targetNode.data.kind === Kind.TokenFilter) {
+        const tokenizerNode = graph.nodes.find(n => n.data.kind === Kind.Tokenizer);
+        
+        // S'il n'y a pas encore de tokenizer dans le graphe, on ne peut pas connecter de token filter.
+        if (!tokenizerNode) {
+            toast.error("Veuillez d'abord ajouter un tokenizer avant d'ajouter un token filter.");
+            return false;
+        }
+
+        // On vérifie la compatibilité du nouveau filtre avec le tokenizer existant.
+        if (!isFilterCompatible(tokenizerNode.data.name, targetNode.data.name)) {
+            toast.error(`Le filtre '${targetNode.data.name}' n'est pas compatible avec le tokenizer '${tokenizerNode.data.name}'.`);
+            return false;
+        }
+      }
+
+      // Si toutes les vérifications passent, la connexion est valide.
+      return true;
     },
     [graph.nodes]
   );
@@ -155,7 +182,7 @@ function FlowEditor() {
               onNodeClick={onNodeClick}
               onPaneClick={onPaneClick}
               onNodesDelete={onNodesDelete}
-              isValidConnection={isValidConnection}
+              isValidConnection={isValidConnection} // <-- Utilise maintenant la nouvelle logique
               fitView
             >
               <Controls />
@@ -176,7 +203,7 @@ function FlowEditor() {
 export default function App() {
   return (
     <ReactFlowProvider>
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <FlowEditor />
     </ReactFlowProvider>
   );

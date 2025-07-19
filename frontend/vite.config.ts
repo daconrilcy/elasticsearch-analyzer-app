@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      { find: '@', replacement: path.resolve(__dirname, 'src') }
+      { find: '@', replacement: path.resolve(__dirname, 'src') },
+      { find: '@shared', replacement: path.resolve(__dirname, '../shared-contract') }
     ]
   },
   // 👇 Ajoutez cette section pour rediriger les appels API vers le backend
