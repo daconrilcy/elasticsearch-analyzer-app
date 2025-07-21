@@ -5,9 +5,9 @@ import {
   availableTokenFilters, 
   availableCharFilters,
   isFilterCompatible 
-} from '../../../registry/componentRegistry'; // Assurez-vous que ce chemin est correct
+} from '../../registry/componentRegistry'; 
 
-// import './Sidebar.css';
+
 
 const onDragStart = (event: React.DragEvent, nodeType: string, nodeName: string, isDisabled: boolean) => {
   if (isDisabled) {

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useFlowEditorStore } from '../store';
-import { findComponentDefinition } from '../../../registry/componentRegistry';
+import { findComponentDefinition } from '../../registry/componentRegistry';
 import { FormField } from './FormField';
 // import './ConfigurationPanel.scss';
 

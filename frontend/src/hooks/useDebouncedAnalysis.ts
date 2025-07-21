@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useFlowEditorStore, type FlowEditorState } from '../features/flow-editor/store';
+import { useFlowEditorStore, type FlowEditorState } from '../features/store';
 import debounce from 'lodash.debounce';
 
 /**

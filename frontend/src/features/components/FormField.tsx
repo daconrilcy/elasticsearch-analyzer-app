@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useFlowEditorStore } from '../store';
-import { findComponentDefinition } from '../../../registry/componentRegistry';
+import { findComponentDefinition } from '../../registry/componentRegistry';
 
 interface FormFieldProps {
   paramDef: any;

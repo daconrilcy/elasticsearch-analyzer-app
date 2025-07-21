@@ -14,14 +14,14 @@ import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
 
 // --- Import des composants et hooks ---
-import { useFlowEditorStore } from './features/flow-editor/store';
+import { useFlowEditorStore } from './features/store';
 import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
-import { CustomNode } from './features/flow-editor/components/CustomNode';
-import { Sidebar } from './features/flow-editor/components/Sidebar';
-import { ResultPanel } from './features/flow-editor/components/ResultPanel';
-import { ConfigurationPanel } from './features/flow-editor/components/ConfigurationPanel';
-import { Header } from './features/flow-editor/components/Header';
-import { IconSidebar } from './features/flow-editor/components/IconSidebar';
+import { CustomNode } from './features/components/CustomNode';
+import { Sidebar } from './features/components/Sidebar';
+import { ResultPanel } from './features/components/ResultPanel';
+import { ConfigurationPanel } from './features/components/ConfigurationPanel';
+import { Header } from './features/components/Header';
+import { IconSidebar } from './features/components/IconSidebar';
 
 // --- Import des types et de la logique de validation ---
 import { Kind, type NodeData, type CustomNode as CustomNodeType } from './shared/types/analyzer.d';

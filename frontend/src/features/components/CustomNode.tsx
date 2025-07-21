@@ -1,6 +1,6 @@
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { useFlowEditorStore } from '../store';
-import type { NodeData } from '../../../shared/types/analyzer.d';
+import type { NodeData } from '../../shared/types/analyzer';
 
 export function CustomNode({ data }: NodeProps<NodeData>) {
   const { kind, label, name } = data;

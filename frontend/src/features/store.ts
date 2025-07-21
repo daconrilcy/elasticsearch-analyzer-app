@@ -10,7 +10,7 @@ import {
 } from 'reactflow';
 import toast from 'react-hot-toast';
 
-import { Kind, type AnalyzerD, type CustomNode, type NodeData } from '../../shared/types/analyzer.d';
+import { Kind, type AnalyzerD, type CustomNode, type NodeData } from '../shared/types/analyzer.d';
 
 // --- Définition des Types ---
 interface ProjectListItem { id: number; name: string; }
