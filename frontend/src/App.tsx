@@ -8,6 +8,7 @@ import ReactFlow, {
   type Node,
   type Connection,
   type EdgeTypes,
+  type DefaultEdgeOptions,
 } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
@@ -51,16 +52,23 @@ const nodeTypes = {
 
 const edgeTypes: EdgeTypes = {};
 
+// Ces options sont pour la prévisualisation de la connexion pendant le drag.
+// La logique finale est gérée dans le store.
+const defaultEdgeOptions: DefaultEdgeOptions = {
+    type: 'smoothstep',
+    // @ts-ignore - 'borderRadius' est une prop valide pour 'smoothstep'
+    borderRadius: 200,
+};
+
 /**
  * Le composant principal de l'éditeur avec le layout et la logique finale.
  */
 function FlowEditor() {
-  // --- State et Store ---
   const {
     graph,
     onNodesChange,
     onEdgesChange,
-    onConnect,
+    onConnect, // Utilise la fonction onConnect directement depuis le store
     addNode,
     analysisSteps,
     isLoading,
@@ -74,7 +82,6 @@ function FlowEditor() {
   const [activePanel, setActivePanel] = useState('nodes');
   const reactFlowInstance = useReactFlow();
 
-  // --- Callbacks et Handlers ---
   const onDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
@@ -184,12 +191,7 @@ function FlowEditor() {
               onNodesDelete={onNodesDelete}
               isValidConnection={isValidConnection}
               fitView
-              // @ts-ignore - 'borderRadius' est une prop valide pour 'smoothstep' mais n'est pas dans le type de base.
-              // React Flow l'utilisera correctement à l'exécution pour arrondir les angles des liens.
-              defaultEdgeOptions={{
-                type: 'smoothstep',
-                borderRadius: 20,
-              }}
+              defaultEdgeOptions={defaultEdgeOptions}
             >
               <Controls style={{ bottom: 20, left: 20 }} />
               <Background color="#e0e7ff" gap={24} size={1.5} />

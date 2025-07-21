@@ -6,6 +6,7 @@ import {
   type NodeChange,
   type EdgeChange,
   type Connection,
+  type DefaultEdgeOptions, // NOUVEL IMPORT
 } from 'reactflow';
 import toast from 'react-hot-toast';
 
@@ -20,7 +21,7 @@ export interface FlowEditorState {
   graph: AnalyzerD;
   inputText: string;
   analysisSteps: AnalysisStep[];
-  analysisPath: AnalysisPath | null; // Pour le surlignage du chemin
+  analysisPath: AnalysisPath | null;
   isLoading: boolean;
   selectedNode: CustomNode | null;
   projectList: ProjectListItem[];
@@ -51,6 +52,13 @@ const NODE_ORDER: Record<string, number> = {
   [Kind.Output]: 4,
 };
 
+// NOUVEAU : Définir les options par défaut pour les arêtes
+const defaultEdgeOptions: DefaultEdgeOptions = {
+    type: 'smoothstep',
+    // @ts-ignore - 'borderRadius' est une prop valide pour 'smoothstep'
+    borderRadius: 200,
+};
+
 function isValidConnection(sourceNode: CustomNode, targetNode: CustomNode): boolean {
   const sourceOrder = NODE_ORDER[sourceNode.data.kind];
   const targetOrder = NODE_ORDER[targetNode.data.kind];
@@ -79,16 +87,24 @@ export const useFlowEditorStore = create<FlowEditorState>((set, get) => ({
   // --- Actions ---
   onNodesChange: (changes) => set(state => ({ graph: { ...state.graph, nodes: applyNodeChanges(changes, state.graph.nodes) } })),
   onEdgesChange: (changes) => set(state => ({ graph: { ...state.graph, edges: applyEdgeChanges(changes, state.graph.edges) } })),
+  
+  // CORRECTION : La logique est maintenant centralisée ici
   onConnect: (connection) => {
     const { graph } = get();
-    const sourceNode = graph.nodes.find(node => node.id === connection.source);
-    const targetNode = graph.nodes.find(node => node.id === connection.target);
+    const sourceNode = graph.nodes.find(node => node.id === connection.source) as CustomNode;
+    const targetNode = graph.nodes.find(node => node.id === connection.target) as CustomNode;
+    
     if (sourceNode && targetNode && isValidConnection(sourceNode, targetNode)) {
-      set(state => ({ graph: { ...state.graph, edges: addEdge(connection, state.graph.edges) } }));
+      // Fusionne les options par défaut avec la nouvelle connexion
+      const edgeWithOptions = { ...connection, ...defaultEdgeOptions };
+      set(state => ({ 
+        graph: { ...state.graph, edges: addEdge(edgeWithOptions, state.graph.edges) } 
+      }));
     } else if (sourceNode && targetNode) {
       toast.error(`Connexion invalide : un '${sourceNode.data.kind}' ne peut pas précéder un '${targetNode.data.kind}'.`);
     }
   },
+
   addNode: (node) => set(state => ({ graph: { ...state.graph, nodes: [...state.graph.nodes, node] } })),
   setInputText: (text) => set({ inputText: text }),
   setSelectedNode: (node) => set({ selectedNode: node }),

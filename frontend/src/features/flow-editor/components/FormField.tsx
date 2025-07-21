@@ -50,7 +50,7 @@ export const FormField = ({ paramDef, nodeId }: FormFieldProps) => {
     );
   }
   
-  // Le reste de la logique est dans un switch
+
   switch (field.type) {
     case 'input':
       return (

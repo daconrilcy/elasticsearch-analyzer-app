@@ -1,4 +1,3 @@
-import React from 'react';
 import './IconSidebar.scss';
 
 // Icônes SVG simples pour l'exemple
