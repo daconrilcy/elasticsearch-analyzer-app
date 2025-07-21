@@ -1,23 +1,24 @@
 import { useEffect, useMemo } from 'react';
-import { useFlowEditorStore, type FlowEditorState } from '../features/store';
 import debounce from 'lodash.debounce';
+import { useAnalysisStore } from '@/features/store/analysisStore';
+import { useGraphStore } from '@/features/store/graphStore';
 
 /**
  * Ce hook surveille les changements dans le texte d'entrée et la structure du graphe.
- * Lorsqu'un changement est détecté, il attend 500ms que l'utilisateur ait fini
- * ses modifications, puis déclenche automatiquement l'analyse.
+ * Lorsqu'un changement est détecté, il attend 500ms puis déclenche l'analyse.
  */
 export function useDebouncedAnalysis() {
-  // Sélection explicite et typée
-  const analyze = useFlowEditorStore((state: FlowEditorState) => state.analyze);
-  const graph = useFlowEditorStore((state: FlowEditorState) => state.graph);
-  const inputText = useFlowEditorStore((state: FlowEditorState) => state.inputText);
+  // Sélectionne les états et actions depuis les stores spécialisés
+  const { runAnalysis, inputText } = useAnalysisStore();
+  const { graph } = useGraphStore();
 
   const debouncedAnalysis = useMemo(
-    () => debounce(() => {
-      analyze();
-    }, 500),
-    [analyze]
+    () =>
+      debounce(() => {
+        // Le graphe est maintenant passé en argument à l'action
+        runAnalysis(graph);
+      }, 500),
+    [runAnalysis, graph] // `graph` doit être dans les dépendances
   );
 
   useEffect(() => {

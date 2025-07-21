@@ -1,14 +1,15 @@
+// frontend/src/features/flow-editor/components/Sidebar.tsx
+
 import { useMemo } from 'react';
-import { useFlowEditorStore } from '../store';
-import { 
+import { useGraphStore } from '../store/graphStore'; // <- Correction: Importer le store du graphe
+import {
   availableTokenizers, 
   availableTokenFilters, 
   availableCharFilters,
   isFilterCompatible 
-} from '../../registry/componentRegistry'; 
+} from '../../registry/componentRegistry';
 
-
-
+// Correction: Le type de l'événement est `React.DragEvent`
 const onDragStart = (event: React.DragEvent, nodeType: string, nodeName: string, isDisabled: boolean) => {
   if (isDisabled) {
     event.preventDefault();
@@ -20,7 +21,8 @@ const onDragStart = (event: React.DragEvent, nodeType: string, nodeName: string,
 };
 
 export function Sidebar() {
-  const { graph } = useFlowEditorStore();
+  // Correction: Utiliser le nouveau store pour accéder au graphe
+  const { graph } = useGraphStore();
 
   // On analyse le graphe actuel pour en déduire les règles de validation
   const validationState = useMemo(() => {
@@ -68,7 +70,6 @@ export function Sidebar() {
 
       <h4>Token Filters</h4>
       {availableTokenFilters.map(tf => {
-        // Un filtre est désactivé si : 1. Il n'y a pas de tokenizer, OU 2. Il est incompatible.
         const isDisabled = !validationState.hasTokenizer || !isFilterCompatible(validationState.tokenizerName, tf.name);
         return (
           <div

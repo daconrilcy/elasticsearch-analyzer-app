@@ -1,32 +1,42 @@
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { useFlowEditorStore } from '../store';
-// import './Header.css';
+// Correction: Import the new, separated stores and necessary types
+import { useProjectStore, type ProjectListItem } from '../store/projectStore';
+import { useGraphStore } from '../store/graphStore';
 
 export function Header() {
+  // Correction: Get state and actions from the correct stores
   const {
     projectList,
     currentProject,
     fetchProjects,
     loadProject,
-    saveCurrentProject,
+    saveProject,
     createNewProject,
     setCurrentProjectName,
     exportCurrentProject,
-  } = useFlowEditorStore();
+  } = useProjectStore();
 
-  // Charger la liste des projets au premier rendu du composant
+  const { graph } = useGraphStore();
+
+  // Load the project list when the component mounts
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
-  // Gestionnaire pour la sauvegarde, avec une validation simple
+  // Handler for saving, with simple validation
   const handleSave = () => {
     if (!currentProject.name.trim()) {
       toast.error("Veuillez donner un nom à votre projet.");
       return;
     }
-    saveCurrentProject();
+    // Pass the current graph from the graphStore to the save action
+    saveProject(graph);
+  };
+  
+  const handleCreateNew = () => {
+      // The createNewProject action now handles resetting the other stores
+      createNewProject();
   };
 
   return (
@@ -50,7 +60,8 @@ export function Header() {
           value={currentProject.id || ''}
         >
           <option value="" disabled>Charger un projet...</option>
-          {projectList.map((p) => (
+          {/* Correction: Explicitly type 'p' */}
+          {projectList.map((p: ProjectListItem) => (
             <option key={p.id} value={p.id}>
               {p.name}
             </option>
@@ -67,7 +78,7 @@ export function Header() {
         </button>
 
         <button onClick={handleSave} className="action-button">Sauvegarder</button>
-        <button onClick={createNewProject} className="action-button primary">Nouveau Projet</button>
+        <button onClick={handleCreateNew} className="action-button primary">Nouveau Projet</button>
       </div>
     </header>
   );

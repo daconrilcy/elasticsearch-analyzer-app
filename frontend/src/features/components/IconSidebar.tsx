@@ -1,4 +1,4 @@
-
+import { type UIState } from '../store/uiStore';
 // Icônes SVG simples pour l'exemple
 const InputIcon = () => <svg viewBox="0 0 24 24"><path d="M21 3.01H3c-1.1 0-2 .9-2 2V9h2V4.99h18v14.03H3V15H1v4.01c0 1.1.9 1.98 2 1.98h18c1.1 0 2-.88 2-1.98v-14c0-1.11-.9-2-2-2zM11 16l4-4-4-4v3H1v2h10v3z"/></svg>;
 const CharFilterIcon = () => <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>;
@@ -6,12 +6,14 @@ const TokenizerIcon = () => <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.9
 
 // Le composant accepte un `activePanel` et une fonction pour le changer
 interface IconSidebarProps {
-  activePanel: string;
-  setActivePanel: (panel: string) => void;
+  activePanel: UIState['activePanel'];
+  // Correction: Utiliser le type exact du store pour une meilleure sécurité de typage
+  setActivePanel: (panel: UIState['activePanel']) => void; 
 }
 
 export function IconSidebar({ activePanel, setActivePanel }: IconSidebarProps) {
-  const togglePanel = (panelName: string) => {
+  const togglePanel = (panelName: 'nodes' | 'config' | 'results') => {
+    // La logique existante est correcte, mais on type le paramètre pour plus de clarté
     setActivePanel(activePanel === panelName ? '' : panelName);
   };
 
