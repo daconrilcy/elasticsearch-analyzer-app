@@ -110,6 +110,7 @@
             "field": {
               "label": "Expression réguliere",
               "type": "input",
+              "component": "input",
               "itemType": "text",
               "placeholder": "Expression réguliere",
               "description": "Expression réguliere",
@@ -124,6 +125,7 @@
             "field": {
               "label": "Numéro de groupe",
               "type": "input",
+              "component": "input",
               "itemType": "number",
               "default": -1,
               "placeholder": "Numéro de groupe",
@@ -176,6 +178,7 @@
             "field": {
               "label": "Delimitateur",
               "type": "input",
+              "component": "input",
               "itemType": "text",
               "default": "/",
               "placeholder": "Delimitateur",
@@ -191,6 +194,7 @@
             "field": {
               "label": "Remplacement",
               "type": "input",
+              "component": "textarea",
               "itemType": "text",
               "placeholder": "Remplacement",
               "description": "Remplacement",
@@ -205,6 +209,7 @@
             "field": {
               "label": "Inverser",
               "type": "input",
+              "component": "checkbox",
               "itemType": "checkbox",
               "default": false,
               "description": "Inverser"
@@ -218,6 +223,7 @@
             "field": {
               "label": "Ignorer",
               "type": "input",
+              "component": "input",
               "itemType": "number",
               "default": 0,
               "placeholder": "Ignorer",
@@ -256,6 +262,7 @@
               "label": "Longueur minimale",
               "type": "input",
               "itemType": "number",
+              "component": "input",
               "default": 1,
               "placeholder": "Longueur minimale",
               "description": "Longueur minimale",
@@ -270,6 +277,7 @@
             "field": {
               "label": "Longueur maximale",
               "type": "input",
+              "component": "input",
               "itemType": "number",
               "default": 2,
               "placeholder": "Longueur maximale",
@@ -285,6 +293,7 @@
             "field": {
               "label": "Caractères",
               "type": "input",
+              "component": "checkbox-group",
               "itemType": "checkbox",
               "choices": [
                 {
@@ -341,6 +350,7 @@
             "field": {
               "label": "Longueur minimale",
               "type": "input",
+              "component": "input",
               "itemType": "number",
               "default": 1,
               "placeholder": "Longueur minimale",
@@ -356,6 +366,7 @@
             "field": {
               "label": "Longueur maximale",
               "type": "input",
+              "component": "input",
               "itemType": "number",
               "default": 2,
               "placeholder": "Longueur maximale",
@@ -371,6 +382,7 @@
             "field": {
               "label": "Caractères",
               "type": "input",
+              "component": "checkbox-group",
               "itemType": "checkbox",
               "choices": [
                 {

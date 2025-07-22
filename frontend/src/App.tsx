@@ -1,19 +1,17 @@
 import { useMemo } from 'react';
 import ReactFlow, { Controls, Background, ReactFlowProvider } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
+import type { CustomNode as CustomNodeType } from './shared/types/analyzer.d';
 
-// --- Import des Stores (via le fichier baril pour la propreté) ---
-import {
-  useGraphStore,
-  useAnalysisStore,
-  useUIStore
-} from './features/store/index'; // <- L'import est maintenant unifié et plus propre
+// --- Imports des Stores ---
+import { useGraphStore, useAnalysisStore, useUIStore } from './features/store';
 
-// --- Import des Hooks personnalisés ---
+// --- Imports des Hooks ---
 import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
 import { useFlowInteractions } from './hooks/useFlowInteractions';
+import { useConnectionValidation } from './hooks/useConnectionValidation';
 
-// --- Import des Composants ---
+// --- Imports des Composants ---
 import { CustomNode } from './features/components/CustomNode';
 import { Sidebar } from './features/components/Sidebar';
 import { ResultPanel } from './features/components/ResultPanel';
@@ -24,7 +22,7 @@ import { IconSidebar } from './features/components/IconSidebar';
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
 
-// --- Constantes de configuration ---
+// Défini en dehors du composant pour éviter les re-créations inutiles (optimisation)
 const nodeTypes = {
   input: CustomNode,
   output: CustomNode,
@@ -33,30 +31,27 @@ const nodeTypes = {
   token_filter: CustomNode,
 };
 
-/**
- * Le composant principal de l'éditeur de flux.
- * Il assemble les composants et connecte les stores et les hooks.
- */
 function FlowEditor() {
-  // --- Lecture depuis les stores ---
+  // --- Récupération de l'état depuis les stores ---
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
   const { analysisSteps, isLoading } = useAnalysisStore();
   const { activePanel, setActivePanel, selectedNodeId } = useUIStore();
   
-  // --- Logique extraite dans les hooks ---
+  // --- Hooks personnalisés pour la logique métier ---
   useDebouncedAnalysis();
   const { onDragOver, onDrop, onNodeClick, onPaneClick, onNodesDelete } = useFlowInteractions();
+  const { isValidConnection } = useConnectionValidation();
 
-  // On retrouve le noeud sélectionné à partir de son ID et de la liste des noeuds
   const selectedNode = useMemo(
-    () => graph.nodes.find(node => node.id === selectedNodeId),
+    () => graph.nodes.find((node: CustomNodeType) => node.id === selectedNodeId),
     [graph.nodes, selectedNodeId]
   );
 
+  // Un composant simple pour le cas où aucun nœud n'est sélectionné
   const ConfigPlaceholder = () => (
     <div className="placeholder-panel">
       <h3>Configuration</h3>
-      <p>Sélectionnez un nœud sur le canvas pour voir ses options.</p>
+      <p>Sélectionnez un nœud pour voir ses options.</p>
     </div>
   );
 
@@ -67,9 +62,12 @@ function FlowEditor() {
       <main className="flow-editor-main">
         <Header />
         <div className="content-wrapper">
+          {/* Les panneaux latéraux (Sidebar, ConfigurationPanel) sont affichés ici */}
           {activePanel === 'nodes' && <Sidebar />}
           {activePanel === 'config' && (selectedNode ? <ConfigurationPanel key={selectedNode.id} node={selectedNode} /> : <ConfigPlaceholder />)}
           
+          {/* Le conteneur principal pour le canvas React Flow */}
+          {/* Il a `position: relative` grâce à la classe .main-content */}
           <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
             <ReactFlow
               nodes={graph.nodes}
@@ -81,23 +79,28 @@ function FlowEditor() {
               onPaneClick={onPaneClick}
               onNodesDelete={onNodesDelete}
               nodeTypes={nodeTypes}
+              isValidConnection={isValidConnection}
               fitView
             >
               <Controls style={{ bottom: 20, left: 20 }} />
               <Background color="#e0e7ff" gap={24} size={1.5} />
             </ReactFlow>
+            
+            {/* --- POSITIONNEMENT CLÉ ---
+              En plaçant le ResultPanel ici, il devient un enfant de .main-content.
+              Comme .main-content a `position: relative` et que .result-panel a `position: absolute`,
+              le panneau de résultats se positionnera par rapport à son parent (le canvas)
+              et flottera au-dessus, comme souhaité.
+            */}
+            {activePanel === 'results' && <ResultPanel steps={analysisSteps} isLoading={isLoading} />}
           </div>
-          
-          {activePanel === 'results' && <ResultPanel steps={analysisSteps} isLoading={isLoading} />}
         </div>
       </main>
     </div>
   );
 }
 
-/**
- * Le composant racine de l'application qui fournit les contextes nécessaires.
- */
+// Le composant racine qui fournit le contexte React Flow
 export default function App() {
   return (
     <ReactFlowProvider>

@@ -1,0 +1,125 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.result-panel {
+  position: absolute;
+  top: 32px;     // Décale du haut du canvas, ajuste selon ton header
+  right: 32px;   // Décale du bord droit du canvas
+  z-index: 20;   // Passe au-dessus de tout
+//   max-height: calc(85vh - 64px); // Décale du bas du canvas, ajuste selon ton footer
+
+  // --- Effet Glassmorphism amélioré ---
+  background: rgba(255, 255, 255, 0.6); // Fond blanc plus opaque
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(118, 134, 159, 0.2);
+  // ---
+  width: 380px;
+  min-width: 320px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 20px;
+  overflow: visible;
+
+  .steps-container-scrollable {
+    max-height: calc(80vh - 92px); // ajuste si header ou padding différents
+    overflow-y: auto;
+    padding-right: 8px; // optionnel : espace entre scrollbar et bord
+  }
+
+  .result-panel-header {
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .analysis-step {
+    // --- Fond des cartes plus intense ---
+    background-color: #f0f4fb;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    // ---
+    border-radius: 16px;
+    border: 1px solid #eef2f7;
+    padding: 16px;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba($shadow-color, 0.7);
+    }
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .step-tag {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: $font-weight-bold;
+    color: white;
+
+    &.tag-input { background: linear-gradient(120deg, #5d69f3 0%, #9747ff 100%); }
+    &.tag-char-filter { background: linear-gradient(120deg, #30cfd0 0%, #330867 100%); }
+    &.tag-tokenizer { background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%); }
+    &.tag-token-filter { background: linear-gradient(135deg, #fb923c 0%, #f472b6 100%); }
+    &.tag-error { background: linear-gradient(120deg, #f43f5e 0%, #c026d3 100%); }
+    &.tag-default { background-color: #a0aec0; }
+  }
+
+  .step-name-text {
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .step-output {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eef2f7;
+  }
+
+  .token {
+    background-color: white;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: $text-primary;
+    box-shadow: 0 2px 4px rgba($shadow-color, 0.5);
+  }
+
+  .initial-text {
+    font-family: $font-family-sans;
+    font-size: 0.95rem;
+    color: $text-secondary;
+    line-height: 1.5;
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: $text-secondary;
+  }
+}

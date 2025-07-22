@@ -21,6 +21,7 @@
   flex-grow: 1;
   gap: $spacing-unit * 2;
   overflow: hidden;
+  position: relative; // <-- AJOUTÉ : Permet de positionner des enfants en absolu
 }
 
 // Wrapper pour le canvas et les panneaux latéraux
@@ -35,6 +36,6 @@
   flex-grow: 1;
   position: relative;
   border-radius: $border-radius-xl;
-  overflow: hidden; // Assure que le canvas ne déborde pas
+  overflow: hidden; 
   @include soft-shadow;
 }

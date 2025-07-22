@@ -10,13 +10,16 @@
 @use 'layout/sidebar' as *;
 @use 'layout/panels' as *;
 // 4. Components (Buttons, Nodes, Forms)
+@use 'components/form-exclusive-choice' as *;
 @use 'components/button' as *;
 @use 'components/custom-node' as *;
 @use 'components/form' as *;
 @use 'components/reactflow' as *;
 @use 'components/input_output' as *;
 @use 'components/icon-sidebar' as *;
-
+@use 'components/form-checkbox-group' as *;
+@use 'components/form-file' as *;
+@use 'components/result-panel' as *;
 
 // --- Global Styles for React Flow ---
 .reactflow-wrapper {

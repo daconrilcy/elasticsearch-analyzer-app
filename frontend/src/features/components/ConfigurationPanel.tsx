@@ -3,14 +3,13 @@ import { useGraphStore } from '../store/graphStore';
 import { useUIStore } from '../store/uiStore';
 import { findComponentDefinition } from '../../registry/componentRegistry';
 import { FormField } from './FormField';
+import { FormExclusiveChoice } from './form/FormExclusiveChoice'; // <-- AJOUTER L'IMPORT
 import { type CustomNode } from '@/shared/types/analyzer.d';
 
-// --- Icônes (inchangées) ---
+// --- Icônes ---
 const BackIcon = () => ( <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> );
 const DeleteIcon = () => ( <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2-2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> );
 
-// --- Interface des Props ---
-// On définit l'interface AVANT de l'utiliser.
 interface ConfigurationPanelProps {
   node: CustomNode;
 }
@@ -24,10 +23,7 @@ export function ConfigurationPanel({ node }: ConfigurationPanelProps) {
     return findComponentDefinition(node.data.kind, node.data.name);
   }, [node]);
 
-  // Si aucun nœud n'est sélectionné, on ne rend rien.
-  if (!node) {
-    return null;
-  }
+  if (!node) return null;
 
   const handleLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateNodeData(node.id, { label: event.target.value });
@@ -36,35 +32,55 @@ export function ConfigurationPanel({ node }: ConfigurationPanelProps) {
   const handleDelete = () => {
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le nœud "${node.data.label || node.data.name}" ?`)) {
       deleteNode(node.id);
-      setSelectedNodeId(null); // Désélectionner après suppression
+      setSelectedNodeId(null);
     }
   };
 
   const renderParamsForm = () => {
     if (!componentDef?.params?.elements) {
-      return <p className="no-params-message">Aucun paramètre n'est configurable pour ce nœud.</p>;
+      return <p className="no-params-message">Aucun paramètre n'est configurable.</p>;
     }
-    const { elements } = componentDef.params;
-    const isCheckbox = (param: any) => param.field.type === 'checkbox' || (param.field.type === 'input' && param.field.itemType === 'checkbox');
-    
-    return elements.map((param: any) => (
-      <div className="form-group" key={param.name}>
-        {!isCheckbox(param) && <label>{param.field.label}</label>}
-        <FormField paramDef={param} nodeId={node.id} />
-        {param.field.description && !isCheckbox(param) && <p className="field-description">{param.field.description}</p>}
-      </div>
-    ));
+
+    const { elements, exclusive: isExclusive } = componentDef.params;
+
+    // --- NOUVELLE LOGIQUE ---
+    if (isExclusive) {
+      // Si les paramètres sont exclusifs, on rend notre nouveau composant conteneur
+      return (
+        <div className="form-group">
+          <FormExclusiveChoice
+            paramDef={{ elements }}
+            value={node.data.params || {}}
+            onChange={(newValue) => updateNodeData(node.id, { params: newValue })}
+          />
+        </div>
+      );
+    }
+
+    // --- Logique existante pour les paramètres non-exclusifs ---
+    return elements.map((param: any) => {
+      const currentValue = node.data.params?.[param.name] ?? param.field.default ?? '';
+      const handleChange = (newValue: any) => {
+        updateNodeData(node.id, { params: { ...node.data.params, [param.name]: newValue } });
+      };
+      const shouldShowLabel = param.field.component !== 'switch';
+
+      return (
+        <div className="form-group" key={param.name}>
+          {shouldShowLabel && <label>{param.field.label}</label>}
+          <FormField paramDef={param} value={currentValue} onChange={handleChange} />
+          {param.field.description && shouldShowLabel && <p className="field-description">{param.field.description}</p>}
+        </div>
+      );
+    });
   };
 
   const canBeDeleted = node.data.kind !== 'input' && node.data.kind !== 'output';
 
   return (
     <aside className="config-panel">
-       <div className="panel-header">
-        <button onClick={() => setSelectedNodeId(null)} className="back-button">
-          <BackIcon />
-          <span>Retour</span>
-        </button>
+      <div className="panel-header">
+        <button onClick={() => setSelectedNodeId(null)} className="back-button"><BackIcon /><span>Retour</span></button>
         <h2>Configuration</h2>
       </div>
       <div className="panel-content">

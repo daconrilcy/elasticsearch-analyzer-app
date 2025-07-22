@@ -111,6 +111,7 @@
             "field": {
               "label": "Liste prédéfinie",
               "type": "select",
+              "component": "select",
               "multiple": false,
               "choices": [
                 {
@@ -261,6 +262,7 @@
             "field": {
               "label": "Liste personnalisée",
               "type": "input",
+              "component": "textarea",
               "itemType": "text",
               "placeholder": "Mots à supprimer",
               "description": "une liste de mots à supprimer en les séparant par une virgule…"
@@ -273,8 +275,10 @@
             "field": {
               "label": "Fichier de stopwords",
               "type": "file",
+              "component": "file",
               "accept": ".txt",
-              "description": "Un mot par ligne. Le fichier doit être présent sur le serveur Elasticsearch."
+              "description": "Un mot par ligne. Le fichier doit être présent sur le serveur Elasticsearch.",
+              "in_es": true
             }
           }
         ],
