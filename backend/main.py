@@ -1,52 +1,66 @@
-from fastapi import FastAPI
+# main.py
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# 1. Imports mis à jour
 from app.api.v1 import analyzers, projects, es_config_files, auth
-from app.core.db import engine, Base
-from dotenv import load_dotenv
-
-# 👇 1. Importez le middleware CORS
-from fastapi.middleware.cors import CORSMiddleware
-
-load_dotenv()
+from app.core.db import engine, Base, get_db
+from app.core.logging_config import setup_logging  # <-- Importer la configuration du logging
+from loguru import logger  # <-- Importer logger pour l'utiliser
 
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
+    # 2. Configurer le logging au démarrage de l'application
+    setup_logging()
+    logger.info("Démarrage de l'application...")
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("✅ Tables checked/created (lifespan startup)")
+    logger.info("Tables de la base de données vérifiées/créées.")
     yield
-    # ...
+    logger.info("Arrêt de l'application...")
 
 
-app = FastAPI(lifespan=lifespan)
-
-# 👇 2. Définissez les origines autorisées
-origins = [
-    "http://localhost:5173",  # L'adresse de votre frontend Vite
-    "http://localhost:3000",  # Au cas où vous utiliseriez un autre port
-]
-
-# 👇 3. Ajoutez le middleware à votre application
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # Autorise toutes les méthodes (GET, POST, etc.)
-    allow_headers=["*"],  # Autorise tous les en-têtes
+app = FastAPI(
+    title="Elasticsearch Analyzer API",
+    lifespan=lifespan
 )
 
-# Le reste de votre fichier main.py
-app.include_router(analyzers.router, prefix="/api/v1/analyzer")
-app.include_router(projects.router, prefix="/api/v1/projects")
-app.include_router(es_config_files.router, prefix="/api/v1/es_config_files")
-app.include_router(auth.router, prefix="/api/v1/auth")
+
+# ... (votre configuration CORS reste ici) ...
+
+# 3. Nouveaux endpoints pour les Health Checks
+@app.get("/health", tags=["Health Checks"])
+async def health_check():
+    """
+    Vérifie si l'application est en cours d'exécution (liveness probe).
+    """
+    logger.info("Health check demandé.")
+    return {"status": "ok"}
 
 
-@app.get("/ping")
-def ping():
-    return {"message": "pong"}
+@app.get("/ready", tags=["Health Checks"])
+async def readiness_check(db: AsyncSession = Depends(get_db)):
+    """
+    Vérifie si l'application est prête à accepter du trafic (readiness probe),
+    en testant la connexion à la base de données.
+    """
+    try:
+        await db.execute("SELECT 1")
+        logger.info("Readiness check réussi.")
+        return {"status": "ready", "dependencies": {"database": "ok"}}
+    except Exception as e:
+        logger.error(f"Readiness check échoué : impossible de se connecter à la base de données. Erreur: {e}")
+        return {"status": "not_ready", "dependencies": {"database": "error"}}
 
+
+# Inclusion des routeurs (inchangé)
+app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"])
+app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
+app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from .models import UserRole
 
 
 class UserCreate(BaseModel):
@@ -16,7 +17,8 @@ class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
+    role: UserRole
 
-    model_config = {
-        "from_attributes": True
-    }
+    class Config:
+        from_attributes = True
+
