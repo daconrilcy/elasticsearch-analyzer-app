@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "Elasticsearch Analyzer Backend"
     API_V1_STR: str = "/api/v1"
 
+    # Dossier des fichiers de données
+    UPLOAD_DIR: Path = Path("./data/uploads")
+
 
 @lru_cache()
 def get_settings() -> Settings:

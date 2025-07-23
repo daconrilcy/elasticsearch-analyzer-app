@@ -2,7 +2,7 @@ import json
 from typing import List, Dict, Any, Tuple, Optional
 from elasticsearch import AsyncElasticsearch
 from backend.app.domain.analyzer.models import AnalyzerGraph, Node, Kind
-from backend.app.domain.analyzer.component_loader import get_component_definition
+from backend.app.domain.analyzer.registry_loader import RegistryLoader
 
 
 async def debug_analyzer_step_by_step(
@@ -135,7 +135,7 @@ def convert_graph_to_es_analyzer(graph: AnalyzerGraph) -> Dict:
 
         # Cas 1 : Le nœud a des paramètres -> on crée un objet de définition complet
         if next_node.params:
-            component_def = get_component_definition(node_kind, node_name)
+            component_def = RegistryLoader().get_component_definition(node_kind, node_name)
             if not component_def or not component_def.get("params"):
                 raise ValueError(f"Définition introuvable pour les paramètres de '{node_name}'.")
 

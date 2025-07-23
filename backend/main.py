@@ -8,6 +8,7 @@ from app.api.v1 import analyzers, projects, es_config_files, auth
 from app.core.db import engine, Base, get_db
 from app.core.logging_config import setup_logging  # <-- Importer la configuration du logging
 from loguru import logger  # <-- Importer logger pour l'utiliser
+from app.api.v1 import datasets
 
 
 @asynccontextmanager
@@ -24,7 +25,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Elasticsearch Analyzer API",
+    title="Elasticsearch Index Creator API",
+    description="API pour créer des index Elasticsearch.",
+    version="0.1.0",
     lifespan=lifespan
 )
 
@@ -61,8 +64,4 @@ app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+app.include_router(datasets.router, prefix="/api/v1/datasets", tags=["Datasets"])
