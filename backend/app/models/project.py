@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from app.core.db import Base
 
@@ -12,3 +13,6 @@ class Project(Base):
     # On ajoute une colonne pour stocker le graphe de l'analyseur.
     # JSONB est un type de données JSON binaire optimisé pour PostgreSQL.
     graph = Column(JSONB, nullable=False)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner = relationship("User")

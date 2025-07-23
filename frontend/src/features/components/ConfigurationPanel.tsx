@@ -12,9 +12,10 @@ const DeleteIcon = () => ( <svg width="16" height="16" viewBox="0 0 24 24" fill=
 
 interface ConfigurationPanelProps {
   node: CustomNode;
+  isVisible: boolean;
 }
 
-export function ConfigurationPanel({ node }: ConfigurationPanelProps) {
+export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps) {
   const { updateNodeData, deleteNode } = useGraphStore();
   const { setSelectedNodeId } = useUIStore();
 
@@ -78,7 +79,7 @@ export function ConfigurationPanel({ node }: ConfigurationPanelProps) {
   const canBeDeleted = node.data.kind !== 'input' && node.data.kind !== 'output';
 
   return (
-    <aside className="config-panel">
+    <aside className={`config-panel ${isVisible ? 'visible' : ''}`}>
       <div className="panel-header">
         <button onClick={() => setSelectedNodeId(null)} className="back-button"><BackIcon /><span>Retour</span></button>
         <h2>Configuration</h2>

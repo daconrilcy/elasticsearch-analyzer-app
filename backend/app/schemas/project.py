@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from typing import Optional
 from app.schemas.analyzer_graph import AnalyzerGraph
 
+class UserInfo(BaseModel):
+    id: int
+    username: str
+
 # Schéma pour la création d'un projet
 class ProjectCreate(BaseModel):
     name: str
@@ -20,6 +24,7 @@ class ProjectOut(BaseModel):
     name: str
     description: Optional[str] = None
     graph: AnalyzerGraph
+    owner: UserInfo
 
     class Config:
         from_attributes = True # Anciennement 'orm_mode'

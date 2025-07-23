@@ -1,42 +1,48 @@
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-// Correction: Import the new, separated stores and necessary types
 import { useProjectStore, type ProjectListItem } from '../store/projectStore';
 import { useGraphStore } from '../store/graphStore';
+import { useAuthStore } from '../store/authStore';
+
+// Icône de déconnexion
+const PowerIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+    <line x1="12" y1="2" x2="12" y2="12"></line>
+  </svg>
+);
 
 export function Header() {
-  // Correction: Get state and actions from the correct stores
   const {
-    projectList,
-    currentProject,
-    fetchProjects,
-    loadProject,
-    saveProject,
-    createNewProject,
-    setCurrentProjectName,
-    exportCurrentProject,
+    projectList, currentProject, fetchProjects, loadProject,
+    saveProject, createNewProject, setCurrentProjectName, exportCurrentProject,
   } = useProjectStore();
 
   const { graph } = useGraphStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
-  // Load the project list when the component mounts
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (isAuthenticated) {
+      fetchProjects();
+    }
+  }, [isAuthenticated, fetchProjects]);
 
-  // Handler for saving, with simple validation
   const handleSave = () => {
     if (!currentProject.name.trim()) {
       toast.error("Veuillez donner un nom à votre projet.");
       return;
     }
-    // Pass the current graph from the graphStore to the save action
     saveProject(graph);
   };
   
   const handleCreateNew = () => {
-      // The createNewProject action now handles resetting the other stores
       createNewProject();
+  };
+
+  // --- CORRECTION : Nouvelle fonction pour gérer la déconnexion ---
+  const handleLogout = () => {
+    logout();
+    toast.success("Vous avez été déconnecté.");
   };
 
   return (
@@ -49,36 +55,34 @@ export function Header() {
           placeholder="Nom du projet"
         />
       </div>
+
       <div className="project-actions">
         <select
           className="project-selector"
-          onChange={(e) => {
-            if (e.target.value) {
-              loadProject(Number(e.target.value));
-            }
-          }}
+          onChange={(e) => { if (e.target.value) { loadProject(Number(e.target.value)); } }}
           value={currentProject.id || ''}
         >
           <option value="" disabled>Charger un projet...</option>
-          {/* Correction: Explicitly type 'p' */}
           {projectList.map((p: ProjectListItem) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
+            <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
         
-        <button 
-          onClick={exportCurrentProject} 
-          className="action-button"
-          disabled={currentProject.id === null}
-          title={currentProject.id === null ? "Sauvegardez d'abord le projet" : "Exporter la configuration"}
-        >
+        <button onClick={exportCurrentProject} className="action-button" disabled={currentProject.id === null}>
           Exporter
         </button>
 
         <button onClick={handleSave} className="action-button">Sauvegarder</button>
         <button onClick={handleCreateNew} className="action-button primary">Nouveau Projet</button>
+      </div>
+
+      <div className="user-info">
+        {user && <span className="username">Bienvenue, {user.username}</span>}
+        {/* Le bouton appelle maintenant la nouvelle fonction handleLogout */}
+        <button onClick={handleLogout} className="logout-button">
+          <PowerIcon />
+          <span>Logout</span>
+        </button>
       </div>
     </header>
   );

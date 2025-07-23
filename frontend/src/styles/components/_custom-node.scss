@@ -1,12 +1,10 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
 
-// Cible le wrapper de React Flow pour surcharger le style de sélection
-
 .react-flow__node {
   &.selected, &:focus-visible {
     .custom-node {
-      box-shadow: 0 0 0 4px rgba($accent-color, 0.3), 0 20px 40px -15px $shadow-color;
+      box-shadow: 0 0 0 3px rgba($accent-color, 0.4), 0 12px 28px rgba($shadow-color, 0.8);
     }
     outline: none;
   }
@@ -18,37 +16,36 @@
   color: white;
   min-width: 180px;
   text-align: center;
-  border: none;
-  overflow: hidden; // Important pour les coins arrondis du contenu
+  border: 1px solid rgba(255, 255, 255, 0.4); // Bordure glossy
+  overflow: hidden;
   @include interactive-shadow;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
   
-  // Applique les dégradés
+  // --- Alignement des couleurs avec la sidebar ---
   &.custom-node-input { background: $gradient-input; }
   &.custom-node-output { background: $gradient-output; }
-  &.custom-node-char_filter,
-  &.custom-node-tokenizer,
-  &.custom-node-token_filter { background: $gradient-tokenizer; }
+  &.custom-node-char_filter { background: $gradient-char-filter; }
+  &.custom-node-tokenizer { background: $gradient-tokenizer; }
+  &.custom-node-token_filter { background: $gradient-token-filter; }
 }
 
-// LA CLÉ DE LA CORRECTION : La tête a une position relative pour ses poignées
 .node-header {
   position: relative;
-  padding: 22px 32px;
+  padding: 18px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   
   strong {
     font-weight: $font-weight-bold;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
 }
 
-// Le conteneur pour la zone de texte
 .node-content {
-  padding: 0 16px 16px 16px; // Padding uniquement pour le contenu
+  padding: 0 16px 16px 16px;
 }
 
 .input-textarea {

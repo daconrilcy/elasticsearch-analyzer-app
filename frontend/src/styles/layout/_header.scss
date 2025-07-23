@@ -2,32 +2,85 @@
 @use '../abstracts/mixins' as *;
 
 .app-header {
-  @include glass-panel;
+  // ... (styles du conteneur inchangés)
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px 0 rgba(118, 134, 159, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-unit $spacing-unit * 2;
+  padding: $spacing-unit * 1.5 $spacing-unit * 3;
   width: 100%;
   
   .project-title input {
-    font-size: 1.1rem;
+    // --- CORRECTION DU STYLE DE L'INPUT ---
+    font-size: 1.4rem;
     font-weight: $font-weight-bold;
-    border: none;
+    color: #223344;
     background: transparent;
-    color: $text-primary;
-    padding: $spacing-unit * 1.5;
-    border-radius: $border-radius-xl;
-    transition: background 0.2s ease;
+    border: none;
+    border-radius: $border-radius-md;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+    min-width: 300px;
+    outline: none;
+
+    &::placeholder {
+      color: #9ab0c9;
+    }
 
     &:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 0 2px rgba($accent-color, 0.2);
     }
   }
 
   .project-actions {
     display: flex;
     align-items: center;
-    gap: $spacing-unit * 1.5;
+    gap: $spacing-unit * 2;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit * 2;
+
+    .username {
+      font-weight: $font-weight-medium;
+      color: #3d4f60;
+    }
+
+    // --- STYLE POUR LE BOUTON DE DÉCONNEXION ---
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit;
+      padding: 12px 24px;
+      border-radius: 24px; // Effet "pill"
+      border: none;
+      background: $gradient-button-primary; // Dégradé
+      color: white;
+      font-size: 0.95rem;
+      font-weight: $font-weight-bold; // Texte en gras
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba($shadow-color, 0.5); // Ombre flottante
+
+      svg {
+        width: 16px;
+        height: 16px;
+        stroke: white;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba($shadow-color, 0.8);
+        filter: brightness(1.1); // Effet lumineux au survol
+      }
+    }
   }
 }

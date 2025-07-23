@@ -1,50 +1,49 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
 
-
-
-.action-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-unit;
-
-  @include interactive-shadow;
-  
-}
-
-
+// Style de base pour tous les boutons d'action et le sélecteur
 .action-button, .project-selector {
-  padding: 10px 20px;
-  border-radius: $border-radius-pill;
-  border: 1px solid transparent;
-  font-size: 0.9rem;
-  font-weight: $font-weight-medium;
+  padding: 12px 24px;
+  border-radius: 24px; // Coins plus généreux
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.95rem;
+  font-weight: $font-weight-bold; // Typo plus grasse
   cursor: pointer;
   transition: all 0.25s ease;
-  color: $text-primary;
+  color: #223344; // Gris bleuté
   background-color: white;
-  @include soft-shadow;
+  box-shadow: 0 4px 12px rgba($shadow-color, 0.5); // Effet flottant
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba($shadow-color, 1.5);
+    box-shadow: 0 8px 20px rgba($shadow-color, 0.8);
+  }
+  
+  &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($accent-color, 0.4);
   }
 
+  // Style du bouton primaire
   &.primary {
     background: $gradient-button-primary;
     color: white;
+    font-size: 1rem; // Un peu plus grand
+    border: none;
   }
   
+  // Style du bouton désactivé
   &:disabled {
-    background: #e9ecef;
-    color: #adb5bd;
+    background: rgba(240, 244, 251, 0.7); // Fond "futuriste"
+    color: #9ab0c9; // Texte moins contrasté
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    border-color: rgba(0, 0, 0, 0.02);
   }
 }
 
+// Style spécifique pour le sélecteur de projet
 .project-selector {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -54,4 +53,36 @@
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 16px 12px;
+}
+
+// Style spécifique pour le bouton de déconnexion
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit;
+  padding: 10px 16px;
+  border-radius: 24px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: $text-secondary;
+  font-size: 0.9rem;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke: $text-secondary;
+    transition: stroke 0.2s ease;
+  }
+
+  &:hover {
+    background-color: #fef2f2; // Fond rouge très clair
+    color: #ef4444; // Texte rouge
+
+    svg {
+      stroke: #ef4444;
+    }
+  }
 }

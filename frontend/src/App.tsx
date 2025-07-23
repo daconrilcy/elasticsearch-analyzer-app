@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import ReactFlow, { Controls, Background, ReactFlowProvider } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
 import type { CustomNode as CustomNodeType } from './shared/types/analyzer.d';
 
 // --- Imports des Stores ---
-import { useGraphStore, useAnalysisStore, useUIStore } from './features/store';
+import { useGraphStore, useAnalysisStore, useUIStore, useAuthStore } from './features/store';
 
 // --- Imports des Hooks ---
 import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
@@ -18,26 +18,30 @@ import { ResultPanel } from './features/components/ResultPanel';
 import { ConfigurationPanel } from './features/components/ConfigurationPanel';
 import { Header } from './features/components/Header';
 import { IconSidebar } from './features/components/IconSidebar';
+import { AuthPage } from './features/auth/AuthPage';
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
 
-// Défini en dehors du composant pour éviter les re-créations inutiles (optimisation)
+// Défini en dehors du composant pour la performance
 const nodeTypes = {
-  input: CustomNode,
-  output: CustomNode,
-  tokenizer: CustomNode,
-  char_filter: CustomNode,
-  token_filter: CustomNode,
+  input: CustomNode, output: CustomNode, tokenizer: CustomNode,
+  char_filter: CustomNode, token_filter: CustomNode,
 };
 
+const fitViewOptions = {
+  padding: 0.2,
+  maxZoom: 1.0,
+};
+
+/**
+ * Le composant principal de l'éditeur, affiché lorsque l'utilisateur est authentifié.
+ */
 function FlowEditor() {
-  // --- Récupération de l'état depuis les stores ---
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
   const { analysisSteps, isLoading } = useAnalysisStore();
   const { activePanel, setActivePanel, selectedNodeId } = useUIStore();
   
-  // --- Hooks personnalisés pour la logique métier ---
   useDebouncedAnalysis();
   const { onDragOver, onDrop, onNodeClick, onPaneClick, onNodesDelete } = useFlowInteractions();
   const { isValidConnection } = useConnectionValidation();
@@ -47,12 +51,12 @@ function FlowEditor() {
     [graph.nodes, selectedNodeId]
   );
 
-  // Un composant simple pour le cas où aucun nœud n'est sélectionné
-  const ConfigPlaceholder = () => (
-    <div className="placeholder-panel">
+  // Un composant placeholder qui reçoit aussi la prop de visibilité
+  const ConfigPlaceholder = ({ isVisible }: { isVisible: boolean }) => (
+    <aside className={`config-panel placeholder-panel ${isVisible ? 'visible' : ''}`}>
       <h3>Configuration</h3>
       <p>Sélectionnez un nœud pour voir ses options.</p>
-    </div>
+    </aside>
   );
 
   return (
@@ -61,51 +65,72 @@ function FlowEditor() {
       
       <main className="flow-editor-main">
         <Header />
-        <div className="content-wrapper">
-          {/* Les panneaux latéraux (Sidebar, ConfigurationPanel) sont affichés ici */}
-          {activePanel === 'nodes' && <Sidebar />}
-          {activePanel === 'config' && (selectedNode ? <ConfigurationPanel key={selectedNode.id} node={selectedNode} /> : <ConfigPlaceholder />)}
-          
-          {/* Le conteneur principal pour le canvas React Flow */}
-          {/* Il a `position: relative` grâce à la classe .main-content */}
-          <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
-            <ReactFlow
-              nodes={graph.nodes}
-              edges={graph.edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={onNodeClick}
-              onPaneClick={onPaneClick}
-              onNodesDelete={onNodesDelete}
-              nodeTypes={nodeTypes}
-              isValidConnection={isValidConnection}
-              fitView
-            >
-              <Controls style={{ bottom: 20, left: 20 }} />
-              <Background color="#e0e7ff" gap={24} size={1.5} />
-            </ReactFlow>
-            
-            {/* --- POSITIONNEMENT CLÉ ---
-              En plaçant le ResultPanel ici, il devient un enfant de .main-content.
-              Comme .main-content a `position: relative` et que .result-panel a `position: absolute`,
-              le panneau de résultats se positionnera par rapport à son parent (le canvas)
-              et flottera au-dessus, comme souhaité.
-            */}
-            {activePanel === 'results' && <ResultPanel steps={analysisSteps} isLoading={isLoading} />}
-          </div>
+        
+        {/* Le canvas ReactFlow prend toute la place disponible */}
+        <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
+          <ReactFlow
+            nodes={graph.nodes}
+            edges={graph.edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onPaneClick={onPaneClick}
+            onNodesDelete={onNodesDelete}
+            nodeTypes={nodeTypes}
+            isValidConnection={isValidConnection}
+            fitView
+            fitViewOptions={fitViewOptions}
+          >
+            <Controls />
+            <Background color="#e0e7ff" gap={24} size={1.5} />
+          </ReactFlow>
         </div>
+
+        {/* --- PANNEAUX FLOTTANTS --- */}
+        {/* Ils sont toujours rendus, mais leur visibilité est contrôlée par CSS */}
+        <Sidebar isVisible={activePanel === 'nodes'} />
+        
+        {selectedNode ? (
+          <ConfigurationPanel 
+            key={selectedNode.id} 
+            node={selectedNode} 
+            isVisible={activePanel === 'config'} 
+          />
+        ) : (
+          <ConfigPlaceholder isVisible={activePanel === 'config'} />
+        )}
+        
+        <ResultPanel 
+          steps={analysisSteps} 
+          isLoading={isLoading} 
+          isVisible={activePanel === 'results'} 
+        />
       </main>
     </div>
   );
 }
 
-// Le composant racine qui fournit le contexte React Flow
-export default function App() {
+/**
+ * Le composant racine qui gère l'authentification et fournit les contextes.
+ */
+function App() {
+  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isLoading) {
+    return <div className="loading-fullscreen">Chargement...</div>;
+  }
+
   return (
     <ReactFlowProvider>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
-      <FlowEditor />
+      {isAuthenticated ? <FlowEditor /> : <AuthPage />}
     </ReactFlowProvider>
   );
 }
+
+export default App;

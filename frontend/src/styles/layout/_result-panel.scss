@@ -3,7 +3,7 @@
 
 .result-panel {
   position: absolute;
-  top: 32px;     // Décale du haut du canvas, ajuste selon ton header
+  top: 90px;     // Décale du haut du canvas, ajuste selon ton header
   right: 32px;   // Décale du bord droit du canvas
   z-index: 20;   // Passe au-dessus de tout
 //   max-height: calc(85vh - 64px); // Décale du bas du canvas, ajuste selon ton footer
@@ -23,6 +23,16 @@
   gap: 20px;
   border-radius: 20px;
   overflow: visible;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(20px) scale(0.98); // Glisse depuis la droite
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) scale(1);
+  }
 
   .steps-container-scrollable {
     max-height: calc(80vh - 92px); // ajuste si header ou padding différents

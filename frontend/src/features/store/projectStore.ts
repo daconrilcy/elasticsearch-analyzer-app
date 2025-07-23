@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { type AnalyzerGraph, Kind } from '@/shared/types/analyzer.d';
+import { apiClient } from '@/services/apiClient';
 import { useGraphStore } from './graphStore'; // Import for callback
 import { useAnalysisStore } from './analysisStore'; // Import for callback
 
@@ -32,7 +33,7 @@ interface ProjectState {
   exportCurrentProject: () => Promise<void>;
 }
 
-const API_BASE_URL = '/api/v1/projects';
+const API_BASE_URL = '/api/v1/projects/';
 
 // --- Store ---
 
@@ -42,18 +43,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   fetchProjects: async () => {
     try {
-      const response = await fetch(API_BASE_URL);
+      // Utiliser apiClient au lieu de fetch
+      const response = await apiClient(API_BASE_URL);
       if (!response.ok) throw new Error('Erreur lors de la récupération des projets.');
       const projects: ProjectListItem[] = await response.json();
       set({ projectList: projects });
     } catch (error) {
-      toast.error((error as Error).message);
+      // apiClient gère déjà la déconnexion en cas d'erreur 401
+      if ((error as Error).message.indexOf('Session expirée') === -1) {
+        toast.error((error as Error).message);
+      }
     }
   },
   
   loadProject: async (projectId: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/${projectId}`);
+      const response = await apiClient(`${API_BASE_URL}/${projectId}`);
       if (!response.ok) throw new Error('Erreur lors du chargement du projet.');
       const project: FullProject = await response.json();
 
@@ -90,7 +95,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     };
 
     try {
-        const response = await fetch(url, {
+        const response = await apiClient(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: currentProject.name, description: "N/A", graph: graphPayload }),

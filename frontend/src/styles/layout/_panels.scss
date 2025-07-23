@@ -3,6 +3,10 @@
 
 
 .config-panel {
+  position: absolute;
+  top: 90px;
+  left: 24px;
+  z-index: 20;
   background: linear-gradient(135deg, hsla(220, 20%, 40%, 0.6) 0%, hsla(220, 22%, 5%, 0.5) 100%);
   border-radius: 32px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 1.5px 12px 0 rgba(0,0,0,0.12);
@@ -15,8 +19,18 @@
   display: flex;
   flex-direction: column;
   min-height: 640px;
-  transition: background 0.3s, box-shadow 0.3s;
+  max-height: calc(100% - 114px);
   overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-20px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) scale(1);
+  }
 
   .panel-header {
     margin-bottom: 36px;

@@ -26,12 +26,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         raise credentials_exception
     return user
 
-@router.post("/api/v1/auth/register", response_model=UserOut)
+@router.post("/register", response_model=UserOut)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     user = await create_user(db, user_in)
     return user
 
-@router.post("/api/v1/auth/login")
+@router.post("/login")
 async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)):
     user = await authenticate_user(db, user_in.username, user_in.password)
     if not user:
@@ -39,11 +39,11 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)):
     token = create_access_token({"sub": str(user.id)})
     return {"access_token": token, "token_type": "bearer"}
 
-@router.get("/api/v1/auth/me", response_model=UserOut)
+@router.get("/me", response_model=UserOut)
 async def read_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.delete("/api/v1/auth/me", response_model=dict)
+@router.delete("/me", response_model=dict)
 async def delete_me(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     await db.delete(current_user)
     await db.commit()

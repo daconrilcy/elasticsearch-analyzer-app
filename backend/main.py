@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.api import analyzer, projects, es_config_files
+from app.api import analyzer, projects, es_config_files, auth
 from app.core.db import engine, Base
 from dotenv import load_dotenv
 
@@ -39,6 +39,7 @@ app.add_middleware(
 app.include_router(analyzer.router, prefix="/api/v1/analyzer")
 app.include_router(projects.router, prefix="/api/v1/projects")
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files")
+app.include_router(auth.router, prefix="/api/v1/auth")
 
 @app.get("/ping")
 def ping():

@@ -3,6 +3,7 @@ import { type AnalysisStep } from '../store/analysisStore';
 interface ResultPanelProps {
   steps: AnalysisStep[];
   isLoading: boolean;
+  isVisible: boolean;
 }
 
 /**
@@ -37,7 +38,7 @@ const formatStepLabel = (stepName: string): string => {
     }
 }
 
-export function ResultPanel({ steps, isLoading }: ResultPanelProps) {
+export function ResultPanel({ steps, isLoading, isVisible }: ResultPanelProps) {
   if (isLoading) {
     return (
       <aside className="result-panel">
@@ -49,7 +50,7 @@ export function ResultPanel({ steps, isLoading }: ResultPanelProps) {
   }
 
   return (
-    <aside className="result-panel">
+    <aside className={`result-panel ${isVisible ? 'visible' : ''}`}>
       <h3 className="result-panel-header">Résultat Détaillé</h3>
       <div className="steps-container-scrollable">
         <div className="steps-container">
