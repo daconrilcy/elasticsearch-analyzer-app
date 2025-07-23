@@ -1,34 +1,33 @@
+# app/domain/project/schemas.py
 from pydantic import BaseModel
 from typing import Optional
 from backend.app.domain.analyzer.models import AnalyzerGraph
+from .models import ProjectStatus  # Import de l'énumération de statut
 
 
-class UserInfo(BaseModel):
-    id: int
-    username: str
-
-
-# Schéma pour la création d'un projet
+# Schéma pour la création d'un projet. Le statut et la version sont gérés par défaut.
 class ProjectCreate(BaseModel):
     name: str
     description: Optional[str] = None
     graph: AnalyzerGraph
 
 
-# Schéma pour la mise à jour d'un projet
+# Schéma pour la mise à jour. Permet de changer le nom, la description, le graphe ou le statut.
 class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     graph: Optional[AnalyzerGraph] = None
+    status: Optional[ProjectStatus] = None  # Permet de changer le statut via l'API
 
 
-# Schéma pour la réponse de l'API (ce que le frontend reçoit)
+# Schéma pour les réponses de l'API, incluant les nouveaux champs.
 class ProjectOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
     graph: AnalyzerGraph
-    owner: UserInfo
+    version: int  # Champ de version ajouté
+    status: ProjectStatus  # Champ de statut ajouté
 
     class Config:
-        from_attributes = True  # Anciennement 'orm_mode'
+        from_attributes = True

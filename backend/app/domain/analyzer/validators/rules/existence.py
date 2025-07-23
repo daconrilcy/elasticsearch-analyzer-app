@@ -2,6 +2,7 @@
 from backend.app.domain.analyzer.models import AnalyzerGraph, Kind
 from backend.app.domain.analyzer.registry_loader import RegistryLoader
 
+
 def validate_all_elements_exist(graph: AnalyzerGraph, definitions: RegistryLoader):
     """
     Valide que chaque nœud du pipeline (hors input/output) existe dans la registry.
