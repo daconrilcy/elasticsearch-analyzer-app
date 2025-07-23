@@ -1,14 +1,13 @@
-import os
 import shutil
 from pathlib import Path
-import time
 
 # --- Configuration ---
 # Le dossier source dans votre projet backend
 SOURCE_DIR = Path(__file__).parent / "app" / "es_analysis_files"
 # Le dossier de destination dans votre instance Elasticsearch (ajustez si nécessaire)
 # C'est le chemin typique dans une installation Docker.
-DEST_DIR = Path("/usr/share/elasticsearch/config/analysis") 
+DEST_DIR = Path("/usr/share/elasticsearch/config/analysis")
+
 
 def sync_files():
     """
@@ -19,13 +18,13 @@ def sync_files():
     - Sa date de dernière modification est plus récente dans la source.
     """
     print("--- Début de la synchronisation des fichiers d'analyse ES ---")
-    
+
     # S'assurer que les dossiers existent
     SOURCE_DIR.mkdir(exist_ok=True)
     DEST_DIR.mkdir(exist_ok=True)
 
     source_files = [f for f in SOURCE_DIR.iterdir() if f.is_file()]
-    
+
     if not source_files:
         print("Aucun fichier à synchroniser dans le dossier source.")
         return
@@ -35,7 +34,7 @@ def sync_files():
 
     for src_file in source_files:
         dest_file = DEST_DIR / src_file.name
-        
+
         should_copy = False
         if not dest_file.exists():
             print(f"[Nouveau] Le fichier '{src_file.name}' n'existe pas dans la destination.")
@@ -49,7 +48,7 @@ def sync_files():
 
         if should_copy:
             try:
-                shutil.copy2(src_file, dest_file) # copy2 préserve les métadonnées
+                shutil.copy2(src_file, dest_file)  # copy2 préserve les métadonnées
                 print(f"  -> Copié : '{src_file.name}' vers '{DEST_DIR}'")
                 copied_count += 1
             except Exception as e:

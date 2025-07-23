@@ -1,7 +1,14 @@
 # app/core/config.py
+from typing import Optional
+from pathlib import Path
+
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
+# Chemin vers le fichier .env
+ENV_PATH = Path(__file__).resolve().parents[3] / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 class Settings(BaseSettings):
     """
@@ -9,6 +16,7 @@ class Settings(BaseSettings):
     Utilise un fichier .env pour le développement local.
     """
     # Base de données
+    model_config = SettingsConfigDict(env_file=str(ENV_PATH), env_file_encoding="utf-8")
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/analyzer"
 
     # Elasticsearch
@@ -26,11 +34,14 @@ class Settings(BaseSettings):
     APP_NAME: str = "Elasticsearch Analyzer Backend"
     API_V1_STR: str = "/api/v1"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding='utf-8')
 
 @lru_cache()
 def get_settings() -> Settings:
     """Retourne l'instance des paramètres, mise en cache."""
     return Settings()
 
+
 settings = get_settings()
+
+if __name__ == "__main__":
+    settings = get_settings()

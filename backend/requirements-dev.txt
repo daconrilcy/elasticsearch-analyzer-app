@@ -1,0 +1,14 @@
+# requirements-dev.txt
+-r requirements.txt
+
+# Tests
+pytest
+pytest-asyncio
+httpx
+
+# Linting & Formatting
+black
+ruff
+
+# Type Checking
+mypy
