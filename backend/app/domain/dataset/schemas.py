@@ -2,7 +2,7 @@
 import uuid
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from .models import FileStatus
 
 
@@ -18,12 +18,13 @@ class UploadedFileOut(BaseModel):
     upload_date: datetime
     status: FileStatus
     uploader_id: uuid.UUID
+    schema: Optional[Dict[str, Any]] = None  # <-- Ajout du schéma
 
     class Config:
         from_attributes = True
 
 
-# --- Schémas pour Dataset ---
+# --- Les autres schémas (DatasetCreate, etc.) restent inchangés ---
 class DatasetCreate(BaseModel):
     name: str
     description: Optional[str] = None

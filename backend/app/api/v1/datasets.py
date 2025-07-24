@@ -6,9 +6,10 @@ from typing import List
 from pathlib import Path
 
 from backend.app.core.db import get_db
-from backend.app.domain.dataset import services, schemas
+from backend.app.domain.dataset import services, schemas, models
 from backend.app.domain.user.models import User
 from backend.app.api.dependencies import get_current_user
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
@@ -94,3 +95,34 @@ async def list_files_for_dataset_endpoint(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à ce jeu de données.")
 
     return dataset.files
+
+
+@router.post("/{file_id}/parse", status_code=status.HTTP_202_ACCEPTED)
+async def parse_file_endpoint(
+        file_id: uuid.UUID,
+        background_tasks: BackgroundTasks,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Déclenche une tâche de parsing en arrière-plan pour un fichier uploadé.
+    """
+    # Utilisons un service pour récupérer le fichier pour garder la logique métier séparée
+    # (Créons-le dans le service)
+    uploaded_file = await services.get_file(db, file_id)
+    if not uploaded_file:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fichier non trouvé.")
+
+    # Vérifie que l'utilisateur est bien le propriétaire du dataset associé
+    if uploaded_file.dataset.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à ce fichier.")
+
+    if uploaded_file.status not in [models.FileStatus.PENDING, models.FileStatus.ERROR]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Le fichier est déjà parsé ou en cours de traitement (statut: {uploaded_file.status})."
+        )
+
+    background_tasks.add_task(services.parse_file_and_update_db, uploaded_file.id)
+
+    return {"message": "Le traitement du fichier a été démarré en arrière-plan."}

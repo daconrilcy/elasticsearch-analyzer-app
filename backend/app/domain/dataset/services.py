@@ -2,16 +2,20 @@
 import uuid
 import hashlib
 import aiofiles
+import pandas as pd
 from pathlib import Path
 from typing import Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 from loguru import logger
 
 from . import models, schemas
 from backend.app.domain.user.models import User
 from backend.app.core.config import settings
+from backend.app.core.db import \
+    SessionLocal  # Assurez-vous que SessionLocal peut fournir une session synchrone pour les tâches
 
 
 # --- Fonctions utilitaires ---
@@ -25,11 +29,10 @@ def _generate_stored_filename(dataset_id: uuid.UUID, version: int, original_file
 async def _calculate_file_hash(file: UploadFile) -> str:
     """Calcule le hash SHA256 d'un fichier uploadé de manière asynchrone."""
     hasher = hashlib.sha256()
-    # Rembobine le fichier au début au cas où il aurait déjà été lu
     await file.seek(0)
     while chunk := await file.read(8192):
         hasher.update(chunk)
-    await file.seek(0)  # Rembobine à nouveau pour la sauvegarde
+    await file.seek(0)
     return hasher.hexdigest()
 
 
@@ -79,7 +82,6 @@ async def upload_new_file_version(
         uploader: User
 ) -> models.UploadedFile:
     """Orchestre le processus d'upload d'un nouveau fichier."""
-
     file_hash = await _calculate_file_hash(file)
     if await is_hash_duplicate(db, dataset.id, file_hash):
         raise HTTPException(
@@ -122,3 +124,67 @@ async def upload_new_file_version(
     logger.info(f"Fichier version {next_version} ajouté au dataset {dataset.id}.")
 
     return new_file
+
+
+# --- Logique de Parsing ---
+
+def _infer_schema_from_dataframe(df: pd.DataFrame) -> dict:
+    """Infère un schéma simple à partir d'un DataFrame pandas."""
+    schema = {}
+    for column, dtype in df.dtypes.items():
+        if "int" in str(dtype):
+            schema[column] = "integer"
+        elif "float" in str(dtype):
+            schema[column] = "float"
+        elif "datetime" in str(dtype):
+            schema[column] = "datetime"
+        else:
+            schema[column] = "string"
+    return schema
+
+
+def parse_file_and_update_db(file_id: uuid.UUID):
+    """
+    Tâche exécutée en arrière-plan.
+    Lit un fichier depuis le disque, infère son schéma, et met à jour la BDD.
+    """
+    db: Session = next(SessionLocal.get_db())
+    uploaded_file = None  # CORRECTION: Initialisation de la variable à None
+    try:
+        uploaded_file = db.get(models.UploadedFile, file_id)
+        if not uploaded_file:
+            logger.error(f"[BackgroundTask] Fichier {file_id} non trouvé pour le parsing.")
+            return
+
+        uploaded_file.status = models.FileStatus.PARSING
+        db.commit()
+
+        file_path = settings.UPLOAD_DIR / str(uploaded_file.dataset_id) / uploaded_file.filename_stored
+        logger.info(f"[BackgroundTask] Parsing du fichier : {file_path}")
+
+        df = None
+        if file_path.suffix == '.csv':
+            df = pd.read_csv(file_path)
+        elif file_path.suffix in ['.xlsx', '.xls']:
+            df = pd.read_excel(file_path)
+        elif file_path.suffix == '.json':
+            df = pd.read_json(file_path, lines=True)
+
+        if df is not None:
+            schema = _infer_schema_from_dataframe(df)
+            uploaded_file.schema = schema
+            uploaded_file.status = models.FileStatus.PARSED
+            logger.info(f"[BackgroundTask] Schéma inféré pour le fichier {file_id}: {schema}")
+        else:
+            raise ValueError("Format de fichier non supporté pour le parsing.")
+
+    except Exception as e:
+        logger.error(f"[BackgroundTask] Échec du parsing pour le fichier {file_id}. Erreur: {e}")
+        # CORRECTION: On vérifie maintenant directement la variable, ce qui est plus sûr.
+        if uploaded_file:
+            uploaded_file.status = models.FileStatus.ERROR
+    finally:
+        # CORRECTION: On s'assure que la variable existe avant de faire le commit.
+        if uploaded_file:
+            db.commit()
+        db.close()

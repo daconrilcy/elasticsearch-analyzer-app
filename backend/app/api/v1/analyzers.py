@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 from backend.app.core.es_client import get_es_client
 from backend.app.domain.analyzer.models import AnalyzerGraph
-from backend.app.domain.analyzer.services import debug_analyzer_step_by_step, convert_graph_to_es_analyzer
+# CORRECTION : L'import de 'convert_graph_to_es_analyzer' a été supprimé car il n'est pas utilisé ici.
+from backend.app.domain.analyzer.services import debug_analyzer_step_by_step
 # Import du validateur principal
 from backend.app.domain.analyzer.validators.validator import validate_full_graph, ValidationError
 
@@ -38,7 +39,6 @@ async def debug_analyzer_endpoint(
                             detail=f"Une erreur interne est survenue: {e}")
 
 
-# NOUVEL ENDPOINT DE VALIDATION
 @router.post("/validate", status_code=status.HTTP_200_OK)
 async def validate_analyzer_endpoint(graph: AnalyzerGraph = Body(...)):
     """
