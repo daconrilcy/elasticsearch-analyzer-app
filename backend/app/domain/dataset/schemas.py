@@ -1,9 +1,9 @@
 # app/domain/dataset/schemas.py
 import uuid
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from .models import FileStatus
+from .models import FileStatus, IngestionStatus
 
 
 # --- Schémas pour UploadedFile ---
@@ -19,6 +19,48 @@ class UploadedFileOut(BaseModel):
     status: FileStatus
     uploader_id: uuid.UUID
     schema: Optional[Dict[str, Any]] = None  # <-- Ajout du schéma
+
+    ingestion_status: IngestionStatus
+    docs_indexed: Optional[int] = None
+    ingestion_errors: Optional[List[str]] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Schémas pour la requête d'ingestion ---
+class IngestRequest(BaseModel):
+    mapping_id: uuid.UUID
+
+
+# --- Schémas pour SchemaMapping ---
+
+class MappingRule(BaseModel):
+    source: str = Field(..., description="Nom de la colonne dans le fichier source.")
+    target: str = Field(..., description="Nom du champ dans l'index Elasticsearch cible.")
+    es_type: str = Field(..., description="Type de données Elasticsearch (ex: keyword, text, integer).")
+
+
+class SchemaMappingCreate(BaseModel):
+    name: str
+    source_file_id: uuid.UUID
+    mapping_rules: List[MappingRule]
+
+
+class SchemaMappingUpdate(BaseModel):
+    name: Optional[str] = None
+    mapping_rules: Optional[List[MappingRule]] = None
+
+
+class SchemaMappingOut(BaseModel):
+    id: uuid.UUID
+    dataset_id: uuid.UUID
+    name: str
+    source_file_id: uuid.UUID
+    mapping_rules: List[MappingRule]
+    created_at: datetime
+    updated_at: datetime
+    index_name: Optional[str]
 
     class Config:
         from_attributes = True
@@ -49,3 +91,24 @@ class DatasetOut(BaseModel):
 
 class DatasetDetailOut(DatasetOut):
     files: List[UploadedFileOut] = []
+    mappings: List[SchemaMappingOut] = []
+
+
+# --- SCHÉMAS POUR LA RECHERCHE ---
+
+class SearchQuery(BaseModel):
+    query: str = Field(..., description="Le terme de recherche.")
+    page: int = Field(1, ge=1, description="Le numéro de la page.")
+    size: int = Field(10, ge=1, le=100, description="Le nombre de résultats par page.")
+
+
+class SearchHit(BaseModel):
+    score: Optional[float] = Field(None, alias="_score")
+    source: Dict[str, Any] = Field(..., alias="_source")
+
+
+class SearchResults(BaseModel):
+    total: int
+    hits: List[SearchHit]
+    page: int
+    size: int
