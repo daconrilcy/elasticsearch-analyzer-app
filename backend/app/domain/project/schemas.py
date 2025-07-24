@@ -1,8 +1,9 @@
 # app/domain/project/schemas.py
 from pydantic import BaseModel
 from typing import Optional
-from backend.app.domain.analyzer.models import AnalyzerGraph
-from .models import ProjectStatus  # Import de l'énumération de statut
+from app.domain.analyzer.models import AnalyzerGraph
+from .models import ProjectStatus
+import uuid
 
 
 # Schéma pour la création d'un projet. Le statut et la version sont gérés par défaut.
@@ -22,7 +23,7 @@ class ProjectUpdate(BaseModel):
 
 # Schéma pour les réponses de l'API, incluant les nouveaux champs.
 class ProjectOut(BaseModel):
-    id: int
+    id: uuid.UUID
     name: str
     description: Optional[str] = None
     graph: AnalyzerGraph

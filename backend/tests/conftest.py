@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from backend.main import app
-from backend.app.core.db import get_db, Base
+from app.core.db import get_db, Base
 
 # Utiliser une base de données SQLite en mémoire pour les tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"

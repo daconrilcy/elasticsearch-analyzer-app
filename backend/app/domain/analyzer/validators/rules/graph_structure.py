@@ -1,7 +1,7 @@
 # backend/app/services/validation/rules/graph_structure.py
-from backend.app.domain.analyzer.models import AnalyzerGraph
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
-from backend.app.domain.analyzer.validators import utils
+from app.domain.analyzer.models import AnalyzerGraph
+from app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.validators import utils
 
 def validate_graph_connectivity(graph: AnalyzerGraph, definitions: RegistryLoader):
     """

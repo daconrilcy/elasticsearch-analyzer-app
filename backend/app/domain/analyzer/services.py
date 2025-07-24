@@ -2,8 +2,8 @@
 import json
 from typing import List, Dict, Any, Tuple, Optional
 from elasticsearch import AsyncElasticsearch
-from backend.app.domain.analyzer.models import AnalyzerGraph, Node, Kind
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.models import AnalyzerGraph, Node, Kind
+from app.domain.analyzer.registry_loader import RegistryLoader
 
 
 async def debug_analyzer_step_by_step(

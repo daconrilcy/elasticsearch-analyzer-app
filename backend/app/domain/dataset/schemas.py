@@ -1,6 +1,6 @@
 # app/domain/dataset/schemas.py
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, field_validator, Field, ValidationInfo
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from .models import FileStatus, IngestionStatus
@@ -18,8 +18,7 @@ class UploadedFileOut(BaseModel):
     upload_date: datetime
     status: FileStatus
     uploader_id: uuid.UUID
-    schema: Optional[Dict[str, Any]] = None  # <-- Ajout du schéma
-
+    inferred_schema: Optional[Dict[str, Any]] = None
     ingestion_status: IngestionStatus
     docs_indexed: Optional[int] = None
     ingestion_errors: Optional[List[str]] = None
@@ -34,11 +33,22 @@ class IngestRequest(BaseModel):
 
 
 # --- Schémas pour SchemaMapping ---
-
 class MappingRule(BaseModel):
     source: str = Field(..., description="Nom de la colonne dans le fichier source.")
     target: str = Field(..., description="Nom du champ dans l'index Elasticsearch cible.")
     es_type: str = Field(..., description="Type de données Elasticsearch (ex: keyword, text, integer).")
+    analyzer_project_id: Optional[uuid.UUID] = Field(None, description="ID du projet d'analyseur à appliquer (si es_type est 'text').")
+
+    # CORRECTION: Ajout de @classmethod pour résoudre l'erreur Pydantic.
+    # Le décorateur @field_validator doit être appliqué à une méthode de classe.
+    @field_validator('analyzer_project_id')
+    @classmethod
+    def analyzer_only_for_text(cls, v: Optional[uuid.UUID], info: ValidationInfo) -> Optional[uuid.UUID]:
+        """Valide qu'un analyseur n'est appliqué qu'à un champ de type 'text'."""
+        # 'info.data' contient les autres champs du modèle déjà validés.
+        if v is not None and info.data.get('es_type') != 'text':
+            raise ValueError("Un analyseur ne peut être appliqué qu'aux champs 'text'.")
+        return v
 
 
 class SchemaMappingCreate(BaseModel):

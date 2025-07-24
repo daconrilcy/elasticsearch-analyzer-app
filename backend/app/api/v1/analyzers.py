@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, Body, HTTPException, status
 from elasticsearch import AsyncElasticsearch, ConnectionError
 from pydantic import BaseModel
 
-from backend.app.core.es_client import get_es_client
-from backend.app.domain.analyzer.models import AnalyzerGraph
+from app.core.es_client import get_es_client
+from app.domain.analyzer.models import AnalyzerGraph
 # CORRECTION : L'import de 'convert_graph_to_es_analyzer' a été supprimé car il n'est pas utilisé ici.
-from backend.app.domain.analyzer.services import debug_analyzer_step_by_step
+from app.domain.analyzer.services import debug_analyzer_step_by_step
 # Import du validateur principal
-from backend.app.domain.analyzer.validators.validator import validate_full_graph, ValidationError
+from app.domain.analyzer.validators.validator import validate_full_graph, ValidationError
 
 router = APIRouter()
 

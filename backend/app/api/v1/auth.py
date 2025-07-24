@@ -2,12 +2,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.db import get_db
-from backend.app.core.security import create_access_token
-from backend.app.domain.user import services as user_services
-from backend.app.domain.user import schemas as user_schemas
+from app.core.db import get_db
+from app.core.security import create_access_token
+from app.domain.user import services as user_services
+from app.domain.user import schemas as user_schemas
 # Import des nouvelles dépendances centralisées
-from backend.app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 

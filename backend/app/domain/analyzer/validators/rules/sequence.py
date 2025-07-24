@@ -1,7 +1,7 @@
 # backend/app/services/validation/rules/sequence.py
-from backend.app.domain.analyzer.models import AnalyzerGraph, Kind
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
-from backend.app.domain.analyzer.validators import utils
+from app.domain.analyzer.models import AnalyzerGraph, Kind
+from app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.validators import utils
 
 
 def validate_node_sequence(graph: AnalyzerGraph, definitions: RegistryLoader):

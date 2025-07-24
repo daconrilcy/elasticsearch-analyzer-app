@@ -1,6 +1,6 @@
 # backend/app/services/validation/rules/compatibility.py
-from backend.app.domain.analyzer.models import AnalyzerGraph, Kind
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.models import AnalyzerGraph, Kind
+from app.domain.analyzer.registry_loader import RegistryLoader
 from ..utils import find_path_and_nodes, find_tokenizer_on_path
 
 def validate_token_filter_compatibility(graph: AnalyzerGraph, definitions: RegistryLoader):

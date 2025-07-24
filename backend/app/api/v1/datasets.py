@@ -5,13 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from pathlib import Path
 
-from backend.app.core.db import get_db
-from backend.app.domain.dataset import services, schemas, models
-from backend.app.domain.user.models import User
-from backend.app.api.dependencies import get_current_user
+from app.core.db import get_db
+from app.domain.dataset import services, schemas, models
+from app.domain.user.models import User
+from app.api.dependencies import get_current_user
 from fastapi import BackgroundTasks
 
-from backend.app.core.es_client import get_es_client
+from app.core.es_client import get_es_client
 from elasticsearch import AsyncElasticsearch
 
 router = APIRouter()

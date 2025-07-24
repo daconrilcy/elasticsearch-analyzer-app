@@ -3,10 +3,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
+import uuid
 
-from backend.app.core.db import get_db
-from backend.app.core.security import decode_access_token
-from backend.app.domain.user import models as user_models
+from app.core.db import get_db
+from app.core.security import decode_access_token
+from app.domain.user import models as user_models
 
 # Ce schéma est utilisé par l'API de connexion pour générer le token.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -31,6 +32,12 @@ async def get_current_user(
 
     user_id = payload.get("sub")
     if user_id is None:
+        raise credentials_exception
+
+    try:
+        # CORRECTION: Convertir le 'sub' du token en UUID
+        user_id = uuid.UUID(user_id_str)
+    except ValueError:
         raise credentials_exception
 
     user = await db.get(user_models.User, int(user_id))

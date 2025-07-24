@@ -1,7 +1,7 @@
 # app/core/es_client.py
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends, HTTPException, status
-from config import get_settings, Settings
+from app.core.config import get_settings, Settings
 
 
 async def get_es_client(settings: Settings = Depends(get_settings)) -> AsyncElasticsearch:

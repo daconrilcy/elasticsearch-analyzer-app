@@ -1,6 +1,6 @@
 # backend/app/services/validation/validator.py
-from backend.app.domain.analyzer.models import AnalyzerGraph
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.models import AnalyzerGraph
+from app.domain.analyzer.registry_loader import RegistryLoader
 from .registry import VALIDATION_RULES
 
 

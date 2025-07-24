@@ -1,6 +1,6 @@
 # backend/app/services/validation/utils.py
 from typing import Dict, List, Set, Optional, Tuple
-from backend.app.domain.analyzer.models import AnalyzerGraph, Node, Kind
+from app.domain.analyzer.models import AnalyzerGraph, Node, Kind
 
 
 def build_adjacency_maps(graph: AnalyzerGraph) -> Tuple[Dict[str, List[str]], Dict[str, List[str]]]:

@@ -1,7 +1,7 @@
 # backend/app/services/validation/rules/uniqueness.py
 from collections import Counter
-from backend.app.domain.analyzer.models import AnalyzerGraph, Kind
-from backend.app.domain.analyzer.registry_loader import RegistryLoader
+from app.domain.analyzer.models import AnalyzerGraph, Kind
+from app.domain.analyzer.registry_loader import RegistryLoader
 
 def validate_node_uniqueness(graph: AnalyzerGraph, definitions: RegistryLoader):
     """

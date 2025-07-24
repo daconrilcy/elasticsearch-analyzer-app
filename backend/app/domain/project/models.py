@@ -1,8 +1,9 @@
 # app/domain/project/models.py
 import enum
 from sqlalchemy import Column, Integer, String, Enum as SQLAlchemyEnum
-from sqlalchemy.dialects.postgresql import JSONB
-from backend.app.core.db import Base
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+from app.core.db import Base
+import uuid
 
 
 # Énumération pour les statuts possibles d'un projet.
@@ -19,7 +20,7 @@ class Project(Base):
     """
     __tablename__ = "projects"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False, index=True)
     description = Column(String, nullable=True)
 

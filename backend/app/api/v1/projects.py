@@ -4,13 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from loguru import logger
 import time
+import uuid
 
-from backend.app.core.db import get_db
-from backend.app.domain.project import services, schemas
-from backend.app.domain.user.models import UserRole
-from backend.app.domain.analyzer.services import convert_graph_to_es_analyzer
-from backend.app.domain.analyzer.models import AnalyzerGraph
-from backend.app.api.dependencies import require_role
+from app.core.db import get_db
+from app.domain.project import services, schemas
+from app.domain.user.models import UserRole
+from app.domain.analyzer.services import convert_graph_to_es_analyzer
+from app.domain.analyzer.models import AnalyzerGraph
+from app.api.dependencies import require_role
 
 router = APIRouter()
 
@@ -54,7 +55,7 @@ async def get_all_projects_endpoint(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{project_id}", response_model=schemas.ProjectOut)
-async def get_project_endpoint(project_id: int, db: AsyncSession = Depends(get_db)):
+async def get_project_endpoint(project_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     """Récupère un projet par son ID."""
     db_project = await services.get_project(db=db, project_id=project_id)
     if db_project is None:
@@ -64,7 +65,7 @@ async def get_project_endpoint(project_id: int, db: AsyncSession = Depends(get_d
 
 @router.put("/{project_id}", response_model=schemas.ProjectOut)
 async def update_project_endpoint(
-        project_id: int,
+        project_id: uuid.UUID,
         project_in: schemas.ProjectUpdate,
         db: AsyncSession = Depends(get_db)
 ):
@@ -81,7 +82,7 @@ async def update_project_endpoint(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(require_role(UserRole.ADMIN))]
 )
-async def delete_project_endpoint(project_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_project_endpoint(project_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     """Supprime un projet (réservé aux administrateurs)."""
     db_project = await services.get_project(db=db, project_id=project_id)
     if db_project is None:
@@ -92,7 +93,7 @@ async def delete_project_endpoint(project_id: int, db: AsyncSession = Depends(ge
 
 
 @router.get("/{project_id}/export", response_model=dict)
-async def export_project_config_endpoint(project_id: int, db: AsyncSession = Depends(get_db)):
+async def export_project_config_endpoint(project_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     """Génère la configuration JSON de l'analyseur pour un projet."""
     db_project = await services.get_project(db=db, project_id=project_id)
     if db_project is None:

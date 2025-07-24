@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from backend.app.domain.project import services, schemas, models
-from backend.app.domain.analyzer.models import AnalyzerGraph
+from app.domain.project import services, schemas, models
+from app.domain.analyzer.models import AnalyzerGraph
 
 # Marqueur pour indiquer que tous les tests de ce fichier sont asynchrones
 pytestmark = pytest.mark.asyncio
