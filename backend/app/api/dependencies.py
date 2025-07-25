@@ -1,21 +1,24 @@
-# app/api/dependencies.py
+import uuid
+from typing import AsyncGenerator
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
+from jose import jwt, JWTError
 from loguru import logger
-import uuid
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.db import get_db
-from app.core.security import decode_access_token
 from app.domain.user import models as user_models
+from app.domain.user.services import user_service
 
-# Ce schéma est utilisé par l'API de connexion pour générer le token.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+# Le tokenUrl doit correspondre au chemin complet de l'endpoint de login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
 
 async def get_current_user(
-        token: str = Depends(oauth2_scheme),
-        db: AsyncSession = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(get_db)
 ) -> user_models.User:
     """
     Dépendance pour obtenir l'utilisateur actuellement authentifié à partir du token JWT.
@@ -26,27 +29,32 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    payload = decode_access_token(token)
-    if payload is None:
-        raise credentials_exception
-
-    user_id = payload.get("sub")
-    if user_id is None:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        user_id_from_payload: str | None = payload.get("sub")
+        if user_id_from_payload is None:
+            raise credentials_exception
+    except JWTError:
         raise credentials_exception
 
     try:
-        # CORRECTION: Convertir le 'sub' du token en UUID
-        user_id = uuid.UUID(user_id_str)
-    except ValueError:
+        user_id = uuid.UUID(user_id_from_payload)
+    except (ValueError, TypeError):
+        # Gère le cas où la chaîne dans le token n'est pas un UUID valide
         raise credentials_exception
 
-    user = await db.get(user_models.User, int(user_id))
+    # --- CORRECTION APPLIQUÉE ICI ---
+    # On utilise le service pour récupérer l'utilisateur avec l'objet UUID directement,
+    # sans aucune conversion en 'int'.
+    user = await user_service.get(session, id=user_id)
     if user is None:
         raise credentials_exception
 
-    # Vérification de sécurité : le rôle dans le token doit correspondre à celui en BDD.
+    # Optionnel mais recommandé : Vérification de sécurité sur le rôle
     if user.role.value != payload.get("role"):
-        logger.warning(f"Incohérence de rôle pour l'utilisateur {user.id}. Token invalide.")
+        logger.warning(f"Incohérence de rôle pour l'utilisateur {user.id}. Token potentiellement invalide.")
         raise credentials_exception
 
     return user
@@ -56,7 +64,6 @@ def require_role(required_role: user_models.UserRole):
     """
     Factory de dépendances pour exiger un rôle utilisateur spécifique.
     """
-
     async def role_checker(current_user: user_models.User = Depends(get_current_user)) -> user_models.User:
         if current_user.role != required_role:
             logger.warning(
@@ -68,5 +75,5 @@ def require_role(required_role: user_models.UserRole):
                 detail="Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
             )
         return current_user
-
     return role_checker
+
