@@ -23,10 +23,14 @@ import { AuthPage } from './features/auth/AuthPage';
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
 
-// Défini en dehors du composant pour la performance
+// L'objet nodeTypes est défini une seule fois au niveau du module.
+// C'est la pratique correcte pour éviter l'avertissement de performance de React Flow.
 const nodeTypes = {
-  input: CustomNode, output: CustomNode, tokenizer: CustomNode,
-  char_filter: CustomNode, token_filter: CustomNode,
+  input: CustomNode,
+  output: CustomNode,
+  tokenizer: CustomNode,
+  char_filter: CustomNode,
+  token_filter: CustomNode,
 };
 
 const fitViewOptions = {
@@ -51,7 +55,6 @@ function FlowEditor() {
     [graph.nodes, selectedNodeId]
   );
 
-  // Un composant placeholder qui reçoit aussi la prop de visibilité
   const ConfigPlaceholder = ({ isVisible }: { isVisible: boolean }) => (
     <aside className={`config-panel placeholder-panel ${isVisible ? 'visible' : ''}`}>
       <h3>Configuration</h3>
@@ -66,7 +69,6 @@ function FlowEditor() {
       <main className="flow-editor-main">
         <Header />
         
-        {/* Le canvas ReactFlow prend toute la place disponible */}
         <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
           <ReactFlow
             nodes={graph.nodes}
@@ -88,7 +90,6 @@ function FlowEditor() {
         </div>
 
         {/* --- PANNEAUX FLOTTANTS --- */}
-        {/* Ils sont toujours rendus, mais leur visibilité est contrôlée par CSS */}
         <Sidebar isVisible={activePanel === 'nodes'} />
         
         {selectedNode ? (
