@@ -1,3 +1,4 @@
+import React from 'react';
 import { useWizardStore } from '../../store/wizardStore';
 import { useInterval } from '../../../hooks/useInterval'; // Importer le custom hook
 import { datasetService } from '../../../services/datasetService'; // Importer le service
