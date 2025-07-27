@@ -110,6 +110,9 @@ app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
 
 if __name__ == "__main__":
+
+    import os
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    print("[FastAPI] PID:", os.getpid())

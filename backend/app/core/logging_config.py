@@ -16,7 +16,7 @@ def setup_logging():
     # Ajout d'un handler pour la console avec un format lisible et des couleurs
     logger.add(
         sys.stdout,
-        level="INFO",  # Niveau de log minimum à afficher dans la console
+        level="DEBUG",  # Niveau de log minimum à afficher dans la console
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
         colorize=True,
     )

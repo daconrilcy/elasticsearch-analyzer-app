@@ -1,7 +1,10 @@
+# app/domain/analyzer/registry_loader.py
 import json
+from math import log
 from pathlib import Path
 from typing import Dict, Any, Optional
 from loguru import logger
+from sqlalchemy import false
 
 class RegistryLoader:
     """
@@ -10,11 +13,8 @@ class RegistryLoader:
     pour la validation d'un pipeline d'Analyzer Elasticsearch.
     """
     _instance = None
-    _definitions: Dict[str, Any] = None
+    _definitions: Dict[str, Any] = {}
 
-    # --- CORRECTION APPLIQUÉE ICI ---
-    # Le chemin remonte maintenant de 5 niveaux pour atteindre la racine du projet.
-    # backend/app/domain/analyzer/ -> ... -> backend/ -> (racine du projet)
     SHARED_PATH = Path(__file__).resolve().parent.parent.parent.parent.parent / "shared-contract" / "registry"
 
     def __new__(cls):
@@ -33,16 +33,19 @@ class RegistryLoader:
         """
         Charge en mémoire les fichiers de définition nécessaires à la validation.
         """
+        logger.debug("_load definitions")
         try:
+            logger.debug("_es_analyzer_tokenizer.json")
             with open(self.SHARED_PATH / "_es_analyzer_tokenizer.json", encoding="utf-8") as f:
                 self._definitions["tokenizers"] = {item['name']: item for item in json.load(f)["tokenizers"]}
-
+            
+            logger.debug("_es_analyzer_token_filter.json")
             with open(self.SHARED_PATH / "_es_analyzer_token_filter.json", encoding="utf-8") as f:
                 self._definitions["token_filters"] = {item['name']: item for item in json.load(f)["token_filters"]}
-
+            logger.debug("_es_analyzer_char_filter.json")
             with open(self.SHARED_PATH / "_es_analyzer_char_filter.json", encoding="utf-8") as f:
                 self._definitions["char_filters"] = {item['name']: item for item in json.load(f)["char_filters"]}
-
+            logger.debug("_es_token_filter_compatibility.json")
             compat_path = self.SHARED_PATH / "_es_token_filter_compatibility.json"
             if compat_path.exists():
                 with open(compat_path, encoding="utf-8") as f:
@@ -52,6 +55,8 @@ class RegistryLoader:
                     }
             else:
                 self._definitions["compatibility"] = {}
+
+            logger.debug(f"tokenizers presents: {self._definitions['tokenizers'].keys()}")
 
         except FileNotFoundError as e:
             logger.critical(f"Fichier de définition critique manquant: {e.filename}")
@@ -80,7 +85,23 @@ class RegistryLoader:
         }
         return self._definitions.get(kind_map.get(kind, kind), {}).get(name)
 
-    def validate_element_exists(self, kind: str, name: str):
-        if not self.get_component(kind, name):
-            raise ValueError(f"L'élément '{name}' de type '{kind}' n'existe pas dans la registry.")
+    # --- CORRECTION : MÉTHODE AJOUTÉE ---
+    def validate_element_exists(self, kind: str, name: str) -> bool:
+        """
+        Vérifie qu'un composant existe dans la registry, sinon lève une ValueError.
+        """
+        logger.debug(f"kind: {kind}, name: {name}")
+        try:
+            if not self.get_component(kind, name):
+                return false
+            return True
+        except Exception as e:
+            available_keys = self._definitions.keys()
+            logger.error(f"error finding {e}")
+            logger.debug(f"available keys:{available_keys}")
+            return false
+
+    @property
+    def __dict__(self):
+        return self._definitions
 

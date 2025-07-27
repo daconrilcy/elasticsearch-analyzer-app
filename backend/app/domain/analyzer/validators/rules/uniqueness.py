@@ -2,6 +2,7 @@
 from collections import Counter
 from app.domain.analyzer.models import AnalyzerGraph, Kind
 from app.domain.analyzer.registry_loader import RegistryLoader
+from loguru import logger
 
 def validate_node_uniqueness(graph: AnalyzerGraph, definitions: RegistryLoader):
     """
