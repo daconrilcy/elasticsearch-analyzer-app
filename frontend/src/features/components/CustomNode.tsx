@@ -1,22 +1,16 @@
 import { Handle, Position, type NodeProps } from 'reactflow';
-// Correction: Import the correct, separated stores
 import { useAnalysisStore } from '../store/analysisStore';
 import type { NodeData } from '../../shared/types/analyzer.d';
 
-export function CustomNode({ data }: NodeProps<NodeData>) {
+export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const { kind, label, name } = data;
-  
-  // Correction: Get state and actions from the specialized store
-  const { inputText, setInputText, analysisPath } = useAnalysisStore();
+  const { inputText, setInputText } = useAnalysisStore();
 
   const isInputNode = kind === 'input';
   const isOutputNode = kind === 'output';
   
-  // Check if the current node is part of the last valid analysis path
-  const isActive = analysisPath?.nodes.includes(data.id);
-
   return (
-    <div className={`custom-node custom-node-${kind} ${isActive ? 'active-path' : ''}`}>
+    <div className={`custom-node custom-node-${kind} ${selected ? 'selected' : ''}`}>
       {!isOutputNode && (
         <Handle type="source" position={Position.Right} />
       )}

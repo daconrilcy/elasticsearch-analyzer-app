@@ -1,37 +1,28 @@
-// frontend/src/features/store/analysisStore.ts
-
+// src/features/store/analysisStore.ts
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { type AnalyzerGraph } from '@/shared/types/analyzer.d';
-
-// --- Types ---
+import { validateGraph } from '@/services/graphValidationService';
 
 export interface AnalysisStep {
   step_name: string;
   output: string | string[];
 }
 
-interface AnalysisPath {
-  nodes: string[];
-  edges: string[];
-}
-
 interface AnalysisState {
   inputText: string;
   analysisSteps: AnalysisStep[];
-  analysisPath: AnalysisPath | null;
+  validationIssues: string[];
   isLoading: boolean;
   setInputText: (text: string) => void;
   runAnalysis: (graph: AnalyzerGraph) => Promise<void>;
   resetAnalysis: () => void;
 }
 
-// --- Store ---
-
 export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   inputText: "The Quick Brown Fox Jumps Over The Lazy Dog",
   analysisSteps: [],
-  analysisPath: null,
+  validationIssues: [],
   isLoading: false,
 
   setInputText: (text: string) => {
@@ -39,10 +30,18 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   },
 
   runAnalysis: async (graph: AnalyzerGraph) => {
-    set({ isLoading: true, analysisSteps: [], analysisPath: null });
+    // 1. Valider le graphe côté client d'abord.
+    const issues = validateGraph(graph);
+    if (issues.length > 0) {
+      // S'il y a des problèmes, on les stocke et on n'appelle pas l'API.
+      set({ validationIssues: issues, analysisSteps: [], isLoading: false });
+      return;
+    }
+
+    // 2. Si le graphe est valide, on procède à l'appel API.
+    set({ isLoading: true, validationIssues: [] });
     const { inputText } = get();
 
-    // Nettoyage du graphe pour l'API
     const cleanedGraph = {
       nodes: graph.nodes.map(n => ({...n.data, meta: { position: n.position, type: n.type }})),
       edges: graph.edges.map(e => ({ id: e.id, source: e.source, target: e.target }))
@@ -61,7 +60,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       }
 
       const result = await response.json();
-      set({ analysisSteps: result.steps, analysisPath: result.path, isLoading: false });
+      set({ analysisSteps: result.steps, isLoading: false });
     } catch (error) {
       console.error("Échec de l'analyse:", error);
       toast.error(`Analyse échouée: ${(error as Error).message}`);
@@ -70,6 +69,6 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   },
   
   resetAnalysis: () => {
-    set({ analysisSteps: [], analysisPath: null });
+    set({ analysisSteps: [], validationIssues: [] });
   },
 }));

@@ -4,7 +4,8 @@ import { Toaster } from 'react-hot-toast';
 import type { CustomNode as CustomNodeType } from './shared/types/analyzer.d';
 
 // --- Imports des Stores ---
-import { useGraphStore, useAnalysisStore, useUIStore, useAuthStore } from './features/store';
+// CORRECTION: 'useAnalysisStore' a été supprimé car il n'est plus utilisé directement dans ce composant.
+import { useGraphStore, useUIStore, useAuthStore } from './features/store';
 
 // --- Imports des Hooks ---
 import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
@@ -19,15 +20,17 @@ import { ConfigurationPanel } from './features/components/ConfigurationPanel';
 import { Header } from './features/components/Header';
 import { IconSidebar } from './features/components/IconSidebar';
 import { AuthPage } from './features/auth/AuthPage';
-import { ImportDataWizard } from './pages/ImportDataWizard'; // Importer le wizard
+import { ImportDataWizard } from './pages/ImportDataWizard';
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
 
-// Défini en dehors du composant pour la performance
 const nodeTypes = {
-  input: CustomNode, output: CustomNode, tokenizer: CustomNode,
-  char_filter: CustomNode, token_filter: CustomNode,
+  input: CustomNode,
+  output: CustomNode,
+  tokenizer: CustomNode,
+  char_filter: CustomNode,
+  token_filter: CustomNode,
 };
 
 const fitViewOptions = {
@@ -40,7 +43,7 @@ const fitViewOptions = {
  */
 function AnalyzerPage() {
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
-  const { analysisSteps, isLoading } = useAnalysisStore();
+  // CORRECTION: La récupération de 'analysisSteps' et 'isLoading' est retirée d'ici.
   const { activePanel, selectedNodeId } = useUIStore();
   
   useDebouncedAnalysis();
@@ -91,9 +94,9 @@ function AnalyzerPage() {
       ) : (
         <ConfigPlaceholder isVisible={activePanel === 'config'} />
       )}
+      
+      {/* CORRECTION: Le composant ResultPanel est maintenant autonome et n'a plus besoin des props 'steps' et 'isLoading' */}
       <ResultPanel 
-        steps={analysisSteps} 
-        isLoading={isLoading} 
         isVisible={activePanel === 'results'} 
       />
     </main>
@@ -105,7 +108,7 @@ function AnalyzerPage() {
  */
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
-  const { activePage } = useUIStore(); // Récupère la page active
+  const { activePage } = useUIStore();
 
   useEffect(() => {
     checkAuth();
@@ -123,9 +126,8 @@ function App() {
     <ReactFlowProvider>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="app-container">
-        <IconSidebar /> {/* La sidebar est maintenant au niveau principal */}
+        <IconSidebar />
         
-        {/* Affichage conditionnel de la page active */}
         {activePage === 'analyzer' && <AnalyzerPage />}
         {activePage === 'importer' && <ImportDataWizard />}
       </div>
