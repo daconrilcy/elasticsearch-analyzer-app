@@ -1,37 +1,37 @@
 import React from 'react';
 import { useWizardStore } from '../features/store/wizardStore';
+import { CreateDatasetStep } from '../features/components/wizards/CreateDatasetStep'; // Importer la nouvelle étape
 import { FileUpload } from '../features/components/wizards/FileUpload';
 import { SchemaEditor } from '../features/components/wizards/SchemaEditor';
 import { Review } from '../features/components/wizards/Review';
-// Importer le futur composant de suivi
-// import { IngestionProgress } from '../components/wizards/IngestionProgress';
+import { IngestionProgress } from '../features/components/wizards/IngestionProgress';
+
+const renderCurrentStep = (step: string) => {
+  switch (step) {
+    case 'createDataset': // Nouvelle première étape
+      return <CreateDatasetStep />;
+    case 'upload':
+      return <FileUpload />;
+    case 'mapping':
+      return <SchemaEditor />;
+    case 'review':
+      return <Review />;
+    case 'ingesting':
+    case 'complete':
+      return <IngestionProgress />;
+    default:
+      return <CreateDatasetStep />;
+  }
+};
 
 export const ImportDataWizard: React.FC = () => {
-  const { step } = useWizardStore();
-
-  const renderCurrentStep = () => {
-    switch (step) {
-      case 'upload':
-        return <FileUpload />;
-      case 'mapping':
-        return <SchemaEditor />; // ✅ Décommenté
-      case 'review':
-        return <Review />; // ✅ Décommenté
-      case 'ingesting':
-        // return <IngestionProgress />; // À construire en Phase 3
-        return <div>Ingestion en cours...</div>;
-      case 'complete':
-        return <div>Ingestion terminée avec succès !</div>;
-      default:
-        return <FileUpload />;
-    }
-  };
+  const step = useWizardStore((state) => state.step);
 
   return (
     <div className="wizard-container">
-      <h1>Assistant d'Intégration de Données</h1>
+      {/* Vous pouvez ajouter un composant "Stepper" ici pour montrer les étapes */}
       <div className="wizard-content">
-        {renderCurrentStep()}
+        {renderCurrentStep(step)}
       </div>
     </div>
   );

@@ -6,8 +6,6 @@ import { datasetService } from '../../../services/datasetService';
 
 /**
  * Formats file size from bytes to a human-readable string (KB, MB).
- * @param bytes - The file size in bytes.
- * @returns A formatted string representing the file size.
  */
 const formatBytes = (bytes: number, decimals = 2): string => {
   if (bytes === 0) return '0 Bytes';
@@ -34,7 +32,16 @@ const UploadIcon: React.FC = () => (
 
 
 export const FileUpload: React.FC = () => {
-  const { file, setFile, setStep, setSchema, setUploadedFile, setIngestionError } = useWizardStore();
+  const { 
+    file, 
+    datasetId, 
+    setFile, 
+    setStep, 
+    setSchema, 
+    setUploadedFile, 
+    setIngestionError 
+  } = useWizardStore();
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -64,20 +71,28 @@ export const FileUpload: React.FC = () => {
   };
 
   const handleStartUpload = async () => {
-    if (!file) return;
+    if (!file || !datasetId) {
+        setIngestionError("Erreur critique: des informations sont manquantes. Veuillez recommencer.");
+        return;
+    }
 
     setIsLoading(true);
     try {
-      // Appel réel au service d'upload
-      const response = await datasetService.upload(file);
+      const response = await datasetService.upload(datasetId, file);
+      
+      // --- AJOUT POUR LE DÉBOGAGE ---
+      // Affiche la réponse brute du backend dans la console.
+      console.log('Réponse reçue du backend après upload:', response);
+      
+      // Valider la réponse du backend avant de continuer.
+      if (!response || !response.file_id || !Array.isArray(response.schema)) {
+        throw new Error("La réponse de l'API est invalide ou ne contient pas de schéma.");
+      }
       
       console.log('Upload réussi. Fichier ID:', response.file_id);
       
-      // Sauvegarder l'ID du fichier et le schéma dans le store
       setUploadedFile(response.file_id);
       setSchema(response.schema);
-      
-      // Passer à l'étape suivante
       setStep('mapping');
 
     } catch (error: any) {

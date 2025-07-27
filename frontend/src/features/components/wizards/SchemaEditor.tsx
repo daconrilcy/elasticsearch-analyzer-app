@@ -1,33 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useWizardStore } from '../../store/wizardStore';
-// import { analyzerService } from '../../../services/analyzerService'; // Service à créer pour récupérer les analyseurs
-
-// --- Données simulées pour les analyseurs (à remplacer par un appel API) ---
-const mockAnalyzers = [
-  { id: 'standard', name: 'Standard' },
-  { id: 'french', name: 'Français' },
-  { id: 'email_analyzer', name: 'Analyseur Email (custom)' },
-];
-// --- Fin de la simulation ---
+import { analyzerService, type Analyzer } from '../../../services/analyzerService';
 
 const ELASTICSEARCH_TYPES = ['text', 'keyword', 'integer', 'float', 'date', 'boolean'];
 
 export const SchemaEditor: React.FC = () => {
   const { schema, mapping, setMapping, setStep } = useWizardStore();
-  const [availableAnalyzers, setAvailableAnalyzers] = useState<{id: string, name: string}[]>([]);
+  const [availableAnalyzers, setAvailableAnalyzers] = useState<Analyzer[]>([]);
+  const [isLoadingAnalyzers, setIsLoadingAnalyzers] = useState(true);
 
-  // Au chargement du composant, initialiser le mapping par défaut
-  // et récupérer la liste des analyseurs disponibles.
   useEffect(() => {
-    // Initialise le mapping dans le store avec les types détectés par le backend.
-    // Cela garantit que les menus déroulants affichent les bonnes valeurs par défaut.
-    schema.forEach(field => {
-        setMapping(field.field, { type: field.type });
-    });
+    if (Array.isArray(schema) && schema.length > 0) {
+      schema.forEach(field => {
+          setMapping(field.field, { type: field.type });
+      });
+    }
 
-    // Simuler la récupération des analyseurs depuis le backend
-    // TODO: Remplacer par un appel réel: analyzerService.getAnalyzers().then(setAvailableAnalyzers);
-    setAvailableAnalyzers(mockAnalyzers);
+    const fetchAnalyzers = async () => {
+      try {
+        setIsLoadingAnalyzers(true);
+        const analyzers = await analyzerService.getAnalyzers();
+        setAvailableAnalyzers(analyzers);
+      } catch (error) {
+        console.error("Impossible de charger la liste des analyseurs:", error);
+      } finally {
+        setIsLoadingAnalyzers(false);
+      }
+    };
+
+    fetchAnalyzers();
 
   }, [schema, setMapping]);
 
@@ -36,7 +37,6 @@ export const SchemaEditor: React.FC = () => {
     setMapping(field, {
       ...currentMapping,
       type: newType,
-      // Si le nouveau type n'est pas 'text', on supprime l'analyseur associé
       ...(newType !== 'text' && { analyzer: undefined }),
     });
   };
@@ -45,8 +45,21 @@ export const SchemaEditor: React.FC = () => {
     setMapping(field, { ...mapping[field], analyzer });
   };
 
-  if (!schema || schema.length === 0) {
-    return <div>Chargement du schéma ou schéma invalide...</div>;
+  if (!Array.isArray(schema) || schema.length === 0) {
+    return (
+        <div className="schema-editor-container error-state">
+            <h2>Impossible de détecter un schéma</h2>
+            <p>
+                Nous n'avons pas pu extraire de colonnes de votre fichier.
+                Veuillez vérifier que le fichier n'est pas vide et qu'il est correctement formaté (CSV, JSON, Excel).
+            </p>
+            <div className="wizard-actions">
+                <button onClick={() => setStep('upload')} className="button-secondary">
+                    Retourner à l'upload
+                </button>
+            </div>
+        </div>
+    );
   }
 
   return (
@@ -82,9 +95,13 @@ export const SchemaEditor: React.FC = () => {
                   <select
                     value={mapping[field]?.analyzer || ''}
                     onChange={(e) => handleAnalyzerChange(field, e.target.value)}
+                    disabled={isLoadingAnalyzers}
                   >
-                    <option value="" disabled>Choisir un analyseur</option>
-                    {availableAnalyzers.map(analyzer => (
+                    <option value="" disabled>
+                      {isLoadingAnalyzers ? "Chargement..." : "Choisir un analyseur"}
+                    </option>
+                    {/* Correction: Ajout du type explicite pour 'analyzer' */}
+                    {availableAnalyzers.map((analyzer: Analyzer) => (
                       <option key={analyzer.id} value={analyzer.id}>
                         {analyzer.name}
                       </option>
@@ -108,3 +125,5 @@ export const SchemaEditor: React.FC = () => {
     </div>
   );
 };
+
+//TODO: AFFICHER ENSUITE L'APERCU DU NOUVEAU FICHIER

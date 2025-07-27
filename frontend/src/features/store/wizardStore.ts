@@ -1,24 +1,28 @@
 import { create } from 'zustand';
 
-// Définition des types pour un typage robuste
-type WizardStep = 'upload' | 'mapping' | 'review' | 'ingesting' | 'complete';
+type WizardStep = 'createDataset' | 'upload' | 'mapping' | 'review' | 'ingesting' | 'complete';
 type IngestionStatus = 'idle' | 'in_progress' | 'success' | 'error';
 
-// Interface pour l'état du store
 interface WizardState {
   step: WizardStep;
+  
+  // Informations sur le jeu de données
+  datasetName: string;
+  datasetDescription: string;
+  datasetId: string | null;
+
   file: File | null;
-  fileId: string | null; // ID du fichier après upload
-  jobId: string | null; // ID du job d'ingestion
-  dataPreview: any[]; 
+  fileId: string | null;
+  jobId: string | null;
   schema: any[]; 
   mapping: any; 
   indexName: string;
   ingestionStatus: IngestionStatus;
   error: string | null;
 
-  // Actions pour mettre à jour l'état
   setStep: (step: WizardStep) => void;
+  setDatasetDetails: (details: { name: string; description: string }) => void;
+  setDatasetId: (id: string) => void;
   setFile: (file: File | null) => void;
   setUploadedFile: (fileId: string) => void;
   setSchema: (schema: any[]) => void;
@@ -30,13 +34,14 @@ interface WizardState {
   reset: () => void;
 }
 
-// État initial
 const initialState = {
-  step: 'upload' as WizardStep,
+  step: 'createDataset' as WizardStep,
+  datasetName: '',
+  datasetDescription: '',
+  datasetId: null,
   file: null,
   fileId: null,
   jobId: null,
-  dataPreview: [],
   schema: [],
   mapping: {},
   indexName: '',
@@ -44,12 +49,13 @@ const initialState = {
   error: null,
 };
 
-// Création du store
 export const useWizardStore = create<WizardState>((set, get) => ({
   ...initialState,
 
   setStep: (step) => set({ step }),
-  setFile: (file) => set({ file, error: null, fileId: null }), // Réinitialise l'erreur et fileId
+  setDatasetDetails: (details) => set({ datasetName: details.name, datasetDescription: details.description }),
+  setDatasetId: (id) => set({ datasetId: id }),
+  setFile: (file) => set({ file, error: null, fileId: null }),
   setUploadedFile: (fileId) => set({ fileId }),
   setSchema: (schema) => set({ schema }),
   setIndexName: (name) => set({ indexName: name }),

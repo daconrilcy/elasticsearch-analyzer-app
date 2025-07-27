@@ -1,10 +1,18 @@
 import { apiClient } from './apiClient';
 
-// Définissons les types pour les réponses de l'API pour plus de robustesse
+// --- Définition des types pour les réponses de l'API ---
+
+// Nouveau type pour l'objet Dataset
+interface Dataset {
+    id: string;
+    name: string;
+    description: string;
+}
+
 interface UploadResponse {
   file_id: string;
   filename: string;
-  schema: any[]; // Idéalement, typer le schéma plus précisément
+  schema: any[]; 
 }
 
 interface IngestionResponse {
@@ -20,7 +28,6 @@ interface StatusResponse {
 
 /**
  * Gère les erreurs des réponses API qui ne sont pas 'ok'.
- * @param response La réponse de l'API.
  */
 const handleApiError = async (response: Response) => {
   if (!response.ok) {
@@ -30,21 +37,35 @@ const handleApiError = async (response: Response) => {
 };
 
 /**
- * Service pour gérer l'upload, le mapping et l'ingestion des datasets.
+ * Service pour gérer la création de datasets, l'upload de fichiers et l'ingestion.
  */
 class DatasetService {
   /**
-   * Envoie un fichier au backend pour analyse et détection de schéma.
+   * Crée un nouveau jeu de données (Dataset).
+   * @param name Le nom du jeu de données.
+   * @param description La description du jeu de données.
+   * @returns Le jeu de données créé, incluant son ID.
+   */
+  async createDataset(name: string, description: string): Promise<Dataset> {
+    const response = await apiClient('/api/v1/datasets/', {
+      method: 'POST',
+      body: JSON.stringify({ name, description }),
+    });
+    await handleApiError(response);
+    return response.json();
+  }
+
+  /**
+   * Envoie un fichier vers un jeu de données existant.
+   * @param datasetId L'ID du jeu de données parent.
    * @param file Le fichier à uploader.
    * @returns Les métadonnées du fichier et le schéma détecté.
    */
-  async upload(file: File): Promise<UploadResponse> {
+  async upload(datasetId: string, file: File): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    // Note: Pour FormData, le header 'Content-Type' est géré automatiquement par le navigateur.
-    // Notre apiClient existant n'a pas besoin d'être modifié.
-    const response = await apiClient('/datasets/upload', {
+    const response = await apiClient(`/api/v1/datasets/${datasetId}/upload-file/`, {
       method: 'POST',
       body: formData,
     });
@@ -67,7 +88,7 @@ class DatasetService {
       mapping: mapping,
     };
 
-    const response = await apiClient('/datasets/ingest', {
+    const response = await apiClient('/datasets/ingest', { // Note: endpoint à vérifier
       method: 'POST',
       body: JSON.stringify(payload),
     });
@@ -82,7 +103,7 @@ class DatasetService {
    * @returns Le statut actuel du job.
    */
   async getIngestionStatus(jobId: string): Promise<StatusResponse> {
-    const response = await apiClient(`/datasets/ingest/status/${jobId}`, {
+    const response = await apiClient(`/datasets/ingest/status/${jobId}`, { // Note: endpoint à vérifier
       method: 'GET',
     });
 

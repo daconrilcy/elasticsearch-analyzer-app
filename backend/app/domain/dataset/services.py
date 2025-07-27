@@ -118,11 +118,32 @@ async def upload_new_file_version(
         size_bytes=file_size,
         uploader_id=uploader.id,
     )
+
+    inferred_schema = None
+    try:
+        if file_path.suffix == '.csv':
+            df = pd.read_csv(file_path, nrows=100)  # nrows pour accélérer
+        elif file_path.suffix in ['.xlsx', '.xls']:
+            df = pd.read_excel(file_path, nrows=100)
+        elif file_path.suffix == '.json':
+            df = pd.read_json(file_path, lines=True)
+        else:
+            df = None
+        if df is not None:
+            inferred_schema_dict = _infer_schema_from_dataframe(df)
+            # Formatte la liste pour la réponse API (et le stockage JSON)
+            inferred_schema = [
+                {"field": field, "type": typ} for field, typ in inferred_schema_dict.items()
+            ]
+            new_file.inferred_schema = inferred_schema  # stocké en JSONB en BDD
+    except Exception as e:
+        logger.warning(f"Incapable d'inférer le schéma du fichier lors de l'upload: {e}")
+
     db.add(new_file)
     await db.commit()
     await db.refresh(new_file)
     logger.info(f"Fichier version {next_version} ajouté au dataset {dataset.id}.")
-    return new_file
+    return new_file, inferred_schema or []
 
 
 # --- Services pour le Parsing ---

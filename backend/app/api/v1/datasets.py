@@ -13,6 +13,7 @@ from fastapi import BackgroundTasks
 
 from app.core.es_client import get_es_client
 from elasticsearch import AsyncElasticsearch
+from loguru import logger
 
 router = APIRouter()
 
@@ -53,7 +54,7 @@ ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json"}
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
 
 
-@router.post("/{dataset_id}/upload-file/", response_model=schemas.UploadedFileOut)
+@router.post("/{dataset_id}/upload-file/", response_model=schemas.FileUploadResponse)
 async def upload_file_endpoint(
         dataset_id: uuid.UUID,
         file: UploadFile = File(...),
@@ -79,7 +80,18 @@ async def upload_file_endpoint(
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                             detail="Le fichier est trop volumineux.")
 
-    return await services.upload_new_file_version(db=db, dataset=dataset, file=file, uploader=current_user)
+    uploaded_file, inferred_schema = await services.upload_new_file_version(db=db, dataset=dataset, file=file, uploader=current_user)
+
+    # Formatage API
+    schema_list = [
+        schemas.FileSchemaField(field=schema["field"], type=schema["type"])
+        for schema in (inferred_schema or [])
+    ]
+
+    answer = schemas.FileUploadResponse( file_id=str(uploaded_file.id), schema=schema_list)
+    logger.debug(f"file Upload: {answer}")
+    
+    return answer
 
 
 @router.get("/{dataset_id}/files/", response_model=List[schemas.UploadedFileOut])
