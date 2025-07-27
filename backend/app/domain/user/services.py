@@ -6,6 +6,7 @@ from app.core.security import get_password_hash, verify_password
 from app.domain.user.schemas import UserCreate
 from fastapi import HTTPException
 
+
 class UserService:
     """
     Classe de service regroupant la logique métier pour les utilisateurs.
@@ -35,7 +36,7 @@ class UserService:
             raise HTTPException(status_code=400, detail="Nom d'utilisateur déjà pris")
         if await self.get_by_email(db, user_in.email):
             raise HTTPException(status_code=400, detail="Email déjà utilisé")
-            
+
         hashed_password = get_password_hash(user_in.password)
         user = User(
             username=user_in.username,
@@ -53,6 +54,7 @@ class UserService:
         if not user or not verify_password(password, user.hashed_password):
             return None
         return user
+
 
 # --- CORRECTION PRINCIPALE ---
 # On crée une instance unique (singleton) de la classe de service.

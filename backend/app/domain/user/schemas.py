@@ -1,9 +1,17 @@
 # backend/app/domain/user/schemas.py
 
 import uuid
+import enum
 from pydantic import BaseModel, EmailStr, ConfigDict
-from .models import UserRole
 
+# --- DÉFINITION DE L'ÉNUMÉRATION ICI POUR CASSER L'IMPORT CIRCULAIRE ---
+class UserRole(str, enum.Enum):
+    """Énumération pour les rôles utilisateurs."""
+    USER = "user"
+    ADMIN = "admin"
+
+
+# --- SCHÉMAS Pydantic ---
 
 class UserCreate(BaseModel):
     """Schéma pour la création d'un utilisateur."""
@@ -24,5 +32,7 @@ class UserOut(BaseModel):
     username: str
     email: EmailStr
     role: UserRole
+    is_active: bool
 
+    # Permet de créer le schéma à partir d'un objet de modèle SQLAlchemy
     model_config = ConfigDict(from_attributes=True)
