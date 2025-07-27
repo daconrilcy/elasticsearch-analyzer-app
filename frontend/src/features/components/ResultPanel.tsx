@@ -1,16 +1,6 @@
-import { type AnalysisStep } from '../store/analysisStore';
+// src/features/components/ResultPanel.tsx
+import { useAnalysisStore, type AnalysisStep } from '../store/analysisStore';
 
-interface ResultPanelProps {
-  steps: AnalysisStep[];
-  isLoading: boolean;
-  isVisible: boolean;
-}
-
-/**
- * Détermine le type d'étape à partir de son nom pour lui assigner une couleur.
- * @param stepName Le nom de l'étape (ex: "After 'standard' (tokenizer)")
- * @returns Le type de l'étape (ex: "tokenizer")
- */
 const getStepType = (stepName: string): string => {
     const lowerCaseName = stepName.toLowerCase();
     if (lowerCaseName.includes('input')) return 'input';
@@ -21,11 +11,6 @@ const getStepType = (stepName: string): string => {
     return 'default';
 };
 
-/**
- * Formate le nom de l'étape pour un affichage plus propre.
- * @param stepName Le nom brut de l'étape
- * @returns Un nom formaté (ex: "Input Text" -> "Input")
- */
 const formatStepLabel = (stepName: string): string => {
     const type = getStepType(stepName);
     switch (type) {
@@ -38,45 +23,65 @@ const formatStepLabel = (stepName: string): string => {
     }
 }
 
-export function ResultPanel({ steps, isLoading, isVisible }: ResultPanelProps) {
-  if (isLoading) {
-    return (
-      <aside className="result-panel">
-        <div className="loading-container">
-          <span>Analyse en cours...</span>
+export function ResultPanel({ isVisible }: { isVisible: boolean }) {
+  // CORRECTION: Utilisation du nom correct 'analysisSteps' depuis le store.
+  const { analysisSteps, isLoading, validationIssues } = useAnalysisStore();
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="loading-container">Analyse en cours...</div>;
+    }
+
+    if (validationIssues.length > 0) {
+      return (
+        <div className="validation-issues">
+          <h4>Actions requises :</h4>
+          <ul>
+            {validationIssues.map((issue, index) => (
+              <li key={index}>{issue}</li>
+            ))}
+          </ul>
         </div>
-      </aside>
+      );
+    }
+    
+    if (analysisSteps.length === 0) {
+        return <div className="placeholder">Les résultats de l'analyse s'afficheront ici.</div>
+    }
+
+    return (
+      <div className="steps-container">
+        {/* CORRECTION: Ajout des types pour les paramètres du map */}
+        {analysisSteps.map((step: AnalysisStep, index: number) => {
+          const stepType = getStepType(step.step_name);
+          const stepLabel = formatStepLabel(step.step_name);
+          return (
+            <div key={index} className="analysis-step">
+              <div className="step-header">
+                <span className={`step-tag tag-${stepType}`}>{stepLabel}</span>
+                <span className="step-name-text">{step.step_name}</span>
+              </div>
+              <div className="step-output">
+                {Array.isArray(step.output) ? (
+                  step.output.map((token: string, tokenIndex: number) => (
+                    <span key={tokenIndex} className="token">{token}</span>
+                  ))
+                ) : (
+                  <span className="initial-text">{step.output}</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     );
-  }
+  };
 
   return (
     <aside className={`result-panel ${isVisible ? 'visible' : ''}`}>
       <h3 className="result-panel-header">Résultat Détaillé</h3>
       <div className="steps-container-scrollable">
-        <div className="steps-container">
-          {steps.map((step, index) => {
-            const stepType = getStepType(step.step_name);
-            const stepLabel = formatStepLabel(step.step_name);
-
-            return (
-              <div key={index} className="analysis-step">
-                <div className="step-header">
-                  <span className={`step-tag tag-${stepType}`}>{stepLabel}</span>
-                  <span className="step-name-text">{step.step_name}</span>
-                </div>
-                <div className="step-output">
-                  {Array.isArray(step.output) ? (
-                    step.output.map((token, tokenIndex) => (
-                      <span key={tokenIndex} className="token">{token}</span>
-                    ))
-                  ) : (
-                    <span className="initial-text">{step.output}</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {renderContent()}
       </div>
     </aside>
   );

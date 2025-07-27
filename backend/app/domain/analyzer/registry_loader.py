@@ -90,7 +90,6 @@ class RegistryLoader:
         """
         Vérifie qu'un composant existe dans la registry, sinon lève une ValueError.
         """
-        logger.debug(f"kind: {kind}, name: {name}")
         try:
             if not self.get_component(kind, name):
                 return false

@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import type { CustomNode as CustomNodeType } from './shared/types/analyzer.d';
 
 // --- Imports des Stores ---
-import { useGraphStore, useAnalysisStore, useUIStore, useAuthStore } from './features/store';
+import { useGraphStore, useUIStore, useAuthStore } from './features/store';
 
 // --- Imports des Hooks ---
 import { useDebouncedAnalysis } from './hooks/useDebouncedAnalysis';
@@ -23,8 +23,6 @@ import { AuthPage } from './features/auth/AuthPage';
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
 
-// L'objet nodeTypes est défini une seule fois au niveau du module.
-// C'est la pratique correcte pour éviter l'avertissement de performance de React Flow.
 const nodeTypes = {
   input: CustomNode,
   output: CustomNode,
@@ -38,12 +36,9 @@ const fitViewOptions = {
   maxZoom: 1.0,
 };
 
-/**
- * Le composant principal de l'éditeur, affiché lorsque l'utilisateur est authentifié.
- */
 function FlowEditor() {
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
-  const { analysisSteps, isLoading } = useAnalysisStore();
+  // 'analysisSteps' et 'isLoading' ne sont plus nécessaires ici, car ResultPanel les lit depuis le store.
   const { activePanel, setActivePanel, selectedNodeId } = useUIStore();
   
   useDebouncedAnalysis();
@@ -102,9 +97,8 @@ function FlowEditor() {
           <ConfigPlaceholder isVisible={activePanel === 'config'} />
         )}
         
+        {/* CORRECTION: Le composant ResultPanel n'a plus besoin des props 'steps' et 'isLoading' */}
         <ResultPanel 
-          steps={analysisSteps} 
-          isLoading={isLoading} 
           isVisible={activePanel === 'results'} 
         />
       </main>
@@ -112,9 +106,6 @@ function FlowEditor() {
   );
 }
 
-/**
- * Le composant racine qui gère l'authentification et fournit les contextes.
- */
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
 
