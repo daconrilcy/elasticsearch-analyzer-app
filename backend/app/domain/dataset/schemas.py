@@ -7,6 +7,15 @@ from .models import FileStatus, IngestionStatus
 
 
 # --- Schémas pour UploadedFile ---
+class FileSchemaField(BaseModel):
+    field: str
+    type: str
+
+class FileUploadResponse(BaseModel):
+    file_id: str
+    schema: List[FileSchemaField]
+
+
 class UploadedFileOut(BaseModel):
     id: uuid.UUID
     dataset_id: uuid.UUID

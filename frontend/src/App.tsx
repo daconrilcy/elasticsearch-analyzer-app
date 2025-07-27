@@ -19,6 +19,7 @@ import { ConfigurationPanel } from './features/components/ConfigurationPanel';
 import { Header } from './features/components/Header';
 import { IconSidebar } from './features/components/IconSidebar';
 import { AuthPage } from './features/auth/AuthPage';
+import { ImportDataWizard } from './pages/ImportDataWizard';
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
@@ -36,11 +37,13 @@ const fitViewOptions = {
   maxZoom: 1.0,
 };
 
-function FlowEditor() {
+/**
+ * Page principale de l'éditeur d'analyseur.
+ */
+function AnalyzerPage() {
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
-  // 'analysisSteps' et 'isLoading' ne sont plus nécessaires ici, car ResultPanel les lit depuis le store.
-  const { activePanel, setActivePanel, selectedNodeId } = useUIStore();
-  
+  const { activePanel, selectedNodeId } = useUIStore();
+
   useDebouncedAnalysis();
   const { onDragOver, onDrop, onNodeClick, onPaneClick, onNodesDelete } = useFlowInteractions();
   const { isValidConnection } = useConnectionValidation();
@@ -58,56 +61,48 @@ function FlowEditor() {
   );
 
   return (
-    <div className="app-container">
-      <IconSidebar activePanel={activePanel} setActivePanel={setActivePanel} />
-      
-      <main className="flow-editor-main">
-        <Header />
-        
-        <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
-          <ReactFlow
-            nodes={graph.nodes}
-            edges={graph.edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            onNodesDelete={onNodesDelete}
-            nodeTypes={nodeTypes}
-            isValidConnection={isValidConnection}
-            fitView
-            fitViewOptions={fitViewOptions}
-          >
-            <Controls />
-            <Background color="#e0e7ff" gap={24} size={1.5} />
-          </ReactFlow>
-        </div>
-
-        {/* --- PANNEAUX FLOTTANTS --- */}
-        <Sidebar isVisible={activePanel === 'nodes'} />
-        
-        {selectedNode ? (
-          <ConfigurationPanel 
-            key={selectedNode.id} 
-            node={selectedNode} 
-            isVisible={activePanel === 'config'} 
-          />
-        ) : (
-          <ConfigPlaceholder isVisible={activePanel === 'config'} />
-        )}
-        
-        {/* CORRECTION: Le composant ResultPanel n'a plus besoin des props 'steps' et 'isLoading' */}
-        <ResultPanel 
-          isVisible={activePanel === 'results'} 
+    <main className="flow-editor-main">
+      <Header />
+      <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
+        <ReactFlow
+          nodes={graph.nodes}
+          edges={graph.edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          onNodesDelete={onNodesDelete}
+          nodeTypes={nodeTypes}
+          isValidConnection={isValidConnection}
+          fitView
+          fitViewOptions={fitViewOptions}
+        >
+          <Controls />
+          <Background color="#e0e7ff" gap={24} size={1.5} />
+        </ReactFlow>
+      </div>
+      <Sidebar isVisible={activePanel === 'nodes'} />
+      {selectedNode ? (
+        <ConfigurationPanel 
+          key={selectedNode.id} 
+          node={selectedNode} 
+          isVisible={activePanel === 'config'} 
         />
-      </main>
-    </div>
+      ) : (
+        <ConfigPlaceholder isVisible={activePanel === 'config'} />
+      )}
+      <ResultPanel isVisible={activePanel === 'results'} />
+    </main>
   );
 }
 
+/**
+ * Composant racine qui gère l'authentification et le routage des pages.
+ */
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const { activePage } = useUIStore();
 
   useEffect(() => {
     checkAuth();
@@ -117,10 +112,18 @@ function App() {
     return <div className="loading-fullscreen">Chargement...</div>;
   }
 
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+
   return (
     <ReactFlowProvider>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
-      {isAuthenticated ? <FlowEditor /> : <AuthPage />}
+      <div className="app-container">
+        <IconSidebar />
+        {activePage === 'analyzer' && <AnalyzerPage />}
+        {activePage === 'importer' && <ImportDataWizard />}
+      </div>
     </ReactFlowProvider>
   );
 }

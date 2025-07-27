@@ -24,7 +24,7 @@ const formatStepLabel = (stepName: string): string => {
 }
 
 export function ResultPanel({ isVisible }: { isVisible: boolean }) {
-  // CORRECTION: Utilisation du nom correct 'analysisSteps' depuis le store.
+  // Utilisation du nom correct 'analysisSteps' depuis le store.
   const { analysisSteps, isLoading, validationIssues } = useAnalysisStore();
 
   const renderContent = () => {
@@ -51,7 +51,6 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
 
     return (
       <div className="steps-container">
-        {/* CORRECTION: Ajout des types pour les paramètres du map */}
         {analysisSteps.map((step: AnalysisStep, index: number) => {
           const stepType = getStepType(step.step_name);
           const stepLabel = formatStepLabel(step.step_name);

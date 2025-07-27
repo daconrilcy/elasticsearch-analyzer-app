@@ -1,0 +1,158 @@
+// =============================================================================
+// == Variables
+// =============================================================================
+// Centralizing values for easy maintenance.
+// You can replace these with your existing global variables.
+
+$color-text-header: #2c3e50;
+$color-text-body: #596a7b;
+$color-text-description: #8a9bb0;
+$color-border: #e0e6ed;
+$color-background-code: #f8f9fa;
+$color-background-section: #ffffff;
+$color-error: #e74c3c;
+$color-button-secondary-text: #596a7b;
+$color-button-secondary-bg: #e0e6ed;
+$color-button-secondary-bg-hover: #c8d1db;
+$color-button-success-text: #ffffff;
+$color-button-success-bg: #27ae60;
+$color-button-success-bg-hover: #229954;
+
+$font-family-main: 'Inter', -apple-system, sans-serif;
+$radius-main: 12px;
+$shadow-main: 0 4px 12px rgba(0, 0, 0, 0.08);
+$transition-main: all 0.3s ease;
+
+// =============================================================================
+// == Review Component Styles
+// =============================================================================
+
+.review-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // Space between main title, description, and sections
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+
+  h2 {
+    font-family: $font-family-main;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: $color-text-header;
+    text-align: center;
+  }
+
+  > p { // Direct child <p> for the main description
+    font-family: $font-family-main;
+    font-size: 1rem;
+    color: $color-text-body;
+    text-align: center;
+    margin-top: -1rem; // Reduce space after h2
+  }
+}
+
+// --- Sections ---
+// Used for "Nom de l'index" and "Résumé du Mapping"
+.review-section {
+  background-color: $color-background-section;
+  border-radius: $radius-main;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-main;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  h3 {
+    font-family: $font-family-main;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-text-header;
+    margin: 0;
+  }
+
+  .section-description {
+    font-family: $font-family-main;
+    font-size: 0.9rem;
+    color: $color-text-description;
+    margin: 0;
+    margin-top: -0.5rem;
+  }
+}
+
+// --- Form Input for Index Name ---
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: $font-family-main;
+  font-size: 1rem;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  transition: $transition-main;
+
+  &:focus {
+    outline: none;
+    border-color: #8e76fa; // Using a primary color from previous styles
+    box-shadow: 0 0 0 3px rgba(142, 118, 250, 0.2);
+  }
+}
+
+.error-text {
+  color: $color-error;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+// --- Mapping Summary Code Block ---
+.mapping-summary {
+  background-color: $color-background-code;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.875rem;
+  white-space: pre-wrap; // Ensures long lines wrap
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+// --- Action Buttons Container ---
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+
+  // Generic button styles can be in a global file,
+  // but specific overrides are here.
+  button {
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-family: $font-family-main;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: $transition-main;
+  }
+}
+
+.button-secondary {
+  background-color: $color-button-secondary-bg;
+  color: $color-button-secondary-text;
+
+  &:hover {
+    background-color: $color-button-secondary-bg-hover;
+  }
+}
+
+.button-success {
+  background-color: $color-button-success-bg;
+  color: $color-button-success-text;
+
+  &:hover {
+    background-color: $color-button-success-bg-hover;
+  }
+}

@@ -9,10 +9,6 @@ export interface AnalysisStep {
   output: string | string[];
 }
 
-// L'interface AnalysisPath n'est plus nécessaire car la validation du chemin
-// se fait maintenant côté client avant l'appel API.
-// interface AnalysisPath { ... }
-
 interface AnalysisState {
   inputText: string;
   analysisSteps: AnalysisStep[];
@@ -47,7 +43,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     const { inputText } = get();
 
     const cleanedGraph = {
-      nodes: graph.nodes.map(n => ({...n.data, meta: { position: n.position, type: n.type }})),
+      nodes: graph.nodes.map(n => ({ ...n.data, meta: { position: n.position, type: n.type } })),
       edges: graph.edges.map(e => ({ id: e.id, source: e.source, target: e.target }))
     };
 
@@ -72,7 +68,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       set({ isLoading: false });
     }
   },
-  
+
   resetAnalysis: () => {
     set({ analysisSteps: [], validationIssues: [] });
   },

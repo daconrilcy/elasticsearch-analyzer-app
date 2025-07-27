@@ -22,6 +22,8 @@
 @use 'components/form-checkbox-group' as *;
 @use 'components/form-file' as *;
 @use 'components/login-page' as *;
+@use 'components/UploadCard' as *;
+@use 'components/Review' as *;
 
 // --- Global Styles for React Flow ---
 .reactflow-wrapper {
