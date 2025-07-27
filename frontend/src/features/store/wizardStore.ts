@@ -8,9 +8,11 @@ type IngestionStatus = 'idle' | 'in_progress' | 'success' | 'error';
 interface WizardState {
   step: WizardStep;
   file: File | null;
-  dataPreview: any[]; // À typer plus précisément selon le format des données
-  schema: any[]; // À typer plus précisément
-  mapping: any; // À typer plus précisément
+  fileId: string | null; // ID du fichier après upload
+  jobId: string | null; // ID du job d'ingestion
+  dataPreview: any[]; 
+  schema: any[]; 
+  mapping: any; 
   indexName: string;
   ingestionStatus: IngestionStatus;
   error: string | null;
@@ -18,20 +20,22 @@ interface WizardState {
   // Actions pour mettre à jour l'état
   setStep: (step: WizardStep) => void;
   setFile: (file: File | null) => void;
+  setUploadedFile: (fileId: string) => void;
   setSchema: (schema: any[]) => void;
   setIndexName: (name: string) => void;
-  startIngestion: () => void;
+  startIngestion: (jobId: string) => void;
   setIngestionSuccess: () => void;
   setIngestionError: (error: string) => void;
   setMapping: (field: string, newConfig: { type: string; analyzer?: string }) => void;
   reset: () => void;
-
 }
 
 // État initial
 const initialState = {
   step: 'upload' as WizardStep,
   file: null,
+  fileId: null,
+  jobId: null,
   dataPreview: [],
   schema: [],
   mapping: {},
@@ -45,10 +49,11 @@ export const useWizardStore = create<WizardState>((set, get) => ({
   ...initialState,
 
   setStep: (step) => set({ step }),
-  setFile: (file) => set({ file, error: null }), // Réinitialise l'erreur lors du nouvel upload
+  setFile: (file) => set({ file, error: null, fileId: null }), // Réinitialise l'erreur et fileId
+  setUploadedFile: (fileId) => set({ fileId }),
   setSchema: (schema) => set({ schema }),
   setIndexName: (name) => set({ indexName: name }),
-  startIngestion: () => set({ ingestionStatus: 'in_progress', step: 'ingesting' }),
+  startIngestion: (jobId) => set({ ingestionStatus: 'in_progress', step: 'ingesting', jobId }),
   setIngestionSuccess: () => set({ ingestionStatus: 'success', step: 'complete' }),
   setIngestionError: (error) => set({ ingestionStatus: 'error', error }),
   reset: () => set(initialState),

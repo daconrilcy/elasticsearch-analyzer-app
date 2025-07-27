@@ -1,53 +1,58 @@
 import React, { useState } from 'react';
 import { useWizardStore } from '../../store/wizardStore';
+import { datasetService } from '../../../services/datasetService'; // Importer le service
 
 /**
  * Composant pour la dernière étape de validation avant l'ingestion.
- * Affiche un résumé complet de la configuration et demande à l'utilisateur
- * de nommer son index avant de lancer le processus.
  */
 export const Review: React.FC = () => {
   const { 
-    file,
+    fileId, // Récupérer l'ID du fichier depuis le store
     mapping, 
     indexName, 
     setIndexName, 
     startIngestion, 
-    setIngestionSuccess, 
     setIngestionError,
     setStep 
   } = useWizardStore();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
    * Gère le lancement du processus d'ingestion.
    */
-  const handleStartProcess = () => {
-    // Validation simple du nom de l'index
+  const handleStartProcess = async () => {
+    // Validation que l'ID du fichier existe
+    if (!fileId) {
+      setError("Erreur critique: l'ID du fichier est manquant. Veuillez recommencer le processus d'upload.");
+      return;
+    }
+    // Validation que le nom de l'index est rempli
     if (!indexName.trim()) {
       setError("Veuillez donner un nom à votre index.");
       return;
     }
     setError(null);
+    setIsLoading(true);
     
-    // Déclenche l'état d'ingestion dans le store
-    startIngestion();
+    try {
+      // Appel réel au service pour démarrer l'ingestion
+      const response = await datasetService.startIngestion(fileId, indexName, mapping);
+      
+      // Déclencher l'état d'ingestion dans le store avec le jobId retourné par l'API
+      startIngestion(response.job_id);
 
-    // --- Simulation d'un appel API asynchrone ---
-    // Dans une application réelle, ici se trouverait l'appel à votre backend.
-    console.log("Lancement du processus pour l'index:", indexName);
-    console.log("Fichier:", file?.name);
-    console.log("Mapping final:", mapping);
-
-    setTimeout(() => {
-      // Simulation d'une réussite ou d'un échec de manière aléatoire
-      if (Math.random() > 0.3) { // 70% de chance de succès
-        setIngestionSuccess();
-      } else {
-        setIngestionError("Échec du parsing du fichier. Le format de la colonne 'date' est invalide à la ligne 42.");
-      }
-    }, 3000); // Simule un délai de 3 secondes
+    } catch (err: any) {
+      console.error("Erreur lors du lancement de l'ingestion:", err);
+      const errorMessage = err.message || "Une erreur est survenue lors du lancement de l'ingestion.";
+      setIngestionError(errorMessage);
+      // En cas d'erreur au lancement (ex: l'API est indisponible), 
+      // on passe quand même à l'étape d'ingestion pour y afficher le message d'erreur.
+      setStep('ingesting'); 
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,7 +60,6 @@ export const Review: React.FC = () => {
       <h2>Étape 3: Révision et Lancement</h2>
       <p>Vérifiez la configuration finale avant de créer l'index et d'importer vos données.</p>
       
-      {/* Section pour nommer l'index */}
       <div className="review-section">
         <h3>1. Nom de l'index</h3>
         <p className="section-description">
@@ -67,11 +71,11 @@ export const Review: React.FC = () => {
           value={indexName}
           onChange={(e) => setIndexName(e.target.value)}
           placeholder="ex: mon-index-de-produits"
+          disabled={isLoading}
         />
         {error && <p className="error-text">{error}</p>}
       </div>
 
-      {/* Section pour le résumé du mapping */}
       <div className="review-section">
         <h3>2. Résumé du Mapping</h3>
         <p className="section-description">
@@ -82,13 +86,12 @@ export const Review: React.FC = () => {
         </pre>
       </div>
       
-      {/* Boutons d'action */}
       <div className="wizard-actions">
-        <button onClick={() => setStep('mapping')} className="button-secondary">
+        <button onClick={() => setStep('mapping')} className="button-secondary" disabled={isLoading}>
           Retour
         </button>
-        <button onClick={handleStartProcess} className="button-success">
-          Lancer la Création et l'Ingestion
+        <button onClick={handleStartProcess} className="button-success" disabled={isLoading}>
+          {isLoading ? "Lancement..." : "Lancer la Création et l'Ingestion"}
         </button>
       </div>
     </div>

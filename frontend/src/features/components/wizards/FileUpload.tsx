@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import type { FileRejection } from 'react-dropzone';
 import { useWizardStore } from '../../store/wizardStore';
-import { datasetService } from '../../../services/datasetService'; // Importer le service de dataset
+import { datasetService } from '../../../services/datasetService';
 
 /**
  * Formats file size from bytes to a human-readable string (KB, MB).
@@ -34,7 +34,7 @@ const UploadIcon: React.FC = () => (
 
 
 export const FileUpload: React.FC = () => {
-  const { file, setFile, setStep, setSchema, setIngestionError } = useWizardStore();
+  const { file, setFile, setStep, setSchema, setUploadedFile, setIngestionError } = useWizardStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -44,8 +44,6 @@ export const FileUpload: React.FC = () => {
       return;
     }
     if (acceptedFiles.length > 0) {
-      // L'action setFile réinitialise déjà l'erreur dans le store,
-      // la ligne setIngestionError(null) était donc redondante.
       setFile(acceptedFiles[0]);
     }
   }, [setFile, setIngestionError]);
@@ -73,9 +71,10 @@ export const FileUpload: React.FC = () => {
       // Appel réel au service d'upload
       const response = await datasetService.upload(file);
       
-      console.log('Schéma reçu du backend:', response.schema);
+      console.log('Upload réussi. Fichier ID:', response.file_id);
       
-      // Mettre à jour le store avec le schéma détecté
+      // Sauvegarder l'ID du fichier et le schéma dans le store
+      setUploadedFile(response.file_id);
       setSchema(response.schema);
       
       // Passer à l'étape suivante
