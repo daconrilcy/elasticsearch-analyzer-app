@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import type { FileRejection } from 'react-dropzone'; // Correction: Importation de type explicite
+import type { FileRejection } from 'react-dropzone';
 import { useWizardStore } from '../../store/wizardStore';
+import { datasetService } from '../../../services/datasetService'; // Importer le service de dataset
 
 /**
  * Formats file size from bytes to a human-readable string (KB, MB).
@@ -33,20 +34,21 @@ const UploadIcon: React.FC = () => (
 
 
 export const FileUpload: React.FC = () => {
-  const { file, setFile, setStep } = useWizardStore();
+  const { file, setFile, setStep, setSchema, setIngestionError } = useWizardStore();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     if (fileRejections.length > 0) {
-      // You can add more sophisticated error handling here (e.g., a toast notification)
       console.error('File rejected:', fileRejections[0].errors[0].message);
+      setIngestionError(`Fichier rejeté: ${fileRejections[0].errors[0].message}`);
       return;
     }
-    
     if (acceptedFiles.length > 0) {
-      const selectedFile = acceptedFiles[0];
-      setFile(selectedFile);
+      // L'action setFile réinitialise déjà l'erreur dans le store,
+      // la ligne setIngestionError(null) était donc redondante.
+      setFile(acceptedFiles[0]);
     }
-  }, [setFile]);
+  }, [setFile, setIngestionError]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -63,18 +65,33 @@ export const FileUpload: React.FC = () => {
     setFile(null);
   };
 
-  const handleStartUpload = () => {
-    if (file) {
-      // Here you would typically trigger the actual API upload call.
-      // For now, we just move to the next step in the wizard.
-      console.log(`Starting process for ${file.name}`);
+  const handleStartUpload = async () => {
+    if (!file) return;
+
+    setIsLoading(true);
+    try {
+      // Appel réel au service d'upload
+      const response = await datasetService.upload(file);
+      
+      console.log('Schéma reçu du backend:', response.schema);
+      
+      // Mettre à jour le store avec le schéma détecté
+      setSchema(response.schema);
+      
+      // Passer à l'étape suivante
       setStep('mapping');
+
+    } catch (error: any) {
+      console.error("Erreur lors de l'upload:", error);
+      const errorMessage = error.message || "Une erreur est survenue lors de l'envoi du fichier.";
+      setIngestionError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div {...getRootProps()} className={`upload-card ${isDragActive ? 'dropzone-active' : ''}`}>
-      {/* The input is hidden but necessary for react-dropzone to work */}
       <input {...getInputProps()} />
 
       {!file ? (
@@ -98,17 +115,27 @@ export const FileUpload: React.FC = () => {
                 type="button"
                 className="file-item__remove-btn"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent dropzone click event
+                  e.stopPropagation();
                   handleRemoveFile();
                 }}
                 aria-label="Remove file"
+                disabled={isLoading}
               >
                 &times;
               </button>
             </div>
           </div>
-          <button type="button" className="upload-card__button" onClick={handleStartUpload}>
-            Start Upload
+          
+          <button 
+            type="button" 
+            className="upload-card__button" 
+            onClick={(e) => {
+                e.stopPropagation();
+                handleStartUpload();
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Analyse en cours...' : 'Start Upload'}
           </button>
         </>
       )}
