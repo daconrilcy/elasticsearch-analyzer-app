@@ -19,6 +19,7 @@ import { ConfigurationPanel } from './features/components/ConfigurationPanel';
 import { Header } from './features/components/Header';
 import { IconSidebar } from './features/components/IconSidebar';
 import { AuthPage } from './features/auth/AuthPage';
+import { ImportDataWizard } from './pages/ImportDataWizard'; // Importer le wizard
 
 // --- Import des styles ---
 import 'reactflow/dist/style.css';
@@ -35,12 +36,12 @@ const fitViewOptions = {
 };
 
 /**
- * Le composant principal de l'éditeur, affiché lorsque l'utilisateur est authentifié.
+ * Le composant contenant la page de l'éditeur d'analyseur.
  */
-function FlowEditor() {
+function AnalyzerPage() {
   const { graph, onNodesChange, onEdgesChange, onConnect } = useGraphStore();
   const { analysisSteps, isLoading } = useAnalysisStore();
-  const { activePanel, setActivePanel, selectedNodeId } = useUIStore();
+  const { activePanel, selectedNodeId } = useUIStore();
   
   useDebouncedAnalysis();
   const { onDragOver, onDrop, onNodeClick, onPaneClick, onNodesDelete } = useFlowInteractions();
@@ -51,7 +52,6 @@ function FlowEditor() {
     [graph.nodes, selectedNodeId]
   );
 
-  // Un composant placeholder qui reçoit aussi la prop de visibilité
   const ConfigPlaceholder = ({ isVisible }: { isVisible: boolean }) => (
     <aside className={`config-panel placeholder-panel ${isVisible ? 'visible' : ''}`}>
       <h3>Configuration</h3>
@@ -60,62 +60,52 @@ function FlowEditor() {
   );
 
   return (
-    <div className="app-container">
-      <IconSidebar activePanel={activePanel} setActivePanel={setActivePanel} />
-      
-      <main className="flow-editor-main">
-        <Header />
-        
-        {/* Le canvas ReactFlow prend toute la place disponible */}
-        <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
-          <ReactFlow
-            nodes={graph.nodes}
-            edges={graph.edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            onNodesDelete={onNodesDelete}
-            nodeTypes={nodeTypes}
-            isValidConnection={isValidConnection}
-            fitView
-            fitViewOptions={fitViewOptions}
-          >
-            <Controls />
-            <Background color="#e0e7ff" gap={24} size={1.5} />
-          </ReactFlow>
-        </div>
-
-        {/* --- PANNEAUX FLOTTANTS --- */}
-        {/* Ils sont toujours rendus, mais leur visibilité est contrôlée par CSS */}
-        <Sidebar isVisible={activePanel === 'nodes'} />
-        
-        {selectedNode ? (
-          <ConfigurationPanel 
-            key={selectedNode.id} 
-            node={selectedNode} 
-            isVisible={activePanel === 'config'} 
-          />
-        ) : (
-          <ConfigPlaceholder isVisible={activePanel === 'config'} />
-        )}
-        
-        <ResultPanel 
-          steps={analysisSteps} 
-          isLoading={isLoading} 
-          isVisible={activePanel === 'results'} 
+    <main className="flow-editor-main">
+      <Header />
+      <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
+        <ReactFlow
+          nodes={graph.nodes}
+          edges={graph.edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          onNodesDelete={onNodesDelete}
+          nodeTypes={nodeTypes}
+          isValidConnection={isValidConnection}
+          fitView
+          fitViewOptions={fitViewOptions}
+        >
+          <Controls />
+          <Background color="#e0e7ff" gap={24} size={1.5} />
+        </ReactFlow>
+      </div>
+      <Sidebar isVisible={activePanel === 'nodes'} />
+      {selectedNode ? (
+        <ConfigurationPanel 
+          key={selectedNode.id} 
+          node={selectedNode} 
+          isVisible={activePanel === 'config'} 
         />
-      </main>
-    </div>
+      ) : (
+        <ConfigPlaceholder isVisible={activePanel === 'config'} />
+      )}
+      <ResultPanel 
+        steps={analysisSteps} 
+        isLoading={isLoading} 
+        isVisible={activePanel === 'results'} 
+      />
+    </main>
   );
 }
 
 /**
- * Le composant racine qui gère l'authentification et fournit les contextes.
+ * Le composant racine qui gère l'authentification et le routage des pages.
  */
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  const { activePage } = useUIStore(); // Récupère la page active
 
   useEffect(() => {
     checkAuth();
@@ -125,10 +115,20 @@ function App() {
     return <div className="loading-fullscreen">Chargement...</div>;
   }
 
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+
   return (
     <ReactFlowProvider>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
-      {isAuthenticated ? <FlowEditor /> : <AuthPage />}
+      <div className="app-container">
+        <IconSidebar /> {/* La sidebar est maintenant au niveau principal */}
+        
+        {/* Affichage conditionnel de la page active */}
+        {activePage === 'analyzer' && <AnalyzerPage />}
+        {activePage === 'importer' && <ImportDataWizard />}
+      </div>
     </ReactFlowProvider>
   );
 }
