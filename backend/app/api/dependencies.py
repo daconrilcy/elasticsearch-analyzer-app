@@ -48,7 +48,7 @@ async def get_current_user(
         raise credentials_exception
 
     # On récupère l'utilisateur via le service (bonne pratique pour centraliser la logique métier)
-    user = await user_service.get(session, id=user_id)
+    user = await user_service.get(session, user_id=user_id)
     if user is None:
         logger.warning(f"Aucun utilisateur trouvé avec l'UUID {user_id}")
         raise credentials_exception

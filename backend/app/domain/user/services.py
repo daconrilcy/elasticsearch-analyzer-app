@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.domain.user.models import User
 from app.core.security import get_password_hash, verify_password
-from app.domain.user.schemas import UserCreate
+from app.domain.user.schemas import UserCreate, UserRole
 from fastapi import HTTPException
 
 
@@ -45,7 +45,9 @@ class UserService:
         user = User(
             username=user_in.username,
             email=user_in.email,
-            hashed_password=hashed_password
+            hashed_password=hashed_password,
+            role=UserRole.USER,
+            is_active=True
         )
         db.add(user)
         await db.commit()
