@@ -1,152 +1,145 @@
-""" app/api/v1/datasets.py """
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from loguru import logger
-from elasticsearch import AsyncElasticsearch
 
+from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Import des dépendances, modèles, schémas et services
 from app.core.db import get_db
-from app.core.es_client import get_es_client
-from app.domain.dataset import services
-from app.domain.dataset import schemas, models
+from app.core.dependencies import get_current_user, PaginationParams
 from app.domain.user.models import User
-from app.api.dependencies import get_current_user
+from app.domain.dataset import models, schemas
+from app.domain.dataset.services import DatasetService, FileService
 
-router = APIRouter()
+# --- Initialisation du routeur et des services ---
+
+router = APIRouter(
+    prefix="/datasets",
+    tags=["Datasets"],
+    dependencies=[Depends(get_current_user)]  # Sécurise toutes les routes du routeur
+)
+
+dataset_service = DatasetService()
+file_service = FileService()
 
 
-@router.post("/", response_model=schemas.DatasetOut, status_code=status.HTTP_201_CREATED)
-async def create_dataset_endpoint(
+# --- Dépendance de sécurité pour ce routeur ---
+
+async def get_current_dataset_for_owner(
+        dataset_id: uuid.UUID,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+) -> models.Dataset:
+    """
+    Dépendance FastAPI pour récupérer un Dataset par son ID et vérifier
+    que l'utilisateur authentifié en est bien le propriétaire.
+    """
+    return await dataset_service.get_owned_by_user(db=db, dataset_id=dataset_id, user=current_user)
+
+
+# --- Endpoints pour la gestion des Datasets ---
+
+@router.post(
+    "/",
+    response_model=schemas.DatasetOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Créer un nouveau dataset"
+)
+async def create_dataset(
         dataset_in: schemas.DatasetCreate,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Crée un nouveau jeu de données."""
-    return await services.create_dataset(db=db, dataset_in=dataset_in, owner=current_user)
+    """Crée un nouveau conteneur logique (dataset) pour des fichiers."""
+    return await dataset_service.create(db=db, dataset_in=dataset_in, owner=current_user)
 
 
-@router.get("/{dataset_id}", response_model=schemas.DatasetDetailOut)
-async def get_dataset_endpoint(
-        dataset_id: uuid.UUID,
+@router.get(
+    "/",
+    response_model=List[schemas.DatasetOut],
+    summary="Lister les datasets de l'utilisateur"
+)
+async def list_datasets(
         db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_user),
+        pagination: PaginationParams = Depends()  # Utilise la dépendance de pagination
 ):
-    """Récupère un jeu de données par son ID."""
-    return await services.get_dataset_owned_by_user(db, dataset_id, current_user)
+    """Retourne une liste paginée des datasets appartenant à l'utilisateur."""
+    # Note: une méthode `get_multi_by_owner` devrait être ajoutée à DatasetService
+    # pour gérer la pagination.
+    return await dataset_service.get_multi_by_owner(
+        db=db, owner_id=current_user.id, skip=pagination.skip, limit=pagination.limit
+    )
 
 
-@router.post("/{dataset_id}/upload-file/", response_model=schemas.FileUploadResponse)
-async def upload_file_endpoint(
-        dataset_id: uuid.UUID,
+@router.get(
+    "/{dataset_id}",
+    response_model=schemas.DatasetDetailOut,
+    summary="Obtenir les détails d'un dataset"
+)
+async def get_dataset_details(
+        dataset: models.Dataset = Depends(get_current_dataset_for_owner)
+):
+    """
+    Retourne les informations détaillées d'un dataset, y compris la liste
+    de ses fichiers et mappings.
+    """
+    # Note: DatasetDetailOut nécessite que les relations `files` et `mappings`
+    # soient chargées. SQLAlchemy les chargera paresseusement (lazy loading).
+    return dataset
+
+
+@router.delete(
+    "/{dataset_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Supprimer un dataset"
+)
+async def delete_dataset(
+        dataset: models.Dataset = Depends(get_current_dataset_for_owner),
+        db: AsyncSession = Depends(get_db)
+):
+    """
+    Supprime un dataset et toutes ses ressources associées (fichiers, mappings)
+    en cascade.
+    """
+    await dataset_service.remove(db=db, dataset_id=dataset.id)
+    return
+
+
+# --- Endpoints pour la gestion des Fichiers au sein d'un Dataset ---
+
+@router.post(
+    "/{dataset_id}/files",
+    response_model=schemas.FileOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Uploader un nouveau fichier dans un dataset"
+)
+async def upload_file_to_dataset(
+        dataset: models.Dataset = Depends(get_current_dataset_for_owner),
         file: UploadFile = File(...),
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
 ):
-    """Ajoute un nouveau fichier au jeu de données."""
-    dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
-    services.validate_uploaded_file(file)
-    uploaded_file, inferred_schema = await services.upload_new_file_version(db, dataset, file, current_user)
-    schema_list = [schemas.FileStructureField(field=s["field"], type=s["type"]) for s in (inferred_schema or [])]
-    logger.debug(f"File uploaded: {uploaded_file.id}")
-    return schemas.FileUploadResponse(file_id=str(uploaded_file.id), schema=schema_list)
+    """
+    Uploade un nouveau fichier. Le service gère la validation, le stockage,
+    le versioning et la création de l'enregistrement en base de données.
+    Une tâche de parsing est ensuite lancée en arrière-plan.
+    """
+    return await file_service.upload(db=db, dataset=dataset, file=file, uploader=current_user)
 
 
-@router.get("/{dataset_id}/files/", response_model=List[schemas.UploadedFileOut])
-async def list_files_for_dataset_endpoint(
-        dataset_id: uuid.UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+@router.get(
+    "/{dataset_id}/files",
+    response_model=List[schemas.FileOut],
+    summary="Lister les fichiers d'un dataset"
+)
+async def list_files_in_dataset(
+        dataset: models.Dataset = Depends(get_current_dataset_for_owner),
+        pagination: PaginationParams = Depends()
 ):
-    """Liste tous les fichiers d'un jeu de données."""
-    dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
-    return dataset.files
-
-
-@router.post("/{file_id}/parse", status_code=status.HTTP_202_ACCEPTED)
-async def parse_file_endpoint(
-        file_id: uuid.UUID,
-        background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """Lance le traitement d'un fichier."""
-    file = await services.get_file_owned_by_user(db, file_id, current_user)
-    if file.status not in [models.FileStatus.PENDING, models.FileStatus.ERROR]:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Le fichier est déjà en cours ou traité.")
-    background_tasks.add_task(services.parse_file_and_update_db, file.id)
-    return {"message": "Le traitement a été lancé."}
-
-
-@router.post("/{dataset_id}/mappings/", response_model=schemas.SchemaMappingOut, status_code=status.HTTP_201_CREATED)
-async def create_schema_mapping_endpoint(
-        dataset_id: uuid.UUID,
-        mapping_in: schemas.SchemaMappingCreate,
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """Crée un nouveau mapping."""
-    dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
-    return await services.create_schema_mapping(db, dataset, mapping_in)
-
-
-@router.get("/{dataset_id}/mappings/", response_model=List[schemas.SchemaMappingOut])
-async def get_mappings_for_dataset_endpoint(
-        dataset_id: uuid.UUID,
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """Récupère tous les mappings d'un jeu de données."""
-    await services.get_dataset_owned_by_user(db, dataset_id, current_user)
-    return await services.get_mappings_for_dataset(db, dataset_id)
-
-
-@router.post("/mappings/{mapping_id}/create-index", response_model=schemas.SchemaMappingOut)
-async def create_index_from_mapping_endpoint(
-        mapping_id: uuid.UUID,
-        db: AsyncSession = Depends(get_db),
-        es_client: AsyncElasticsearch = Depends(get_es_client),
-        current_user: User = Depends(get_current_user)
-):
-    """Crée un index Elasticsearch à partir d'un mapping."""
-    mapping = await services.get_mapping(db, mapping_id)
-    if not mapping or mapping.dataset.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à ce mapping.")
-    return await services.create_es_index_from_mapping(db, es_client, mapping)
-
-
-@router.post("/files/{file_id}/ingest", status_code=status.HTTP_202_ACCEPTED)
-async def ingest_file_data_endpoint(
-        file_id: uuid.UUID,
-        ingest_request: schemas.IngestRequest,
-        background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """Ingestion des données d'un fichier."""
-    file = await services.get_file_owned_by_user(db, file_id, current_user)
-    mapping = await services.get_mapping(db, ingest_request.mapping_id)
-    if not mapping or mapping.dataset_id != file.dataset_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Mapping invalide ou non lié au dataset.")
-    if not mapping.index_name:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="L'index Elasticsearch est manquant.")
-    if file.status != models.FileStatus.PARSED:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Le fichier doit être parsé avant ingestion.")
-    background_tasks.add_task(services.ingest_data_from_file_task, file.id, ingest_request.mapping_id)
-    return {"message": "Ingestion en arrière-plan démarrée."}
-
-
-@router.post("/search/{index_name}", response_model=schemas.SearchResults)
-async def search_index_endpoint(
-        index_name: str,
-        search_query: schemas.SearchQuery,
-        db: AsyncSession = Depends(get_db),
-        es_client: AsyncElasticsearch = Depends(get_es_client),
-        current_user: User = Depends(get_current_user)
-):
-    """Recherche dans un index Elasticsearch."""
-    mapping = await services.get_mapping_by_index_name(db, index_name)
-    if not mapping or mapping.dataset.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à cet index.")
-    return await services.search_in_index(es_client, index_name, search_query.query, search_query.page,
-                                          search_query.size)
+    """Retourne la liste paginée des fichiers appartenant à un dataset spécifique."""
+    # Note: La pagination sur une relation chargée paresseusement peut être inefficace.
+    # Une méthode de service dédiée `file_service.get_multi_by_dataset` serait préférable.
+    start = pagination.skip
+    end = pagination.skip + pagination.limit
+    return dataset.files[start:end]
