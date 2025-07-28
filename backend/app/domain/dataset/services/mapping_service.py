@@ -1,3 +1,4 @@
+"""app/domain/dataset/services/mapping_service.py"""
 import uuid
 from typing import List, Optional, Dict, Any
 from fastapi import HTTPException, status
@@ -13,8 +14,9 @@ from app.domain.analyzer.services import convert_graph_to_es_analyzer
 
 
 async def create_schema_mapping(
-    db: AsyncSession, dataset: models.Dataset, mapping_in: schemas.SchemaMappingCreate
+        db: AsyncSession, dataset: models.Dataset, mapping_in: schemas.SchemaMappingCreate
 ) -> models.SchemaMapping:
+    """Crée un nouveau mapping."""
     source_file = await db.get(models.UploadedFile, mapping_in.source_file_id)
     if not source_file or source_file.dataset_id != dataset.id:
         raise HTTPException(
@@ -49,10 +51,12 @@ async def create_schema_mapping(
 
 
 async def get_mapping(db: AsyncSession, mapping_id: uuid.UUID) -> Optional[models.SchemaMapping]:
+    """Récupère un mapping par son ID."""
     return await db.get(models.SchemaMapping, mapping_id)
 
 
 async def get_mappings_for_dataset(db: AsyncSession, dataset_id: uuid.UUID) -> List[models.SchemaMapping]:
+    """Récupère tous les mappings d'un dataset."""
     result = await db.execute(
         select(models.SchemaMapping).where(models.SchemaMapping.dataset_id == dataset_id)
     )
@@ -60,8 +64,9 @@ async def get_mappings_for_dataset(db: AsyncSession, dataset_id: uuid.UUID) -> L
 
 
 async def create_es_index_from_mapping(
-    db: AsyncSession, es_client: AsyncElasticsearch, mapping: models.SchemaMapping
+        db: AsyncSession, es_client: AsyncElasticsearch, mapping: models.SchemaMapping
 ) -> models.SchemaMapping:
+    """Crée un index Elasticsearch à partir d'un mapping."""
     if mapping.index_name and await es_client.indices.exists(index=mapping.index_name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -95,7 +100,7 @@ async def create_es_index_from_mapping(
 
 
 async def _generate_es_index_definition(
-    db: AsyncSession, rules: List[schemas.MappingRule]
+        db: AsyncSession, rules: List[schemas.MappingRule]
 ) -> Dict[str, Any]:
     properties = {}
     analyzers = {}

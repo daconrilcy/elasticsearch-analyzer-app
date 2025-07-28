@@ -1,4 +1,4 @@
-# backend/app/services/validation/registry.py
+""" backend/app/services/validation/registry.py """
 from .rules import (
     existence,
     uniqueness,

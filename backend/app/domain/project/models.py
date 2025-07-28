@@ -1,4 +1,4 @@
-# backend/app/domain/project/models.py
+""" backend/app/domain/project/models.py """
 
 import enum
 import uuid
@@ -9,7 +9,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from app.core.db import Base
-from app.utils.db_types import UUID as CustomUUID, get_json_type
+from app.utils.db_types import UuidType as CustomUUID, get_json_type
+
 
 class ProjectStatus(str, enum.Enum):
     """
@@ -18,6 +19,7 @@ class ProjectStatus(str, enum.Enum):
     DRAFT = "draft"
     VALIDATED = "validated"
     PUBLISHED = "published"
+
 
 class Project(Base):
     """

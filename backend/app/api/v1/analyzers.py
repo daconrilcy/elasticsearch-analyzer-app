@@ -1,4 +1,4 @@
-# app/api/v1/analyzers.py
+"""app/api/v1/analyzers.py"""
 from fastapi import APIRouter, Depends, Body, HTTPException, status
 from elasticsearch import AsyncElasticsearch, ConnectionError
 from loguru import logger
@@ -28,7 +28,7 @@ async def debug_analyzer_endpoint(
     """Analyse un texte pas à pas et retourne chaque étape."""
     logger.debug("try validation")
     try:
-        
+
         validate_full_graph(request.graph)
         steps, path = await debug_analyzer_step_by_step(request.graph, request.text, es_client)
         return {"steps": steps, "path": path}

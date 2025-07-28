@@ -1,4 +1,4 @@
-# app/domain/dataset/models.py
+""" app/domain/dataset/models.py """
 
 import uuid
 import enum
@@ -16,8 +16,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.core.db import Base
 from app.utils.db_types import JSONOrJSONB
 
+
 # Enum pour le statut des fichiers uploadés
 class FileStatus(str, enum.Enum):
+    """ Enum pour le statut des fichiers uploadés """
+    UPLOADED = "uploaded"
     PENDING = "pending"
     PARSING = "parsing"
     PARSED = "parsed"
@@ -26,6 +29,7 @@ class FileStatus(str, enum.Enum):
 
 # Enum pour le suivi de l’ingestion des données
 class IngestionStatus(str, enum.Enum):
+    """ Enum pour le suivi de l’ingestion des données """
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -33,6 +37,7 @@ class IngestionStatus(str, enum.Enum):
 
 
 class Dataset(Base):
+    """ Modèle SQLAlchemy du dataset """
     __tablename__ = "datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -47,6 +52,7 @@ class Dataset(Base):
 
 
 class UploadedFile(Base):
+    """ Modèle SQLAlchemy du fichier uploadé """
     __tablename__ = "uploaded_files"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -69,6 +75,7 @@ class UploadedFile(Base):
 
 
 class SchemaMapping(Base):
+    """ Modèle SQLAlchemy de la mapping """
     __tablename__ = "schema_mappings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

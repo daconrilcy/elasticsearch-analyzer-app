@@ -6,8 +6,9 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from typing import Type
 from sqlalchemy.orm import DeclarativeMeta
 
+
 # --- Type Personnalisé pour UUID (compatible PG/SQLite) ---
-class UUID(TypeDecorator):
+class UuidType(TypeDecorator):
     """
     Type personnalisé pour stocker les UUID.
     Utilise le type UUID natif de PostgreSQL et CHAR(36) pour les autres BDD.
@@ -40,6 +41,7 @@ class UUID(TypeDecorator):
             return uuid.UUID(value)
         return value
 
+
 # --- Type Personnalisé pour JSON (compatible PG/SQLite) ---
 class JSONOrJSONB(TypeDecorator):
     """Gère JSON vs JSONB selon le dialecte : JSONB pour PostgreSQL, JSON pour SQLite."""
@@ -51,6 +53,7 @@ class JSONOrJSONB(TypeDecorator):
             return dialect.type_descriptor(JSONB())
         else:
             return dialect.type_descriptor(JSON())
+
 
 # --- Fonction utilitaire (conservée pour compatibilité) ---
 def get_json_type(model_cls: Type[DeclarativeMeta]):

@@ -1,4 +1,4 @@
-# app/core/config.py
+"""app/core/config.py"""
 from typing import Optional
 from pathlib import Path
 
@@ -9,6 +9,7 @@ from functools import lru_cache
 # Chemin vers le fichier .env
 ENV_PATH = Path(__file__).resolve().parents[3] / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
+
 
 class Settings(BaseSettings):
     """

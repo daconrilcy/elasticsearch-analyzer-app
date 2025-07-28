@@ -1,4 +1,4 @@
-# main.py
+""""main.py"""
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -110,7 +110,6 @@ app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
 
 if __name__ == "__main__":
-
     import os
     import uvicorn
 

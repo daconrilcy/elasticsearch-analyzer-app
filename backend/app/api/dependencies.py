@@ -1,3 +1,4 @@
+"""backend/app/api/dependencies.py"""
 import uuid
 from typing import AsyncGenerator
 
@@ -15,9 +16,10 @@ from app.domain.user.services import user_service
 # Utilise le paramétrage dynamique, mais conserve la clarté du commentaire.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
+
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    session: AsyncSession = Depends(get_db)
+        token: str = Depends(oauth2_scheme),
+        session: AsyncSession = Depends(get_db)
 ) -> user_models.User:
     """
     Récupère l'utilisateur authentifié via le token JWT.
@@ -65,7 +67,9 @@ def require_role(required_role: user_models.UserRole):
     Dépendance pour restreindre l’accès à un rôle utilisateur précis.
     Usage: Depends(require_role(UserRole.admin))
     """
+
     async def role_checker(current_user: user_models.User = Depends(get_current_user)) -> user_models.User:
+        """Vérifie le rôle de l'utilisateur."""
         if current_user.role != required_role:
             logger.warning(
                 f"Accès refusé pour l'utilisateur {current_user.username} : "
@@ -76,4 +80,5 @@ def require_role(required_role: user_models.UserRole):
                 detail="Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
             )
         return current_user
+
     return role_checker

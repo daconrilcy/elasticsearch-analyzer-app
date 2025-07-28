@@ -1,10 +1,10 @@
-# backend/app/domain/user/schemas.py
+""" backend/app/domain/user/schemas.py """
 
 import uuid
 import enum
 from pydantic import BaseModel, EmailStr, ConfigDict
 
-# --- DÉFINITION DE L'ÉNUMÉRATION ICI POUR CASSER L'IMPORT CIRCULAIRE ---
+
 class UserRole(str, enum.Enum):
     """Énumération pour les rôles utilisateurs."""
     USER = "user"

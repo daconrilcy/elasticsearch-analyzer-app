@@ -1,4 +1,4 @@
-# backend/app/services/validation/validator.py
+""" backend/app/services/validation/validator.py"""
 from app.domain.analyzer.models import AnalyzerGraph
 from app.domain.analyzer.registry_loader import RegistryLoader
 from .registry import VALIDATION_RULES
@@ -22,7 +22,6 @@ def validate_full_graph(graph: AnalyzerGraph):
     try:
         # 1. Charger toutes les définitions et les règles de compatibilité
         definitions = RegistryLoader()
-
 
         # 2. Exécuter chaque règle enregistrée
         for rule_func in VALIDATION_RULES:

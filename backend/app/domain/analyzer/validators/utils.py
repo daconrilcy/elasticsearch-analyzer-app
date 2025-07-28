@@ -1,4 +1,4 @@
-# backend/app/services/validation/utils.py
+""" backend/app/services/validation/utils.py"""
 from typing import Dict, List, Set, Optional, Tuple
 from app.domain.analyzer.models import AnalyzerGraph, Node, Kind
 

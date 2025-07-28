@@ -1,3 +1,4 @@
+"""app/domain/dataset/services/search_service.py"""
 from typing import Optional
 from elasticsearch import AsyncElasticsearch
 from fastapi import HTTPException, status
@@ -9,6 +10,7 @@ from app.domain.dataset import models, schemas
 
 
 async def get_mapping_by_index_name(db: AsyncSession, index_name: str) -> Optional[models.SchemaMapping]:
+    """Récupère un mapping par son index."""
     result = await db.execute(
         select(models.SchemaMapping).where(models.SchemaMapping.index_name == index_name)
     )
@@ -22,6 +24,7 @@ async def search_in_index(
         page: int,
         size: int
 ) -> schemas.SearchResults:
+    """Recherche dans un index."""
     if not await es_client.indices.exists(index=index_name):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Index '{index_name}' inexistant.")
 

@@ -1,4 +1,4 @@
-# backend/app/services/validation/rules/sequence.py
+""" backend/app/services/validation/rules/sequence.py """
 from app.domain.analyzer.models import AnalyzerGraph, Kind
 from app.domain.analyzer.registry_loader import RegistryLoader
 from app.domain.analyzer.validators import utils

@@ -1,7 +1,8 @@
-# backend/app/services/validation/rules/graph_structure.py
+"""backend/app/services/validation/rules/graph_structure.py """
 from app.domain.analyzer.models import AnalyzerGraph
 from app.domain.analyzer.registry_loader import RegistryLoader
 from app.domain.analyzer.validators import utils
+
 
 def validate_graph_connectivity(graph: AnalyzerGraph, definitions: RegistryLoader):
     """
@@ -18,6 +19,7 @@ def validate_graph_connectivity(graph: AnalyzerGraph, definitions: RegistryLoade
         raise ValueError(
             f"Nœuds orphelins détectés. Tous les nœuds doivent être connectés au chemin principal. Nœuds non connectés : {', '.join(orphan_ids)}")
 
+
 def validate_acyclic(graph: AnalyzerGraph, definitions: RegistryLoader):
     """
     Valide que le graphe est un Graphe Acyclique Dirigé (DAG).
@@ -32,6 +34,7 @@ def validate_acyclic(graph: AnalyzerGraph, definitions: RegistryLoader):
         if node_id not in visited:
             if _has_cycle_dfs(node_id, adj, visiting, visited):
                 raise ValueError("Un cycle a été détecté dans le graphe. Le pipeline doit être linéaire.")
+
 
 def _has_cycle_dfs(node_id, adj, visiting, visited):
     visiting.add(node_id)

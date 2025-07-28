@@ -1,4 +1,4 @@
-# backend/app/domain/project/schemas.py
+""" backend/app/domain/project/schemas.py"""
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional
@@ -36,6 +36,7 @@ class ProjectOut(BaseModel):
     @field_validator('graph', mode='before')
     @classmethod
     def parse_graph(cls, v):
+        """Parse le graph en AnalyzerGraph."""
         if isinstance(v, dict):
             return AnalyzerGraph(**v)
         return v

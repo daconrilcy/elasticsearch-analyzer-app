@@ -1,4 +1,4 @@
-# app/core/logging_config.py
+"""app/core/logging_config.py"""
 import sys
 from loguru import logger
 
@@ -8,7 +8,7 @@ def setup_logging():
     Configure Loguru pour un logging structuré et performant.
 
     Cette configuration de base est optimisée pour le développement (logs colorisés et lisibles)
-    et peut être facilement adaptée pour la production (logs au format JSON).
+    et peut-être facilement adaptée pour la production (logs au format JSON).
     """
     # On retire le handler par défaut pour avoir un contrôle total
     logger.remove()

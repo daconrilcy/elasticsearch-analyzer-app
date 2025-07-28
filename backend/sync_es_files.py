@@ -1,3 +1,4 @@
+"""sync_es_files.py """
 import shutil
 from pathlib import Path
 

@@ -1,3 +1,4 @@
+"""app/domain/dataset/services/file_service.py"""
 import uuid
 import hashlib
 from pathlib import Path
@@ -20,6 +21,7 @@ async def get_file(db: AsyncSession, file_id: uuid.UUID) -> Optional[models.Uplo
 
 
 async def get_file_owned_by_user(db: AsyncSession, file_id: uuid.UUID, user: User) -> models.UploadedFile:
+    """Vérifie que l'utilisateur possède le fichier et le retourne."""
     file = await get_file(db, file_id)
     if not file:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fichier non trouvé.")
@@ -29,11 +31,13 @@ async def get_file_owned_by_user(db: AsyncSession, file_id: uuid.UUID, user: Use
 
 
 def _generate_stored_filename(dataset_id: uuid.UUID, version: int, original_filename: str) -> str:
+    """Génère le nom de fichier stocké."""
     extension = Path(original_filename).suffix
     return f"{dataset_id}_v{version}{extension}"
 
 
 async def _calculate_file_hash(file: UploadFile) -> str:
+    """Calcul le hash du fichier."""
     hasher = hashlib.sha256()
     await file.seek(0)
     while chunk := await file.read(8192):
@@ -43,6 +47,7 @@ async def _calculate_file_hash(file: UploadFile) -> str:
 
 
 async def _get_next_version(db: AsyncSession, dataset_id: uuid.UUID) -> int:
+    """Récupère la version suivante."""
     from sqlalchemy import select, func
     result = await db.execute(
         select(func.max(models.UploadedFile.version)).where(models.UploadedFile.dataset_id == dataset_id)
@@ -52,6 +57,7 @@ async def _get_next_version(db: AsyncSession, dataset_id: uuid.UUID) -> int:
 
 
 async def _is_duplicate(db: AsyncSession, dataset_id: uuid.UUID, file_hash: str) -> bool:
+    """Vérifie si le fichier est duplique."""
     from sqlalchemy import select
     result = await db.execute(
         select(models.UploadedFile).where(
@@ -63,6 +69,7 @@ async def _is_duplicate(db: AsyncSession, dataset_id: uuid.UUID, file_hash: str)
 
 
 def _infer_schema(df: pd.DataFrame) -> List[Dict[str, str]]:
+    """Inférence du schéma."""
     schema = []
     for column, dtype in df.dtypes.items():
         if "int" in str(dtype):
@@ -78,8 +85,9 @@ def _infer_schema(df: pd.DataFrame) -> List[Dict[str, str]]:
 
 
 async def upload_new_file_version(
-    db: AsyncSession, dataset: models.Dataset, file: UploadFile, uploader: User
+        db: AsyncSession, dataset: models.Dataset, file: UploadFile, uploader: User
 ) -> Tuple[models.UploadedFile, List[Dict[str, str]]]:
+    """Upload un nouveau fichier."""
     file_hash = await _calculate_file_hash(file)
     if await _is_duplicate(db, dataset.id, file_hash):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Fichier déjà existant.")

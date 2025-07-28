@@ -1,4 +1,4 @@
-# app/api/v1/datasets.py
+""" app/api/v1/datasets.py """
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +22,7 @@ async def create_dataset_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Crée un nouveau jeu de données."""
     return await services.create_dataset(db=db, dataset_in=dataset_in, owner=current_user)
 
 
@@ -31,6 +32,7 @@ async def get_dataset_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Récupère un jeu de données par son ID."""
     return await services.get_dataset_owned_by_user(db, dataset_id, current_user)
 
 
@@ -41,6 +43,7 @@ async def upload_file_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Ajoute un nouveau fichier au jeu de données."""
     dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
     services.validate_uploaded_file(file)
     uploaded_file, inferred_schema = await services.upload_new_file_version(db, dataset, file, current_user)
@@ -55,6 +58,7 @@ async def list_files_for_dataset_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Liste tous les fichiers d'un jeu de données."""
     dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
     return dataset.files
 
@@ -66,6 +70,7 @@ async def parse_file_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Lance le traitement d'un fichier."""
     file = await services.get_file_owned_by_user(db, file_id, current_user)
     if file.status not in [models.FileStatus.PENDING, models.FileStatus.ERROR]:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Le fichier est déjà en cours ou traité.")
@@ -80,6 +85,7 @@ async def create_schema_mapping_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Crée un nouveau mapping."""
     dataset = await services.get_dataset_owned_by_user(db, dataset_id, current_user)
     return await services.create_schema_mapping(db, dataset, mapping_in)
 
@@ -90,6 +96,7 @@ async def get_mappings_for_dataset_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Récupère tous les mappings d'un jeu de données."""
     await services.get_dataset_owned_by_user(db, dataset_id, current_user)
     return await services.get_mappings_for_dataset(db, dataset_id)
 
@@ -101,6 +108,7 @@ async def create_index_from_mapping_endpoint(
         es_client: AsyncElasticsearch = Depends(get_es_client),
         current_user: User = Depends(get_current_user)
 ):
+    """Crée un index Elasticsearch à partir d'un mapping."""
     mapping = await services.get_mapping(db, mapping_id)
     if not mapping or mapping.dataset.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à ce mapping.")
@@ -115,6 +123,7 @@ async def ingest_file_data_endpoint(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """Ingestion des données d'un fichier."""
     file = await services.get_file_owned_by_user(db, file_id, current_user)
     mapping = await services.get_mapping(db, ingest_request.mapping_id)
     if not mapping or mapping.dataset_id != file.dataset_id:
@@ -135,6 +144,7 @@ async def search_index_endpoint(
         es_client: AsyncElasticsearch = Depends(get_es_client),
         current_user: User = Depends(get_current_user)
 ):
+    """Recherche dans un index Elasticsearch."""
     mapping = await services.get_mapping_by_index_name(db, index_name)
     if not mapping or mapping.dataset.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès non autorisé à cet index.")

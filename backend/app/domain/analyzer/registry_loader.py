@@ -1,10 +1,11 @@
-# app/domain/analyzer/registry_loader.py
+""" app/domain/analyzer/registry_loader.py """
 import json
 from math import log
 from pathlib import Path
 from typing import Dict, Any, Optional
 from loguru import logger
 from sqlalchemy import false
+
 
 class RegistryLoader:
     """
@@ -23,7 +24,7 @@ class RegistryLoader:
             if not cls.SHARED_PATH.is_dir():
                 logger.error(f"Le répertoire des contrats partagés n'existe pas: {cls.SHARED_PATH}")
                 raise FileNotFoundError(f"Le répertoire des contrats partagés est introuvable: {cls.SHARED_PATH}")
-            
+
             cls._instance = super().__new__(cls)
             cls._instance._definitions = {}
             cls._instance._load_definitions()
@@ -38,7 +39,7 @@ class RegistryLoader:
             logger.debug("_es_analyzer_tokenizer.json")
             with open(self.SHARED_PATH / "_es_analyzer_tokenizer.json", encoding="utf-8") as f:
                 self._definitions["tokenizers"] = {item['name']: item for item in json.load(f)["tokenizers"]}
-            
+
             logger.debug("_es_analyzer_token_filter.json")
             with open(self.SHARED_PATH / "_es_analyzer_token_filter.json", encoding="utf-8") as f:
                 self._definitions["token_filters"] = {item['name']: item for item in json.load(f)["token_filters"]}
@@ -66,18 +67,25 @@ class RegistryLoader:
             raise RuntimeError(f"Erreur de parsing JSON dans un fichier de définition: {e}") from e
 
     def get_tokenizer(self, name: str) -> Optional[Dict[str, Any]]:
+        """Obtenir un tokenizer par son nom."""
         return self._definitions.get("tokenizers", {}).get(name)
 
     def get_token_filter(self, name: str) -> Optional[Dict[str, Any]]:
+        """Obtenir un token_filter par son nom."""
         return self._definitions.get("token_filters", {}).get(name)
 
     def get_char_filter(self, name: str) -> Optional[Dict[str, Any]]:
+        """Obtenir un char_filter par son nom."""
         return self._definitions.get("char_filters", {}).get(name)
 
     def get_compatibility(self, tokenizer_name: str) -> Optional[Dict[str, Any]]:
+        """Obtenir la compatibilité d'un tokenizer par son nom."""
         return self._definitions.get("compatibility", {}).get(tokenizer_name)
 
     def get_component(self, kind: str, name: str) -> Optional[Dict[str, Any]]:
+        """
+        Obtenir un composant par son type et son nom.
+        """
         kind_map = {
             "tokenizer": "tokenizers",
             "token_filter": "token_filters",
@@ -103,4 +111,3 @@ class RegistryLoader:
     @property
     def __dict__(self):
         return self._definitions
-

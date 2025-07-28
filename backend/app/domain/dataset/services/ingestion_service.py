@@ -1,3 +1,5 @@
+"""app/domain/dataset/services/ingestion_service.py"""
+
 import uuid
 import pandas as pd
 from typing import List
@@ -11,6 +13,7 @@ from app.core.db import async_session_maker
 
 
 async def ingest_data_from_file_task(file_id: uuid.UUID, mapping_id: uuid.UUID):
+    """Ingestion des données d'un fichier."""
     async with async_session_maker() as db, AsyncElasticsearch(hosts=[settings.ES_HOST]) as es_client:
         uploaded_file = None
         try:

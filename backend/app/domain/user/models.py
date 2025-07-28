@@ -1,14 +1,15 @@
-# backend/app/domain/user/models.py
+"""backend/app/domain/user/models.py"""
 
 import uuid
 from sqlalchemy import Column, String, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship
 from app.core.db import Base
-from app.utils.db_types import UUID as CustomUUID
-# --- IMPORT CORRIGÉ POUR CASSER LA BOUCLE ---
+from app.utils.db_types import UuidType as CustomUUID
 from app.domain.user.schemas import UserRole
 
+
 class User(Base):
+    """Modèle SQLAlchemy de l'utilisateur."""
     __tablename__ = "users"
 
     id = Column(CustomUUID, primary_key=True, default=uuid.uuid4)

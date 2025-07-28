@@ -1,3 +1,4 @@
+""" backend/app/domain/user/services.py """
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -12,20 +13,23 @@ class UserService:
     Classe de service regroupant la logique métier pour les utilisateurs.
     """
 
-    async def get(self, db: AsyncSession, id: uuid.UUID) -> User | None:
+    @staticmethod
+    async def get(db: AsyncSession, user_id: uuid.UUID) -> User | None:
         """
         Récupère un utilisateur par son ID.
         C'est la fonction qui manquait pour la dépendance get_current_user.
         """
-        result = await db.execute(select(User).where(User.id == id))
+        result = await db.execute(select(User).where(User.id == user_id))
         return result.scalars().first()
 
-    async def get_by_username(self, db: AsyncSession, username: str) -> User | None:
+    @staticmethod
+    async def get_by_username(db: AsyncSession, username: str) -> User | None:
         """Récupère un utilisateur par son nom d'utilisateur."""
         result = await db.execute(select(User).where(User.username == username))
         return result.scalars().first()
 
-    async def get_by_email(self, db: AsyncSession, email: str) -> User | None:
+    @staticmethod
+    async def get_by_email(db: AsyncSession, email: str) -> User | None:
         """Récupère un utilisateur par son email."""
         result = await db.execute(select(User).where(User.email == email))
         return result.scalars().first()
@@ -56,7 +60,6 @@ class UserService:
         return user
 
 
-# --- CORRECTION PRINCIPALE ---
 # On crée une instance unique (singleton) de la classe de service.
 # C'est cet objet 'user_service' qui sera importé par les autres fichiers.
 user_service = UserService()

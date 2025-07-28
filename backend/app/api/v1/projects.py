@@ -1,5 +1,7 @@
-# app/api/v1/projects.py
-"""Routes pour les projets."""
+"""
+app/api/v1/projects.py
+Routes pour les projets.
+"""
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List

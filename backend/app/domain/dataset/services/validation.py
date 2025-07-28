@@ -1,8 +1,10 @@
+"""app/domain/dataset/services/validation.py"""
 from fastapi import UploadFile, HTTPException, status
 from pathlib import Path
 
 ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json"}
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
+
 
 def validate_uploaded_file(file: UploadFile) -> None:
     """Valide l'extension et la taille du fichier."""

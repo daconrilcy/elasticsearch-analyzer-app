@@ -1,4 +1,4 @@
-# app/api/v1/auth.py
+""" app/api/v1/auth.py """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 

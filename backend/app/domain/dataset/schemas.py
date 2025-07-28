@@ -1,4 +1,4 @@
-# app/domain/dataset/schemas.py
+""" app/domain/dataset/schemas.py """
 import uuid
 from pydantic import BaseModel, field_validator, Field, ValidationInfo, ConfigDict
 from datetime import datetime
@@ -11,9 +11,11 @@ class FileStructureField(BaseModel):
     field: str
     type: str
 
+
 class FileUploadResponse(BaseModel):
     file_id: str
-    inferred_schema: List[FileStructureField] = Field(..., alias="schema") # On adapte le nom du champs `inferred_schema` par `schema` : schema est attendu par le client 
+    inferred_schema: List[FileStructureField] = Field(...,
+                                                      alias="schema")  # On adapte le nom du champs `inferred_schema` par `schema` : schema est attendu par le client
 
     model_config = {
         "populate_by_name": True,

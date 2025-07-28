@@ -1,4 +1,4 @@
-# backend/app/services/validation/rules/params.py
+""" backend/app/services/validation/rules/params.py """
 from app.domain.analyzer.models import AnalyzerGraph, Kind
 from app.domain.analyzer.registry_loader import RegistryLoader
 from loguru import logger
