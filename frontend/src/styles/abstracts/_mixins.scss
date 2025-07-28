@@ -1,0 +1,28 @@
+@use 'variables' as var;
+
+// Le mixin pour les panneaux flottants
+@mixin glass-panel {
+  background: var.$bg-panel;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var.$border-radius-xl;
+  border: 1px solid var.$border-color;
+  box-shadow: 0 12px 32px 0 var.$shadow-color;
+}
+
+// 👇 LE MIXIN MANQUANT, MAINTENANT AJOUTÉ 👇
+// Une ombre simple et douce pour les éléments statiques comme le canvas
+@mixin soft-shadow {
+  box-shadow: 0 8px 32px var.$shadow-color;
+}
+
+// Un mixin pour les éléments interactifs avec un effet au survol
+@mixin interactive-shadow {
+  box-shadow: 0 4px 16px var.$shadow-color;
+  transition: all 0.25s ease-out;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var.$shadow-color;
+  }
+}

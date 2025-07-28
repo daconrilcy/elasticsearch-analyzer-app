@@ -1,0 +1,134 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// --- PALETTE DE DÉGRADÉS UNIFIÉE ET MOINS SATURÉE ---
+$gradient-char-filter: linear-gradient(135deg, #8998e8 0%, #a480c2 100%);
+$gradient-tokenizer: linear-gradient(135deg, #63d4ff 0%, #8ca0e6 100%);
+$gradient-token-filter: linear-gradient(135deg, #ff9a5a 0%, #ff639e 100%);
+
+.sidebar {
+  position: absolute;
+  top: 90px;
+  left: 24px;
+  z-index: 20;
+  width: 324px;
+  max-height: calc(100% - 114px);
+  border-radius: 28px;
+  @include glass-panel;
+  background: rgba(247, 249, 252, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(118, 134, 159, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  // **Padding général du contenu (scrollbar comprise)**
+  padding: ($spacing-unit * 2);
+  box-sizing: border-box;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-20px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.sidebar-content-scrollable {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: ($spacing-unit * 2);
+
+  // --- Scrollbar moderne ---
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #dde3ec;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    box-shadow: 0 2px 8px rgba(120,130,180,0.08);
+  }
+  scrollbar-width: thin;
+  scrollbar-color: #dde3ec transparent;
+}
+
+// Les autres styles restent inchangés...
+.sidebar-description {
+  font-size: 0.95rem;
+  color: $text-secondary;
+  margin-bottom: $spacing-unit * 4;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit * 1.5;
+  font-size: 1rem;
+  font-weight: $font-weight-bold;
+  color: #223344;
+  margin-top: $spacing-unit * 4;
+  margin-bottom: $spacing-unit * 2;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  .title-icon { font-size: 1.2rem; color: $accent-color; }
+}
+
+.sidebar-node {
+  width: 100%;
+  padding: 16px 22px;
+  border-radius: 50px;
+  cursor: grab;
+  font-weight: $font-weight-bold;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: center;
+  box-shadow: 0 6px 15px rgba($shadow-color, 0.6);
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.03);
+    filter: brightness(1.15) saturate(1.1);
+    box-shadow: 0 12px 28px rgba($shadow-color, 0.8),
+                0 0 20px rgba(118, 134, 243, 0.4);
+  }
+
+  &.char-filter { background: $gradient-char-filter; }
+  &.tokenizer { background: $gradient-tokenizer; }
+  &.token-filter { background: $gradient-token-filter; }
+
+  &.disabled {
+    background: rgba(240, 244, 251, 0.7);
+    backdrop-filter: blur(4px);
+    color: #9ab0c9;
+    cursor: not-allowed;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    text-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+
+    &:hover {
+      transform: none;
+      filter: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+  }
+}

@@ -1,0 +1,48 @@
+# Ce fichier est conçu pour lancer les services tiers (PostgreSQL et Elasticsearch) en local.
+# L'application backend (Python) et frontend (React) sont lancées séparément, hors de Docker.
+
+services:
+  # --- Service Elasticsearch ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.1
+    container_name: analyzer_es_dev
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Sécurité désactivée pour simplifier le développement
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_dev_data:/usr/share/elasticsearch/data
+      # --- LA SYNCHRONISATION ---
+      # Mappe le dossier local des fichiers d'analyse directement dans le conteneur Elasticsearch.
+      # Votre backend, qui tourne localement, écrira dans ce dossier.
+      - ./backend/app/es_analysis_files:/usr/share/elasticsearch/config/analysis
+    networks:
+      - analyzer_dev_network
+
+  # --- Service Base de Données ---
+  db:
+    image: postgres:16
+    container_name: analyzer_db_dev
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: analyzer
+    ports:
+      - "5432:5432" # Mappé sur l'hôte pour que votre backend local puisse s'y connecter
+    volumes:
+      - pg_dev_data:/var/lib/postgresql/data
+    networks:
+      - analyzer_dev_network
+
+# --- Volumes et Réseaux pour le développement ---
+volumes:
+  pg_dev_data:
+  es_dev_data:
+
+networks:
+  analyzer_dev_network:
+    driver: bridge

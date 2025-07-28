@@ -1,0 +1,211 @@
+// =============================================================================
+// == Variables
+// =============================================================================
+// All values are centralized here for easy theme customization and maintenance.
+
+// --- Colors & Gradients ---
+$color-text-main: #333;
+$color-text-subtle: #888;
+$color-background-card: rgba(255, 255, 255, 0.4);
+$color-background-file-item: #ffffff;
+$color-icon-blue: #4a80f0;
+$color-remove-button: #ccc;
+$color-remove-button-hover: #4a80f0;
+
+$gradient-card-border: linear-gradient(135deg, rgba(168, 120, 255, 0.5), rgba(255, 132, 192, 0.5));
+$gradient-button: linear-gradient(90deg, #8e76fa, #6a8dff);
+$gradient-button-hover: linear-gradient(90deg, #8166ff, #5a7eff);
+
+// --- Typography ---
+$font-family-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-size-title: 1.25rem; // 20px
+$font-size-subtitle: 0.875rem; // 14px
+$font-size-file-item: 1rem; // 16px
+$font-size-button: 1.125rem; // 18px
+
+// --- Shadows ---
+$shadow-card: 0 10px 30px rgba(0, 0, 0, 0.07);
+$shadow-icon: 0 4px 15px rgba($color-icon-blue, 0.25);
+$shadow-file-item: 0 2px 8px rgba(0, 0, 0, 0.05);
+$shadow-button-hover: 0 0 20px rgba(115, 126, 255, 0.6);
+$shadow-button-inset-active: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+
+// --- Dimensions & Radii ---
+$radius-card: 24px;
+$radius-file-item: 12px;
+$radius-button: 50px; // Pill shape
+$radius-remove-button: 50%; // Circle
+
+// --- Transitions ---
+$transition-main: all 0.3s ease;
+
+
+// =============================================================================
+// == Upload Card Component
+// =============================================================================
+// This is the main container for the upload functionality.
+// It features a glassmorphism effect.
+
+.upload-card {
+  // --- Glassmorphism Effect ---
+  background: $color-background-card;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px); // For Safari
+  border-radius: $radius-card;
+  box-shadow: $shadow-card;
+
+  // --- Layout ---
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem; // Space between elements
+  max-width: 450px;
+  width: 100%;
+  position: relative; // For pseudo-element border
+
+  // --- Gradient Border ---
+  // A pseudo-element is used to create a border that supports gradients
+  // without interfering with the blurred background.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: $radius-card;
+    padding: 1px; // Border thickness
+    background: $gradient-card-border;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    pointer-events: none; // Allows clicking through the border
+  }
+}
+
+// =============================================================================
+// == Internal Elements
+// =============================================================================
+
+// --- Upload Icon ---
+.upload-card__icon {
+  width: 80px;
+  height: 80px;
+  color: $color-icon-blue;
+  filter: drop-shadow($shadow-icon);
+
+  // Assuming an SVG is used inside
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// --- Text Content ---
+.upload-card__text-wrapper {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upload-card__title {
+  font-family: $font-family-main;
+  font-weight: 600;
+  font-size: $font-size-title;
+  color: $color-text-main;
+}
+
+.upload-card__subtitle {
+  font-family: $font-family-main;
+  font-weight: 400;
+  font-size: $font-size-subtitle;
+  color: $color-text-subtle;
+}
+
+// --- Uploaded File List ---
+.upload-card__file-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.file-item {
+  background-color: $color-background-file-item;
+  border-radius: $radius-file-item;
+  box-shadow: $shadow-file-item;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: $font-family-main;
+  font-size: $font-size-file-item;
+  transition: $transition-main;
+}
+
+.file-item__name {
+  color: $color-text-main;
+  font-weight: 500;
+}
+
+.file-item__size {
+  color: $color-text-subtle;
+  font-size: 0.875em;
+}
+
+.file-item__remove-btn {
+  background-color: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: $radius-remove-button;
+  color: $color-remove-button;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  transition: $transition-main;
+  font-size: 1.2rem;
+
+  &:hover {
+    background-color: rgba($color-remove-button-hover, 0.1);
+    color: $color-remove-button-hover;
+  }
+}
+
+// --- Main Action Button ---
+.upload-card__button {
+  // --- Appearance ---
+  background: $gradient-button;
+  color: #fff;
+  border: none;
+  border-radius: $radius-button;
+  box-shadow: 0 4px 15px rgba(126, 137, 255, 0.4);
+  
+  // --- Typography & Sizing ---
+  font-family: $font-family-main;
+  font-size: $font-size-button;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  width: 100%;
+  
+  // --- Interactivity ---
+  cursor: pointer;
+  transition: $transition-main;
+  
+  &:hover {
+    background: $gradient-button-hover;
+    box-shadow: $shadow-button-hover;
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-button-inset-active;
+  }
+}

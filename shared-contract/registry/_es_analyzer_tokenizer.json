@@ -1,0 +1,446 @@
+{
+  "tokenizers": [
+    {
+      "name": "standard",
+      "label": "Standard",
+      "category": "standard",
+      "description": "Tokenizer polyvalent par défaut. Coupe sur espaces, ponctuations et caractères spéciaux. Idéal pour la plupart des textes naturels.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "Bonjour, le monde !",
+        "output": [
+          "Bonjour",
+          "le",
+          "monde"
+        ]
+      }
+    },
+    {
+      "name": "whitespace",
+      "label": "Espaces uniquement",
+      "category": "standard",
+      "description": "Coupe uniquement sur les espaces. Ne touche pas aux signes de ponctuation ou caractères spéciaux.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "Hello, world!",
+        "output": [
+          "Hello,",
+          "world!"
+        ]
+      }
+    },
+    {
+      "name": "letter",
+      "label": "Lettres uniquement",
+      "category": "standard",
+      "description": "Coupe dès qu’un caractère n’est pas une lettre. Les chiffres et symboles séparent les tokens.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "abc123-xyz",
+        "output": [
+          "abc",
+          "xyz"
+        ]
+      }
+    },
+    {
+      "name": "lowercase",
+      "label": "Lettres minuscules",
+      "category": "standard",
+      "description": "Comme le tokenizer letter mais convertit tous les caractères en minuscules.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "AbC123-XYz",
+        "output": [
+          "abc",
+          "xyz"
+        ]
+      }
+    },
+    {
+      "name": "keyword",
+      "label": "Mot-clé complet",
+      "category": "standard",
+      "description": "Ne découpe rien, garde l’ensemble du texte comme un seul token. Idéal pour les identifiants, codes ou champs exacts.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "123-XYZ_bonjour",
+        "output": [
+          "123-XYZ_bonjour"
+        ]
+      }
+    },
+    {
+      "name": "classic",
+      "label": "Classique (Lucene)",
+      "category": "standard",
+      "description": "Ancienne version du standard. Fournit la compatibilité avec l’ancienne syntaxe Lucene.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "It's John's book.",
+        "output": [
+          "It",
+          "s",
+          "John",
+          "s",
+          "book"
+        ]
+      }
+    },
+    {
+      "name": "pattern",
+      "label": "Basé sur un motif (regex)",
+      "category": "pattern-based",
+      "description": "Utilise une expression régulière personnalisée (regex) pour découper le texte selon un motif spécifique.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "name": "pattern",
+            "type": "string",
+            "value": "\\W+",
+            "mandatory": true,
+            "description": "Expression réguliere",
+            "field": {
+              "label": "Expression réguliere",
+              "type": "input",
+              "component": "input",
+              "itemType": "text",
+              "placeholder": "Expression réguliere",
+              "description": "Expression réguliere",
+              "return": "string"
+            }
+          },
+          {
+            "name": "group",
+            "type": "number",
+            "description": "Numéro de groupe",
+            "mandatory": false,
+            "field": {
+              "label": "Numéro de groupe",
+              "type": "input",
+              "component": "input",
+              "itemType": "number",
+              "default": -1,
+              "placeholder": "Numéro de groupe",
+              "description": "Numéro de groupe",
+              "return": "number"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "example": {
+        "input": "foo1-bar2-baz3",
+        "output": [
+          "foo1",
+          "bar2",
+          "baz3"
+        ]
+      }
+    },
+    {
+      "name": "uax_url_email",
+      "label": "URL/Email (UAX)",
+      "category": "pattern-based",
+      "description": "Spécialement conçu pour découper proprement emails, URLs, hashtags et noms d’utilisateur.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "Contact: user@email.com, site: https://elasticsearch.org",
+        "output": [
+          "Contact",
+          "user@email.com",
+          "site",
+          "https://elasticsearch.org"
+        ]
+      }
+    },
+    {
+      "name": "path_hierarchy",
+      "label": "Chemin hiérarchique",
+      "category": "pattern-based",
+      "description": "Découpe les chaînes de type chemin (ex : /dossier/sousdossier/fichier). Parfait pour les structures arborescentes.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "name": "delimiter",
+            "type": "string",
+            "mandatory": true,
+            "description": "Delimitateur",
+            "field": {
+              "label": "Delimitateur",
+              "type": "input",
+              "component": "input",
+              "itemType": "text",
+              "default": "/",
+              "placeholder": "Delimitateur",
+              "description": "Delimitateur",
+              "return": "string"
+            }
+          },
+          {
+            "name": "replacement",
+            "type": "string",
+            "mandatory": false,
+            "description": "Remplacement",
+            "field": {
+              "label": "Remplacement",
+              "type": "input",
+              "component": "textarea",
+              "itemType": "text",
+              "placeholder": "Remplacement",
+              "description": "Remplacement",
+              "return": "string"
+            }
+          },
+          {
+            "name": "reverse",
+            "type": "boolean",
+            "mandatory": true,
+            "description": "Inverser",
+            "field": {
+              "label": "Inverser",
+              "type": "input",
+              "component": "checkbox",
+              "itemType": "checkbox",
+              "default": false,
+              "description": "Inverser"
+            }
+          },
+          {
+            "name": "skip",
+            "type": "number",
+            "mandatory": true,
+            "description": "Ignorer",
+            "field": {
+              "label": "Ignorer",
+              "type": "input",
+              "component": "input",
+              "itemType": "number",
+              "default": 0,
+              "placeholder": "Ignorer",
+              "description": "Ignorer",
+              "return": "number"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "example": {
+        "input": "/users/john/docs/file.txt",
+        "output": [
+          "/users",
+          "/users/john",
+          "/users/john/docs",
+          "/users/john/docs/file.txt"
+        ]
+      }
+    },
+    {
+      "name": "ngram",
+      "label": "Ngram",
+      "category": "ngram-edge",
+      "description": "Découpe en sous-chaînes de longueur n. Utilisé pour la recherche approximative ou l’autocomplétion.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "name": "min_gram",
+            "type": "number",
+            "description": "Longueur minimale",
+            "mandatory": true,
+            "value": 1,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "itemType": "number",
+              "component": "input",
+              "default": 1,
+              "placeholder": "Longueur minimale",
+              "description": "Longueur minimale",
+              "return": "number"
+            }
+          },
+          {
+            "name": "max_gram",
+            "type": "number",
+            "description": "Longueur maximale",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "component": "input",
+              "itemType": "number",
+              "default": 2,
+              "placeholder": "Longueur maximale",
+              "description": "Longueur maximale",
+              "return": "number"
+            }
+          },
+          {
+            "name": "token_chars",
+            "type": "multiple",
+            "description": "Caractères",
+            "mandatory": false,
+            "field": {
+              "label": "Caractères",
+              "type": "input",
+              "component": "checkbox-group",
+              "itemType": "checkbox",
+              "choices": [
+                {
+                  "label": "Letter",
+                  "value": "letter"
+                },
+                {
+                  "label": "Digit",
+                  "value": "digit"
+                },
+                {
+                  "label": "Whitespace",
+                  "value": "whitespace"
+                },
+                {
+                  "label": "Punctuation",
+                  "value": "punctuation"
+                },
+                {
+                  "label": "Symbol",
+                  "value": "symbol"
+                }
+              ],
+              "placeholder": "Caractères",
+              "description": "Caractères",
+              "return": "multiple"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "example": {
+        "input": "chat",
+        "output": [
+          "ch",
+          "ha",
+          "at"
+        ]
+      }
+    },
+    {
+      "name": "edge_ngram",
+      "label": "Edge Ngram",
+      "category": "ngram-edge",
+      "description": "Génère uniquement les débuts des mots. Utile pour l’autocomplétion et les suggestions.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "name": "min_gram",
+            "type": "number",
+            "description": "Longueur minimale",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur minimale",
+              "type": "input",
+              "component": "input",
+              "itemType": "number",
+              "default": 1,
+              "placeholder": "Longueur minimale",
+              "description": "Longueur minimale",
+              "return": "number"
+            }
+          },
+          {
+            "name": "max_gram",
+            "type": "number",
+            "description": "Longueur maximale",
+            "mandatory": true,
+            "field": {
+              "label": "Longueur maximale",
+              "type": "input",
+              "component": "input",
+              "itemType": "number",
+              "default": 2,
+              "placeholder": "Longueur maximale",
+              "description": "Longueur maximale",
+              "return": "number"
+            }
+          },
+          {
+            "name": "token_chars",
+            "type": "multiple",
+            "description": "Caractères",
+            "mandatory": false,
+            "field": {
+              "label": "Caractères",
+              "type": "input",
+              "component": "checkbox-group",
+              "itemType": "checkbox",
+              "choices": [
+                {
+                  "label": "Letter",
+                  "value": "letter"
+                },
+                {
+                  "label": "Digit",
+                  "value": "digit"
+                },
+                {
+                  "label": "Whitespace",
+                  "value": "whitespace"
+                },
+                {
+                  "label": "Punctuation",
+                  "value": "punctuation"
+                },
+                {
+                  "label": "Symbol",
+                  "value": "symbol"
+                }
+              ],
+              "placeholder": "Caractères",
+              "description": "Caractères",
+              "return": "multiple"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "example": {
+        "input": "search",
+        "output": [
+          "s",
+          "se",
+          "sea",
+          "sear",
+          "searc",
+          "search"
+        ]
+      }
+    },
+    {
+      "name": "icu_tokenizer",
+      "label": "ICU (multilingue)",
+      "category": "custom",
+      "description": "Nécessite le plugin ICU. Gestion avancée du multilingue, des langues asiatiques et des caractères spéciaux.",
+      "requires_additional_info": false,
+      "params": null,
+      "example": {
+        "input": "東京123 Tokyo",
+        "output": [
+          "東京",
+          "123",
+          "Tokyo"
+        ]
+      }
+    }
+  ]
+}

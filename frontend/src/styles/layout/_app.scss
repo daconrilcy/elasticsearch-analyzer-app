@@ -1,0 +1,29 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: $bg-main;
+  padding: $spacing-unit * 2;
+  gap: $spacing-unit * 2;
+}
+
+.flow-editor-main {
+  position: relative; // Contexte de positionnement pour tous les panneaux
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: $spacing-unit * 2;
+  overflow: hidden;
+}
+
+// Le .content-wrapper n'est plus nécessaire
+
+.main-content {
+  flex-grow: 1; // Le canvas prend toute la hauteur restante
+  border-radius: $border-radius-xl;
+  overflow: hidden; 
+  @include soft-shadow;
+}

@@ -1,0 +1,131 @@
+{
+  "char_filters": [
+    {
+      "category": "mapping",
+      "name": "mapping",
+      "label": "Mapping",
+      "description": "Remplace des caractères ou séquences selon une table de correspondance.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "file",
+            "name": "mappings_path",
+            "mandatory": true,
+            "field": {
+              "label": "Fichier de mapping",
+              "type": "file",
+              "accept": ".txt",
+              "description": "Fichier texte listant les remplacements (un par ligne, ex : 'ph=>f')."
+            }
+          },
+          {
+            "type": "list",
+            "name": "mappings",
+            "mandatory": false,
+            "field": {
+              "label": "Liste personnalisée",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "ph=>f, oe=>œ…",
+              "description": "Liste de remplacements caractères ou séquences, séparés par une virgule."
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "char_filter": {
+          "my_mapping": {
+            "type": "mapping",
+            "mappings": ["ph=>f", "oe=>œ"]
+          }
+        }
+      },
+      "example": {
+        "input": "phoenicien et oeuvre",
+        "output": "foenicien et œuvre"
+      }
+    },
+    {
+      "category": "html",
+      "name": "html_strip",
+      "label": "HTML Strip",
+      "description": "Supprime toutes les balises HTML et convertit les entités HTML.",
+      "requires_additional_info": false,
+      "params": null,
+      "script_example": {
+        "char_filter": {
+          "my_html": {
+            "type": "html_strip"
+          }
+        }
+      },
+      "example": {
+        "input": "<b>Hello&nbsp;world!</b>",
+        "output": "Hello world!"
+      }
+    },
+    {
+      "category": "pattern",
+      "name": "pattern_replace",
+      "label": "Pattern Replace",
+      "description": "Remplace les caractères ou séquences selon une expression régulière.",
+      "requires_additional_info": true,
+      "params": {
+        "elements": [
+          {
+            "type": "string",
+            "name": "pattern",
+            "mandatory": true,
+            "field": {
+              "label": "Pattern (regex)",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "\\d+",
+              "description": "Motif regex à remplacer"
+            }
+          },
+          {
+            "type": "string",
+            "name": "replacement",
+            "mandatory": true,
+            "field": {
+              "label": "Remplacement",
+              "type": "input",
+              "itemType": "text",
+              "placeholder": "_",
+              "description": "Texte de remplacement"
+            }
+          },
+          {
+            "type": "boolean",
+            "name": "replace_all",
+            "mandatory": false,
+            "field": {
+              "label": "Tout remplacer",
+              "type": "input",
+              "itemType": "checkbox",
+              "default": true,
+              "description": "Remplace toutes les occurrences (sinon juste la première)"
+            }
+          }
+        ],
+        "exclusive": false
+      },
+      "script_example": {
+        "char_filter": {
+          "my_pattern_replace": {
+            "type": "pattern_replace",
+            "pattern": "\\d+",
+            "replacement": "_"
+          }
+        }
+      },
+      "example": {
+        "input": "abc123def456",
+        "output": "abc_def_"
+      }
+    }
+  ]
+}

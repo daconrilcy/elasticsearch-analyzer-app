@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AnalyzerGraph",
+    "description": "Représentation d’un pipeline d’analyse Elasticsearch au format graphe, avec nodes (tokenizer, char_filter, token_filter, input, output) et arêtes.",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Identifiant unique du graphe (optionnel pour la plupart des usages)."
+      },
+      "name": {
+        "type": "string",
+        "description": "Nom du projet d’analyzer (pour export/sauvegarde)."
+      },
+      "version": {
+        "type": "string",
+        "description": "Version du modèle (optionnel)."
+      },
+      "nodes": {
+        "type": "array",
+        "description": "Liste ordonnée de tous les nœuds du pipeline (tokenizer, filters, etc).",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id":    { "type": "string", "description": "ID unique du nœud." },
+            "kind":  { "type": "string", "enum": ["input", "tokenizer", "char_filter", "token_filter", "output"], "description": "Type fonctionnel du nœud." },
+            "name":  { "type": "string", "description": "Nom technique du nœud (ex : lowercase, pattern, stop, html_strip...)." },
+            "label": { "type": "string", "description": "Label lisible (pour l’UI, optionnel)." },
+            "category": { "type": "string", "description": "Catégorie du nœud (optionnelle, ex: linguistic, normalization...)" },
+            "params": {
+              "type": "object",
+              "description": "Paramètres spécifiques à ce nœud (optionnel, structure dynamique selon type)."
+            },
+            "meta": {
+              "type": "object",
+              "description": "Données de présentation UI (ex: position XY, couleur, icône...)",
+              "properties": {},
+              "additionalProperties": true
+            }
+          },
+          "required": ["id", "kind", "name"]
+        }
+      },
+      "edges": {
+        "type": "array",
+        "description": "Relations entre les nœuds, pour ordonner le pipeline.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "description": "ID unique de l’arête (optionnel)." },
+            "source": { "type": "string", "description": "ID du nœud source." },
+            "target": { "type": "string", "description": "ID du nœud cible." }
+          },
+          "required": ["source", "target"]
+        }
+      },
+      "settings": {
+        "type": "object",
+        "description": "Paramètres globaux du pipeline (optionnel, ex: ES version, langues, options d’analyse)."
+      }
+    },
+    "required": ["nodes", "edges"]
+}
