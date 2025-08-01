@@ -1,57 +1,64 @@
 import { create } from 'zustand';
-import { authService, type AuthCredentials, type RegisterCredentials, type User } from '@/services/authService';
+// --- CORRECTION : Import des fonctions API nécessaires ---
+import { 
+    login as apiLogin, 
+    register as apiRegister, 
+    getCurrentUser,
+    logout as apiLogout // Assurez-vous d'avoir une fonction logout dans votre apiClient
+} from '@/features/apiClient';
+import type { AuthCredentials, RegisterCredentials, User } from '@/types/api.v1';
 
 // L'interface qui définit la "forme" de notre store
 interface AuthState {
-  token: string | null;
+  // Le token n'est plus stocké côté client
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: AuthCredentials) => Promise<void>;
-  register: (credentials: RegisterCredentials) => Promise<void>; // <-- La propriété manquante est ici
-  logout: () => void;
+  register: (credentials: RegisterCredentials) => Promise<void>;
+  logout: () => Promise<void>; // Logout est maintenant une opération asynchrone
   checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  token: null,
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: true, // L'application commence en état de chargement
 
   login: async (credentials: AuthCredentials) => {
-    const authResponse = await authService.login(credentials);
-    const { access_token } = authResponse;
-    
-    const user = await authService.getCurrentUser(access_token);
-    
-    localStorage.setItem('authToken', access_token);
-    set({ token: access_token, user, isAuthenticated: true });
+    // 1. Appelle l'API de login. Le backend s'occupe de poser le cookie.
+    await apiLogin(credentials);
+    // 2. Récupère les informations de l'utilisateur pour mettre à jour l'état de l'UI.
+    const user = await getCurrentUser();
+    set({ user, isAuthenticated: true });
   },
 
-  // L'implémentation de la fonction register
   register: async (credentials: RegisterCredentials) => {
-    await authService.register(credentials);
-    // Après une inscription réussie, on connecte directement l'utilisateur
+    await apiRegister(credentials);
+    // Après l'inscription, on connecte directement l'utilisateur.
     await get().login({ username: credentials.username, password: credentials.password });
   },
 
-  logout: () => {
-    localStorage.removeItem('authToken');
-    set({ token: null, user: null, isAuthenticated: false });
+  logout: async () => {
+    // Appelle le backend pour qu'il supprime le cookie HttpOnly.
+    await apiLogout();
+    // Met à jour l'état de l'application pour refléter la déconnexion.
+    set({ user: null, isAuthenticated: false });
   },
 
   checkAuth: async () => {
+    set({ isLoading: true });
     try {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        const user = await authService.getCurrentUser(token);
-        set({ token, user, isAuthenticated: true });
-      }
+      // Tente de récupérer l'utilisateur. Si l'utilisateur a un cookie valide,
+      // cette requête réussira.
+      const user = await getCurrentUser();
+      set({ user, isAuthenticated: true });
     } catch (error) {
-      localStorage.removeItem('authToken');
-      set({ token: null, user: null, isAuthenticated: false });
+      // Si la requête échoue (ex: 401 Unauthorized), cela signifie que l'utilisateur
+      // n'est pas connecté. On s'assure que l'état est propre.
+      set({ user: null, isAuthenticated: false });
     } finally {
+      // Dans tous les cas, le chargement initial est terminé.
       set({ isLoading: false });
     }
   },

@@ -2,7 +2,7 @@
 import uuid
 from typing import AsyncGenerator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status,Cookie
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from loguru import logger
@@ -47,18 +47,47 @@ async def get_current_user(
         logger.warning(f"Format d'UUID invalide dans le token: {user_id_from_payload}")
         raise credentials_exception
 
-    # On récupère l'utilisateur via le service (bonne pratique pour centraliser la logique métier)
     user = await user_service.get(session, user_id=user_id)
     if user is None:
         logger.warning(f"Aucun utilisateur trouvé avec l'UUID {user_id}")
         raise credentials_exception
 
-    # Vérifie la cohérence du rôle (plus sûr !)
     token_role = payload.get("role")
     if not token_role or user.role.value != token_role:
         logger.warning(f"Incohérence de rôle pour l'utilisateur {user.id}. Token: {token_role}, BDD: {user.role.value}")
         raise credentials_exception
 
+    return user
+
+async def get_current_user_from_cookie(
+    access_token: str | None = Cookie(None), # Récupère le cookie nommé "access_token"
+    db: AsyncSession = Depends(get_db)
+) -> user_models.User:
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Non authentifié (cookie manquant)"
+        )
+    
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Impossible de valider les identifiants",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        # Le cookie peut contenir "Bearer ", on le retire
+        token = access_token.split(" ")[-1]
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+        
+    user = await user_service.get(db, user_id)
+    if user is None:
+        raise credentials_exception
     return user
 
 
@@ -82,3 +111,14 @@ def require_role(required_role: user_models.UserRole):
         return current_user
 
     return role_checker
+
+# --- Ajout de la dépendance pour la pagination ---
+class PaginationParams:
+    """
+    Dépendance pour gérer les paramètres de pagination (skip/limit).
+    Elle fournit des valeurs par défaut et plafonne la limite pour éviter les abus.
+    """
+    def __init__(self, skip: int = 0, limit: int = 100):
+        self.skip = skip
+        # On s'assure que la limite ne dépasse jamais 100 pour la performance
+        self.limit = min(limit, 100)

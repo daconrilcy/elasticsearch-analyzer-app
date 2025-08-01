@@ -83,4 +83,15 @@
       }
     }
   }
+
+  .page-title h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #223344;
+  }
+  
+  // Style pour l'espace réservé qui maintient la section utilisateur à droite
+  .project-actions-placeholder {
+    flex-grow: 1;
+  }
 }

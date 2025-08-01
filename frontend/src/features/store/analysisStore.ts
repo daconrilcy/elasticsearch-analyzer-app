@@ -2,7 +2,8 @@
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { type AnalyzerGraph } from '@/shared/types/analyzer.d';
-import { validateGraph } from '@/services/graphValidationService';
+// CORRECTION : Le chemin pointe maintenant vers le nouvel emplacement du service
+import { validateGraph } from '@/features/services/graphValidationService';
 
 export interface AnalysisStep {
   step_name: string;
@@ -35,6 +36,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     if (issues.length > 0) {
       // S'il y a des problèmes, on les affiche et on n'appelle pas l'API.
       set({ validationIssues: issues, analysisSteps: [], isLoading: false });
+      // toast.error(issues.join('\n')); // Affiche les erreurs à l'utilisateur
       return;
     }
 
@@ -59,7 +61,6 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         throw new Error(errorData.detail || 'Erreur du serveur d\'analyse.');
       }
 
-      // La réponse du backend ne contient plus que les étapes, car le chemin est déjà validé.
       const result = await response.json();
       set({ analysisSteps: result.steps, isLoading: false });
     } catch (error) {

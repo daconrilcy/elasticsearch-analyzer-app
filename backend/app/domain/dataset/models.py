@@ -1,123 +1,112 @@
 import uuid
-from pydantic import BaseModel, Field, ConfigDict, field_validator, ValidationInfo
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+import enum
+from datetime import datetime, UTC
 
-from .models import FileStatus, IngestionStatus
+from sqlalchemy import (
+    Column,
+    String,
+    Integer,
+    DateTime,
+    ForeignKey,
+    Enum as SQLAlchemyEnum
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 
+from app.core.db import Base
+from app.utils.db_types import JSONOrJSONB # En supposant que ce type custom existe
 
-# --- Schémas pour Dataset ---
+# --- Enums pour les statuts ---
 
-class DatasetBase(BaseModel):
-    name: str = Field(..., min_length=3, max_length=100, description="Le nom du dataset.")
-    description: Optional[str] = None
+class FileStatus(str, enum.Enum):
+    """Statut du cycle de vie d'un fichier."""
+    PENDING = "pending"    # Le fichier est uploadé et en attente de traitement.
+    PARSING = "parsing"    # Le parsing du fichier est en cours.
+    READY = "ready"        # Le fichier est parsé avec succès et prêt à être utilisé.
+    ERROR = "error"        # Une erreur est survenue durant le parsing.
 
+class IngestionStatus(str, enum.Enum):
+    """Statut de l'ingestion des données dans Elasticsearch."""
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
-class DatasetCreate(DatasetBase):
-    pass
+# --- Modèles de tables ---
 
+class Dataset(Base):
+    """
+    Modèle SQLAlchemy pour un Dataset.
+    Un Dataset est un conteneur logique pour des fichiers et des mappings.
+    """
+    __tablename__ = "datasets"
 
-class DatasetUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=3, max_length=100)
-    description: Optional[str] = None
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False, index=True)
+    description = Column(String, nullable=True)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
-
-class DatasetOut(DatasetBase):
-    id: uuid.UUID
-    owner_id: uuid.UUID
-    created_at: datetime
-    updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- Schémas pour File ---
-
-class FileOut(BaseModel):
-    """Schéma de sortie pour une liste de fichiers (vue sommaire)."""
-    id: uuid.UUID
-    filename_original: str
-    version: int
-    size_bytes: int
-    status: FileStatus
-    ingestion_status: IngestionStatus
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class FileDetailOut(FileOut):
-    """Schéma de sortie pour les détails complets d'un fichier."""
-    hash: str
-    inferred_schema: Optional[Dict[str, Any]] = None
-    docs_indexed: Optional[int] = None
-    ingestion_errors: Optional[List[str]] = None
-    uploader_id: uuid.UUID
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- Schémas pour Mapping ---
-
-class MappingRule(BaseModel):
-    """Définit une règle de mapping d'un champ source vers un champ cible."""
-    source: str = Field(..., description="Nom de la colonne dans le fichier source.")
-    target: str = Field(..., description="Nom du champ dans l'index Elasticsearch cible.")
-    es_type: str = Field(..., description="Type de données Elasticsearch (ex: keyword, text, integer).")
-    analyzer_project_id: Optional[uuid.UUID] = Field(None, description="ID du projet d'analyseur à appliquer.")
-
-    @field_validator('analyzer_project_id')
-    @classmethod
-    def analyzer_only_for_text(cls, v: Optional[uuid.UUID], info: ValidationInfo) -> Optional[uuid.UUID]:
-        if v is not None and info.data.get('es_type') != 'text':
-            raise ValueError("Un analyseur ne peut être appliqué qu'aux champs de type 'text'.")
-        return v
+    # Relations
+    owner = relationship("User")
+    files = relationship("File", back_populates="dataset", cascade="all, delete-orphan")
+    mappings = relationship("Mapping", back_populates="dataset", cascade="all, delete-orphan")
 
 
-class MappingBase(BaseModel):
-    name: str = Field(..., min_length=3, max_length=100)
-    source_file_id: uuid.UUID
-    mapping_rules: List[MappingRule]
+class File(Base):
+    """
+    Modèle SQLAlchemy pour un fichier (anciennement UploadedFile).
+    Représente une version d'un fichier de données au sein d'un dataset.
+    """
+    __tablename__ = "files"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    filename_original = Column(String, nullable=False)
+    filename_stored = Column(String, nullable=False, unique=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    version = Column(Integer, nullable=False)
+    hash = Column(String, nullable=False, index=True)
+    size_bytes = Column(Integer, nullable=False)
+    status = Column(SQLAlchemyEnum(FileStatus), nullable=False, default=FileStatus.PENDING)
+    
+    # Métadonnées extraites et statut d'ingestion
+    inferred_schema = Column(JSONOrJSONB, nullable=True)
+    ingestion_status = Column(SQLAlchemyEnum(IngestionStatus), nullable=False, default=IngestionStatus.NOT_STARTED)
+    docs_indexed = Column(Integer, nullable=True)
+    ingestion_errors = Column(JSONOrJSONB, nullable=True)
+    
+    # Clés étrangères
+    dataset_id = Column(UUID(as_uuid=True), ForeignKey("datasets.id"), nullable=False)
+    uploader_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+
+    # Relations
+    dataset = relationship("Dataset", back_populates="files")
+    uploader = relationship("User")
 
 
-class MappingCreate(MappingBase):
-    pass
+class Mapping(Base):
+    """
+    Modèle SQLAlchemy pour un Mapping de schéma (anciennement SchemaMapping).
+    Définit comment les colonnes d'un fichier source sont mappées
+    vers les champs d'un index Elasticsearch.
+    """
+    __tablename__ = "mappings"
 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False)
+    mapping_rules = Column(JSONOrJSONB, nullable=False)
+    index_name = Column(String, nullable=True, unique=True)
+    
+    # Clés étrangères
+    dataset_id = Column(UUID(as_uuid=True), ForeignKey("datasets.id"), nullable=False)
+    source_file_id = Column(UUID(as_uuid=True), ForeignKey("files.id"), nullable=False)
 
-class MappingUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=3, max_length=100)
-    mapping_rules: Optional[List[MappingRule]] = None
+    # Horodatage
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
-
-class MappingOut(MappingBase):
-    id: uuid.UUID
-    dataset_id: uuid.UUID
-    created_at: datetime
-    updated_at: datetime
-    index_name: Optional[str]
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- Schéma composite pour la vue détaillée du Dataset ---
-
-class DatasetDetailOut(DatasetOut):
-    """Vue détaillée d'un dataset incluant ses fichiers et mappings."""
-    files: List[FileOut] = []
-    mappings: List[MappingOut] = []
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-# --- Schémas pour la recherche Elasticsearch ---
-
-class SearchHit(BaseModel):
-    score: Optional[float] = Field(None, alias="_score")
-    source: Dict[str, Any] = Field(..., alias="_source")
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class SearchResults(BaseModel):
-    total: int
-    hits: List[SearchHit]
-    page: int
-    size: int
+    # Relations
+    dataset = relationship("Dataset", back_populates="mappings")
+    source_file = relationship("File")

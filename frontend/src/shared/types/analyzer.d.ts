@@ -2,6 +2,8 @@
 
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from 'reactflow';
 
+export type { ReactFlowEdge };
+
 /**
  * Type fonctionnel du nœud, partagé entre le front et le back.
  */

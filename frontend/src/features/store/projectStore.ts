@@ -1,29 +1,16 @@
-// frontend/src/features/store/projectStore.ts
-
 import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { type AnalyzerGraph, Kind } from '@/shared/types/analyzer.d';
-import { apiClient } from '@/services/apiClient';
-import { useGraphStore } from './graphStore'; // Import for callback
-import { useAnalysisStore } from './analysisStore'; // Import for callback
+import { getAllProjects, getProjectById, saveProject as apiSaveProject } from '@/features/apiClient'; 
+import { useGraphStore } from './graphStore';
+import { useAnalysisStore } from './analysisStore';
+// --- CORRECTION : Import des types depuis le fichier centralisé ---
+import type { ProjectListItem, FullProject } from '@/types/api.v1';
 
-// --- Types ---
-
-export interface ProjectListItem {
-  id: number;
-  name: string;
-}
-
-// Représente la structure complète d'un projet retourné par l'API
-export interface FullProject {
-  id: number;
-  name: string;
-  description?: string;
-  graph: any; // Le graphe vient en JSON de la BDD
-}
+// L'interface locale a été supprimée pour éviter les conflits.
 
 interface ProjectState {
-  projectList: ProjectListItem[];
+  projectList: ProjectListItem[]; // Utilise le type importé
   currentProject: { id: number | null; name: string; };
   fetchProjects: () => Promise<void>;
   loadProject: (projectId: number) => Promise<void>;
@@ -33,23 +20,15 @@ interface ProjectState {
   exportCurrentProject: () => Promise<void>;
 }
 
-const API_BASE_URL = '/api/v1/projects/';
-
-// --- Store ---
-
 export const useProjectStore = create<ProjectState>((set, get) => ({
   projectList: [],
   currentProject: { id: null, name: "Nouveau Projet" },
 
   fetchProjects: async () => {
     try {
-      // Utiliser apiClient au lieu de fetch
-      const response = await apiClient(API_BASE_URL);
-      if (!response.ok) throw new Error('Erreur lors de la récupération des projets.');
-      const projects: ProjectListItem[] = await response.json();
+      const projects = await getAllProjects();
       set({ projectList: projects });
     } catch (error) {
-      // apiClient gère déjà la déconnexion en cas d'erreur 401
       if ((error as Error).message.indexOf('Session expirée') === -1) {
         toast.error((error as Error).message);
       }
@@ -58,10 +37,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   
   loadProject: async (projectId: number) => {
     try {
-      const response = await apiClient(`${API_BASE_URL}/${projectId}`);
-      if (!response.ok) throw new Error('Erreur lors du chargement du projet.');
-      const project: FullProject = await response.json();
-
+      const project: FullProject = await getProjectById(projectId); // Utilise le type importé
       const rehydratedGraph: AnalyzerGraph = {
           nodes: project.graph.nodes.map((node: any) => ({
               id: node.id,
@@ -72,7 +48,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
           edges: project.graph.edges,
       };
       
-      // Utilise les stores importés pour mettre à jour les autres états
       useGraphStore.getState().setGraph(rehydratedGraph);
       useAnalysisStore.getState().resetAnalysis();
 
@@ -83,29 +58,17 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     }
   },
 
+  // ... (le reste du fichier reste identique)
   saveProject: async (graph: AnalyzerGraph) => {
     const { currentProject } = get();
-    const isNew = currentProject.id === null;
-    const url = isNew ? API_BASE_URL : `${API_BASE_URL}/${currentProject.id}`;
-    const method = isNew ? 'POST' : 'PUT';
-
-    const graphPayload = {
-        nodes: graph.nodes.map(node => ({ ...node.data, meta: { position: node.position, type: node.type } })),
-        edges: graph.edges.map(e => ({ id: e.id, source: e.source, target: e.target }))
-    };
-
     try {
-        const response = await apiClient(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: currentProject.name, description: "N/A", graph: graphPayload }),
+        const savedProject = await apiSaveProject({
+            id: currentProject.id,
+            name: currentProject.name,
+            graph: graph
         });
-
-        if (!response.ok) throw new Error('Erreur lors de la sauvegarde du projet.');
-        const savedProject: FullProject = await response.json();
-
         set({ currentProject: { id: savedProject.id, name: savedProject.name } });
-        await get().fetchProjects(); // Rafraîchit la liste
+        await get().fetchProjects();
         toast.success('Projet sauvegardé !');
     } catch (error) {
         toast.error((error as Error).message);
@@ -113,13 +76,11 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   },
 
   createNewProject: () => {
-    // On réinitialise l'état des autres stores via leurs actions
     useGraphStore.getState().setGraph({ nodes: [
         { id: '1', type: 'input', position: { x: 100, y: 100 }, data: { id: '1', kind: Kind.Input, name: 'Input Text', label: 'Input' } },
         { id: '2', type: 'output', position: { x: 500, y: 100 }, data: { id: '2', kind: Kind.Output, name: 'Output Result', label: 'Output' } },
     ], edges: []});
     useAnalysisStore.getState().resetAnalysis();
-
     set({ currentProject: { id: null, name: "Nouveau Projet" } });
     toast.success("Nouveau projet créé.");
   },
@@ -134,9 +95,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       toast.error("Veuillez d'abord sauvegarder le projet avant de l'exporter.");
       return;
     }
-
     try {
-      const response = await fetch(`${API_BASE_URL}/${currentProject.id}/export`);
+      const response = await fetch(`/api/v1/projects/${currentProject.id}/export`);
       if (!response.ok) throw new Error("Erreur lors de la génération de la configuration.");
       
       const data = await response.json();

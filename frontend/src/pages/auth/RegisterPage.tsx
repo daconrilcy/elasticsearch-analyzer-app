@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../features/store/authStore';
 
-interface LoginPageProps {
-  onSwitchToRegister: () => void;
+
+interface RegisterPageProps {
+  // Fonction pour basculer vers la vue de connexion
+  onSwitchToLogin: () => void;
 }
 
-export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
+export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading } = useAuthStore();
+  const { register, isLoading } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!username || !email || !password) {
       toast.error('Veuillez remplir tous les champs.');
       return;
     }
     try {
-      await login({ username, password });
-      toast.success('Connexion réussie !');
+      await register({ username, email, password });
+      toast.success('Inscription réussie ! Vous êtes maintenant connecté.');
     } catch (error) {
       toast.error((error as Error).message);
     }
@@ -28,8 +31,8 @@ export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
   return (
     <div className="login-page-container">
       <div className="login-form-wrapper">
-        <h1 className="login-title">Analyzer UI</h1>
-        <p className="login-subtitle">Connectez-vous pour accéder à vos projets</p>
+        <h1 className="login-title">Créer un Compte</h1>
+        <p className="login-subtitle">Rejoignez la plateforme pour créer vos analyseurs</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Nom d'utilisateur</label>
@@ -39,7 +42,18 @@ export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
-              placeholder="Entrez votre nom d'utilisateur"
+              placeholder="Choisissez un nom d'utilisateur"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Adresse e-mail</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              placeholder="Entrez votre e-mail"
             />
           </div>
           <div className="form-group">
@@ -50,17 +64,16 @@ export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              placeholder="Entrez votre mot de passe"
+              placeholder="Choisissez un mot de passe sécurisé"
             />
           </div>
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Connexion...' : 'Se connecter'}
+            {isLoading ? 'Inscription...' : 'S\'inscrire'}
           </button>
         </form>
-        {/* --- LIGNE AJOUTÉE --- */}
         <div className="switch-form-link">
-          <span>Pas encore de compte ? </span>
-          <button onClick={onSwitchToRegister}>Inscrivez-vous</button>
+          <span>Déjà un compte ? </span>
+          <button onClick={onSwitchToLogin}>Connectez-vous</button>
         </div>
       </div>
     </div>

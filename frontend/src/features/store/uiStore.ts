@@ -1,15 +1,10 @@
 import { create } from 'zustand';
 
-// Ajout du type pour la page active
-type Page = 'analyzer' | 'importer';
+// CORRECTION : Les types 'Page' sont retirés car la navigation est gérée par le routeur.
 type Panel = 'nodes' | 'config' | 'results' | '';
 
 export interface UIState {
-  // Nouveaux états pour la navigation
-  activePage: Page;
-  setActivePage: (page: Page) => void;
-
-  // États existants pour la gestion des panneaux
+  // Les états pour la gestion des panneaux sont conservés
   activePanel: Panel;
   selectedNodeId: string | null;
   setActivePanel: (panel: Panel) => void;
@@ -18,13 +13,7 @@ export interface UIState {
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
-  // --- Nouveaux états ---
-  activePage: 'analyzer', // La page par défaut est l'éditeur d'analyseur
-
-  // --- Actions pour les nouveaux états ---
-  setActivePage: (page) => set({ activePage: page }),
-
-  // --- États et actions existants (inchangés) ---
+  // États et actions pour les panneaux (inchangés)
   activePanel: 'nodes',
   selectedNodeId: null,
 

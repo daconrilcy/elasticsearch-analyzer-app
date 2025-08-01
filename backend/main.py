@@ -5,9 +5,12 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Imports des modules de l'application
-from app.api.v1 import analyzers, projects, es_config_files, auth, datasets
+from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files
 from app.core.db import engine, Base, get_db
 from app.core.logging_config import setup_logging
+from fastapi import FastAPI, Depends, Request
+from fastapi.responses import JSONResponse
+from app.core.exceptions import AppException
 from loguru import logger
 
 # --- Métadonnées pour la documentation de l'API ---
@@ -75,12 +78,30 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# --- NOUVEAU : Gestionnaire d'exceptions global ---
+@app.exception_handler(AppException)
+async def app_exception_handler(request: Request, exc: AppException):
+    import sys
+    print(f"[EXCEPTION_HANDLER] catch: {exc.__class__.__name__} | status: {exc.status_code} | detail: {exc.detail}", file=sys.stderr)
+    logger.debug(f"[EXCEPTION_HANDLER] catch: {exc.__class__.__name__} | status: {exc.status_code} | detail: {exc.detail}", file=sys.stderr)
+    logger.warning(f"Erreur interceptée: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    # Log interne si tu veux
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Erreur serveur inattendue."}
+    )
 
 # --- Endpoints de Health Check ---
 @app.get("/health", tags=["Health Checks"])
@@ -105,6 +126,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 # --- Inclusion des routeurs de l'API ---
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(datasets.router, prefix="/api/v1/datasets", tags=["Datasets"])
+app.include_router(files.router, prefix="/api/v1/files", tags=["Files"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
 app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"])
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
