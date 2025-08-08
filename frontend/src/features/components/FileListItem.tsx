@@ -4,6 +4,7 @@ import type { FileDetail, FileOut } from '../../types/api.v1';
 import { FileStatus } from '../../types/api.v1';
 import { StatusBadge } from './StatusBadge';
 import { DataPreviewModal } from './DataPreviewModal';
+import styles from './FileListItem.module.scss'
 
 interface FileListItemProps {
   file: FileDetail;
@@ -30,16 +31,16 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
   }
 
   return (
-    <li className={`file-list-item status-${file.status}`}>
-      <div className="file-item-main">
+    <li className={`${styles.fileListItem} status-${file.status}`}>
+      <div className={styles.fileItemMain}>
         <StatusBadge status={file.status} />
-        <div className="file-info">
-          <span className="file-name">{file.filename_original}</span>
-          <span className="file-meta">
+        <div className={styles.fileInfo}>
+          <span className={styles.fileName}>{file.filename_original}</span>
+          <span className={styles.fileMeta}>
             Version {file.version}・{formatBytes(file.size_bytes)}・Ajouté le {formatDate(file.created_at)}
           </span>
         </div>
-        <div className="file-actions">
+        <div className={styles.fileActions}>
           <button onClick={() => setIsPreviewOpen(true)} disabled={file.status !== FileStatus.READY}>Aperçu</button>
           {file.mapping_id ? (
             <Link to={`/mappings/${file.mapping_id}`} className="button">Voir Mapping</Link>
@@ -51,24 +52,24 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
       </div>
 
       {isExpanded && (
-        <div className="file-item-details">
+        <div className={styles.fileItemDetails}>
           <h4>Informations Techniques</h4>
           <ul>
             <li><strong>Uploader:</strong> {file.uploader_name || 'N/A'}</li>
             <li><strong>Lignes:</strong> {file.line_count ?? 'N/A'}</li>
             <li><strong>Colonnes:</strong> {file.column_count ?? 'N/A'}</li>
             <li><strong>Dernière modification:</strong> {formatDate(file.updated_at)}</li>
-            <li className="file-hash"><strong>Hash (SHA-256):</strong> <span>{file.hash || 'N/A'}</span></li>
+            <li className={styles.fileHash}><strong>Hash (SHA-256):</strong> <span>{file.hash || 'N/A'}</span></li>
           </ul>
-          <div className="details-actions">
-             <button className="download-button">Télécharger</button>
-             <button className="delete-button" onClick={() => onDelete(file.id)}>Supprimer</button>
+          <div className={styles.detailsActions}>
+             <button className={styles.downloadButton}>Télécharger</button>
+             <button className={styles.deleteButton} onClick={() => onDelete(file.id)}>Supprimer</button>
           </div>
         </div>
       )}
 
       {file.status === FileStatus.ERROR && (
-        <div className="file-item-error">
+        <div className={styles.fileItemError}>
           <p><strong>Erreur de parsing :</strong> {file.parsing_error || 'Une erreur inconnue est survenue.'}</p>
           <button onClick={() => onReparse(file.id)}>Relancer le traitement</button>
         </div>

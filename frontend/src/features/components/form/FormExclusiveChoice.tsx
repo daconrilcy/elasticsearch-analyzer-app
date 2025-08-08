@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FormField } from '../FormField';
+import styles from './FormExclusiveChoice.module.scss'
 
 interface ExclusiveChoiceProps {
   value: { [key: string]: any };
@@ -40,8 +41,8 @@ export const FormExclusiveChoice = ({ value, onChange, paramDef }: ExclusiveChoi
   const activeParamValue = activeParamDef ? value?.[activeParamDef.name] : null;
 
   return (
-    <div className="exclusive-choice-container">
-      <div className="exclusive-choice-radios">
+    <div className={styles.exclusiveChoiceContainer}>
+      <div className={styles.exclusiveChoiceRadios}>
         {paramDef.elements.map((param) => {
           const uniqueKey = `${param.name}_${param.type}`;
           
@@ -60,7 +61,7 @@ export const FormExclusiveChoice = ({ value, onChange, paramDef }: ExclusiveChoi
         })}
       </div>
 
-      <div className="exclusive-choice-content">
+      <div className={styles.exclusiveChoiceContent}>
         {activeParamDef && (
           <FormField
             paramDef={activeParamDef}
