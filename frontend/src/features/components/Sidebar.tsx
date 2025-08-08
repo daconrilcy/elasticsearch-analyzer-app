@@ -6,6 +6,7 @@ import {
   availableCharFilters,
   isFilterCompatible 
 } from '../../registry/componentRegistry';
+import styles from './Sidebar.module.scss'
 
 
 interface SidebarProps {
@@ -37,20 +38,20 @@ export function Sidebar({ isVisible }: SidebarProps) {
   }, [graph.nodes]);
 
   return (
-    <aside className={`sidebar ${isVisible ? 'visible' : ''}`}>
+    <aside className={`${styles.sidebar} ${isVisible ? 'visible' : ''}`}>
       {/* Ce conteneur enfant est la clé de la solution */}
-      <div className="sidebar-content-scrollable">
-        <p className="sidebar-description">Glissez un de ces nœuds sur le canvas.</p>
+      <div className={styles.sidebarContentScrollable}>
+        <p className={styles.sidebarDescription}>Glissez un de ces nœuds sur le canvas.</p>
 
-        <div className="sidebar-section">
-          <h4 className="sidebar-section-title">
+        <div className={styles.sidebarSection}>
+          <h4 className={styles.sidebarSectionTitle}>
             <span className="title-icon">🎨</span>
             <span>Character Filters</span>
           </h4>
           {availableCharFilters.map(cf => (
             <div
               key={cf.name}
-              className="sidebar-node char-filter"
+              className={`${styles.sidebarNode} char-filter`}
               title={cf.description}
               onDragStart={(event) => onDragStart(event, 'char_filter', cf.name, false)}
               draggable
@@ -60,8 +61,8 @@ export function Sidebar({ isVisible }: SidebarProps) {
           ))}
         </div>
 
-        <div className="sidebar-section">
-          <h4 className="sidebar-section-title">
+        <div className={styles.sidebarSection}>
+          <h4 className={styles.sidebarSectionTitle}>
             <span className="title-icon">🧩</span>
             <span>Tokenizer</span>
           </h4>
@@ -70,7 +71,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
             return (
               <div
                 key={t.name}
-                className={`sidebar-node tokenizer ${isDisabled ? 'disabled' : ''}`}
+                className={`${styles.sidebarNode} tokenizer ${isDisabled ? 'disabled' : ''}`}
                 onDragStart={(event) => onDragStart(event, 'tokenizer', t.name, isDisabled)}
                 draggable={!isDisabled}
                 title={isDisabled ? "Un seul tokenizer est autorisé." : t.description}
@@ -81,8 +82,8 @@ export function Sidebar({ isVisible }: SidebarProps) {
           })}
         </div>
 
-        <div className="sidebar-section">
-          <h4 className="sidebar-section-title">
+        <div className={styles.sidebarSection}>
+          <h4 className={styles.sidebarSectionTitle}>
             <span className="title-icon">⚙️</span>
             <span>Token Filters</span>
           </h4>
@@ -91,7 +92,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
             return (
               <div
                 key={tf.name}
-                className={`sidebar-node token-filter ${isDisabled ? 'disabled' : ''}`}
+                className={`${styles.sidebarNode} token-filter ${isDisabled ? 'disabled' : ''}`}
                 onDragStart={(event) => onDragStart(event, 'token_filter', tf.name, isDisabled)}
                 draggable={!isDisabled}
                 title={isDisabled ? `Requiert un tokenizer compatible.` : tf.description}
