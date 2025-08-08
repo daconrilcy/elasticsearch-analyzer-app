@@ -1,5 +1,6 @@
 // src/features/components/ResultPanel.tsx
 import { useAnalysisStore, type AnalysisStep } from '../store/analysisStore';
+import styles from './ResultPanel.module.scss'
 
 const getStepType = (stepName: string): string => {
     const lowerCaseName = stepName.toLowerCase();
@@ -29,7 +30,7 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
 
   const renderContent = () => {
     if (isLoading) {
-      return <div className="loading-container">Analyse en cours...</div>;
+      return <div className={styles.loadingContainer}>Analyse en cours...</div>;
     }
 
     if (validationIssues.length > 0) {
@@ -50,23 +51,23 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
     }
 
     return (
-      <div className="steps-container">
+      <div className={styles.stepsContainer}>
         {analysisSteps.map((step: AnalysisStep, index: number) => {
           const stepType = getStepType(step.step_name);
           const stepLabel = formatStepLabel(step.step_name);
           return (
-            <div key={index} className="analysis-step">
-              <div className="step-header">
+            <div key={index} className={styles.analysisStep}>
+              <div className={styles.stepHeader}>
                 <span className={`step-tag tag-${stepType}`}>{stepLabel}</span>
-                <span className="step-name-text">{step.step_name}</span>
+                <span className={styles.stepNameText}>{step.step_name}</span>
               </div>
-              <div className="step-output">
+              <div className={styles.stepOutput}>
                 {Array.isArray(step.output) ? (
                   step.output.map((token: string, tokenIndex: number) => (
-                    <span key={tokenIndex} className="token">{token}</span>
+                    <span key={tokenIndex} className={styles.token}>{token}</span>
                   ))
                 ) : (
-                  <span className="initial-text">{step.output}</span>
+                  <span className={styles.initialText}>{step.output}</span>
                 )}
               </div>
             </div>
@@ -77,9 +78,9 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
   };
 
   return (
-    <aside className={`result-panel ${isVisible ? 'visible' : ''}`}>
-      <h3 className="result-panel-header">Résultat Détaillé</h3>
-      <div className="steps-container-scrollable">
+    <aside className={`${styles.resultPanel} ${isVisible ? 'visible' : ''}`}>
+      <h3 className={styles.resultPanelHeader}>Résultat Détaillé</h3>
+      <div className={styles.stepsContainerScrollable}>
         {renderContent()}
       </div>
     </aside>
