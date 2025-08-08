@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../features/store/authStore';
+import styles from './RegisterPage.module.scss'
 
 
 interface RegisterPageProps {
@@ -29,12 +30,12 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
   };
 
   return (
-    <div className="login-page-container">
-      <div className="login-form-wrapper">
+    <div className={styles.loginPageContainer}>
+      <div className={styles.loginFormWrapper}>
         <h1 className="login-title">Créer un Compte</h1>
         <p className="login-subtitle">Rejoignez la plateforme pour créer vos analyseurs</p>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="username">Nom d'utilisateur</label>
             <input
               id="username"
@@ -45,7 +46,7 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
               placeholder="Choisissez un nom d'utilisateur"
             />
           </div>
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="email">Adresse e-mail</label>
             <input
               id="email"
@@ -56,7 +57,7 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
               placeholder="Entrez votre e-mail"
             />
           </div>
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="password">Mot de passe</label>
             <input
               id="password"
@@ -67,11 +68,11 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
               placeholder="Choisissez un mot de passe sécurisé"
             />
           </div>
-          <button type="submit" className="login-button" disabled={isLoading}>
+          <button type="submit" className={styles.loginButton} disabled={isLoading}>
             {isLoading ? 'Inscription...' : 'S\'inscrire'}
           </button>
         </form>
-        <div className="switch-form-link">
+        <div className={styles.switchFormLink}>
           <span>Déjà un compte ? </span>
           <button onClick={onSwitchToLogin}>Connectez-vous</button>
         </div>
