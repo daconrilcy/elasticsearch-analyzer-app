@@ -24,6 +24,7 @@ import { DatasetListPage } from './pages/DatasetListPage';
 import { DatasetDetailPage } from './pages/DatasetDetail';
 
 import 'reactflow/dist/style.css';
+import styles from './App.module.scss'
 
 const nodeTypes = {
     input: CustomNode,
@@ -53,8 +54,8 @@ function AnalyzerPage() {
     // --- CORRECTION : La structure originale est restaurée ici ---
     // Cet élément <main> fournit le contexte de positionnement pour les panneaux.
     return (
-        <main className="flow-editor-main">
-            <div className="main-content" onDragOver={onDragOver} onDrop={onDrop}>
+        <main className={styles.flowEditorMain}>
+            <div className={styles.mainContent} onDragOver={onDragOver} onDrop={onDrop}>
                 <ReactFlow 
                     nodes={graph.nodes} 
                     edges={graph.edges} 
@@ -83,7 +84,7 @@ function App() {
 
     useEffect(() => { checkAuth(); }, [checkAuth]);
 
-    if (isLoading) { return <div className="loading-fullscreen">Chargement...</div>; }
+    if (isLoading) { return <div className={styles.loadingFullscreen}>Chargement...</div>; }
 
     return (
         <Router>
@@ -95,11 +96,11 @@ function App() {
                     </Routes>
                 ) : (
                     // --- CORRECTION : Nouvelle structure de mise en page globale ---
-                    <div className="app-container">
+                    <div className={styles.appContainer}>
                         <IconSidebar />
-                        <div className="page-container">
+                        <div className={styles.pageContainer}>
                             <Header />
-                            <main className="page-content">
+                            <main className={styles.pageContent}>
                                 <Routes>
                                     <Route path="/" element={<Navigate to="/analyzer" replace />} />
                                     <Route path="/analyzer" element={<AnalyzerPage />} />

@@ -1,47 +1,4 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
 
-.app-container {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  background-color: $bg-main;
-  padding: $spacing-unit * 2;
-  gap: $spacing-unit * 2;
-  box-sizing: border-box;
-}
-
-// --- NOUVEAU : Conteneur pour la zone principale (Header + Contenu) ---
-.page-container {
-  flex: 1; // Prend tout l'espace restant à côté de l'IconSidebar
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-unit * 2;
-  overflow: hidden; // Empêche le dépassement
-}
-
-// --- NOUVEAU : Conteneur pour le contenu routé (les pages) ---
-.page-content {
-  flex: 1; // Prend tout l'espace restant sous le Header
-  position: relative; // Contexte de positionnement pour les pages
-  display: flex; // Permet à la page enfant de s'étirer
-  flex-direction: column;
-}
-
-// L'ancienne classe `.flow-editor-main` s'étire maintenant pour remplir son nouveau parent `.page-content`
-.flow-editor-main {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  gap: $spacing-unit * 2;
-  overflow: hidden;
-}
-
-// Inchangé, mais fonctionnera maintenant correctement
-.main-content {
-  flex-grow: 1;
-  border-radius: $border-radius-xl;
-  overflow: hidden; 
-  @include soft-shadow;
-}
+// moved to CSS Module: App.module.scss
