@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { useAnalysisStore } from '../store/analysisStore';
 import type { NodeData } from '../../shared/types/analyzer.d';
+import styles from './CustomNode.module.scss'
 
 export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const { kind, label, name } = data;
@@ -10,12 +11,12 @@ export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const isOutputNode = kind === 'output';
 
   return (
-    <div className={`custom-node custom-node-${kind} ${selected ? 'selected' : ''}`}>
+    <div className={`${styles.customNode} custom-node-${kind} ${selected ? 'selected' : ''}`}>
       {!isOutputNode && (
         <Handle type="source" position={Position.Right} />
       )}
 
-      <div className="node-header">
+      <div className={styles.nodeHeader}>
         {!isInputNode && (
           <Handle type="target" position={Position.Left} />
         )}
@@ -23,9 +24,9 @@ export function CustomNode({ data, selected }: NodeProps<NodeData>) {
       </div>
 
       {isInputNode && (
-        <div className="node-content">
+        <div className={styles.nodeContent}>
           <textarea
-            className="input-textarea"
+            className={styles.inputTextarea}
             value={inputText}
             onChange={(evt) => setInputText(evt.target.value)}
             placeholder="Saisissez votre texte ici..."
