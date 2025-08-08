@@ -17,6 +17,7 @@ import type {
   NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import styles from './CreateMappingModal.module.scss'
 
 import { createMapping, getFileDetails } from '@/features/apiClient';
 import type { FileDetailOut, MappingCreate, MappingRule, FileOut } from '@/types/api.v1';
@@ -106,26 +107,26 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <header className="modal-header">
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <header className={styles.modalHeader}>
               <h2>Créer un Mapping</h2>
-              <button onClick={onClose} className="close-button">&times;</button>
+              <button onClick={onClose} className={styles.closeButton}>&times;</button>
             </header>
             {isFileLoading ? (
               <div>Chargement des détails du fichier...</div>
             ) : fileDetails ? (
               <>
-                <main className="modal-body">
+                <main className={styles.modalBody}>
                   <p>Fichier source : <strong>{fileDetails.filename_original}</strong></p>
                    <input
                     type="text"
-                    className="form-input"
+                    className={styles.formInput}
                     value={mappingName}
                     onChange={(e) => setMappingName(e.target.value)}
                     placeholder="Nom du mapping"
                     />
-                  <div className="react-flow-container" style={{ height: '400px', border: '1px solid #ccc', marginTop: '1rem' }}>
+                  <div className={styles.reactFlowContainer} style={{ height: '400px', border: '1px solid #ccc', marginTop: '1rem' }}>
                     <ReactFlow
                       nodes={nodes}
                       edges={edges}
@@ -143,9 +144,9 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
                      Ajouter un champ cible
                    </button>
                 </main>
-                <footer className="modal-footer">
+                <footer className={styles.modalFooter}>
                   <button onClick={onClose} disabled={createMappingMutation.isPending}>Annuler</button>
-                  <button onClick={handleSaveMapping} className="primary" disabled={createMappingMutation.isPending}>
+                  <button onClick={handleSaveMapping} className={styles.primary} disabled={createMappingMutation.isPending}>
                     {createMappingMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                   </button>
                 </footer>
