@@ -1,0 +1,23 @@
+@use '../../styles/abstracts/variables' as *;
+@use '../../styles/abstracts/mixins' as *;
+@use 'sass:color';
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: $border-radius-xl;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.ready { background-color: color.adjust($success-color, $lightness: 40%); color: color.adjust($success-color, $lightness: -10%); }
+  &.parsing,
+  &.pending { background-color: color.adjust($bg-panel, $lightness: 40%); color: color.adjust($bg-panel, $lightness: -10%); }
+  &.error { background-color: color.adjust($danger-color, $lightness: 35%); color: color.adjust($danger-color, $lightness: -15%); }
+
+  .icon { font-size: 1rem; }
+}
+
+

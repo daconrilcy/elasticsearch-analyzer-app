@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileStatus } from '../../types/api.v1';
+import styles from './StatusBadge.module.scss'
 
 interface StatusBadgeProps {
   status: FileStatus;
@@ -16,8 +17,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const info = statusInfo[status] || { text: status, className: 'default', icon: '❓' };
 
   return (
-    <div className={`status-badge ${info.className}`} title={info.text}>
-      <span className="icon">{info.icon}</span>
+    <div className={`${styles.statusBadge} ${info.className}`} title={info.text}>
+      <span className={styles.icon}>{info.icon}</span>
       <span>{info.text}</span>
     </div>
   );
