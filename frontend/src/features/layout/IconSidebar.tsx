@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
+import styles from './IconSidebar.module.scss'
 
 // --- CORRECTION : La syntaxe des viewBox a été nettoyée ---
 const UploadIcon = () => (
@@ -28,7 +29,7 @@ export const IconSidebar: React.FC = () => {
     const isAnalyzerPage = location.pathname.startsWith('/analyzer');
 
     return (
-        <nav className="icon-sidebar">
+        <nav className={styles.iconSidebar}>
             <ul>
                 <li>
                     <Link to="/analyzer" title="Éditeur d'analyseur">
