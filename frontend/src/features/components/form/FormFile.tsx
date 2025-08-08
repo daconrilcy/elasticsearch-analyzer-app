@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import styles from './FormFile.module.scss'
 import toast from 'react-hot-toast';
 
 // --- Icônes (inchangées) ---
@@ -92,7 +93,7 @@ export const FormFile = ({ value, onChange, fieldDef }: FormFileProps) => {
     if (inputType === 'path') {
       return (
         <select
-          className="file-select"
+          className={styles.fileSelect}
           value={typeof value === 'string' ? value : ''}
           onChange={(e) => onChange(e.target.value)}
           disabled={isLoadingFiles}
@@ -110,23 +111,23 @@ export const FormFile = ({ value, onChange, fieldDef }: FormFileProps) => {
     }
 
     return ( // Mode 'upload'
-      <div className="file-upload-container" onClick={handleContainerClick}>
+      <div className={styles.fileUploadContainer} onClick={handleContainerClick}>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept={fieldDef.accept} style={{ display: 'none' }} />
         {fileName ? (
-          <div className="file-display"><FileIcon /><span className="file-name">{fileName}</span><button className="clear-button" onClick={handleClearFile}><ClearIcon /></button></div>
+          <div className={styles.fileDisplay}><FileIcon /><span className={styles.fileName}>{fileName}</span><button className={styles.clearButton} onClick={handleClearFile}><ClearIcon /></button></div>
         ) : (
-          <div className="file-placeholder"><UploadIcon /><span>{fieldDef.placeholder || 'Choisir ou déposer un fichier'}</span></div>
+          <div className={styles.filePlaceholder}><UploadIcon /><span>{fieldDef.placeholder || 'Choisir ou déposer un fichier'}</span></div>
         )}
       </div>
     );
   };
 
   return (
-    <div className="form-file-wrapper">
+    <div className={styles.formFileWrapper}>
       {fieldDef.in_es && (
-        <div className="file-input-toggle">
-          <button onClick={() => switchInputType('upload')} className={`toggle-button ${inputType === 'upload' ? 'active' : ''}`}>Téléverser</button>
-          <button onClick={() => switchInputType('path')} className={`toggle-button ${inputType === 'path' ? 'active' : ''}`}>Chemin du serveur</button>
+        <div className={styles.fileInputToggle}>
+          <button onClick={() => switchInputType('upload')} className={`${styles.toggleButton} ${inputType === 'upload' ? 'active' : ''}`}>Téléverser</button>
+          <button onClick={() => switchInputType('path')} className={`${styles.toggleButton} ${inputType === 'path' ? 'active' : ''}`}>Chemin du serveur</button>
         </div>
       )}
       {renderInput()}

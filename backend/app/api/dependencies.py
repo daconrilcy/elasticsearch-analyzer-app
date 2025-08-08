@@ -47,7 +47,7 @@ async def get_current_user(
         logger.warning(f"Format d'UUID invalide dans le token: {user_id_from_payload}")
         raise credentials_exception
 
-    user = await user_service.get(session, user_id=user_id)
+    user = await user_service.get(session, user_id)
     if user is None:
         logger.warning(f"Aucun utilisateur trouvé avec l'UUID {user_id}")
         raise credentials_exception
@@ -79,10 +79,12 @@ async def get_current_user_from_cookie(
         # Le cookie peut contenir "Bearer ", on le retire
         token = access_token.split(" ")[-1]
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        user_id_str: str | None = payload.get("sub")
+        if user_id_str is None:
             raise credentials_exception
-    except JWTError:
+        # Convertit en UUID pour la requête ORM
+        user_id = uuid.UUID(user_id_str)
+    except (JWTError, ValueError, TypeError):
         raise credentials_exception
         
     user = await user_service.get(db, user_id)

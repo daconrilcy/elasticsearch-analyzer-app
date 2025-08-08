@@ -8,6 +8,8 @@ $shadow-color: rgba(118, 134, 159, 0.15);
 $accent-color: #5d69f3;
 $accent-color-edge: #a5b4fc;
 $accent-glow: rgba($accent-color, 0.7);
+$danger-color: rgba(255, 0, 0, 1);
+$success-color: rgba(0,255,0, 1);
 
 // 2. Gradients (plus doux et orientés)
 $gradient-char-filter: linear-gradient(120deg, #30cfd0 0%, #330867 100%);

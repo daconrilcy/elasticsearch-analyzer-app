@@ -12,6 +12,8 @@ interface FormCheckboxGroupProps {
   };
 }
 
+import styles from './FormCheckboxGroup.module.scss'
+
 export const FormCheckboxGroup = ({ value, onChange, fieldDef }: FormCheckboxGroupProps) => {
   // Correction : On spécifie explicitement que le Set contiendra des 'string'.
   const selectedValues = Array.isArray(value) ? new Set<string>(value) : new Set<string>();
@@ -29,17 +31,17 @@ export const FormCheckboxGroup = ({ value, onChange, fieldDef }: FormCheckboxGro
   };
 
   return (
-    <div className="checkbox-group-container">
+    <div className={styles.checkboxGroupContainer}>
       {fieldDef.choices.map((choice) => (
-        <label key={choice.value} className="checkbox-label">
+        <label key={choice.value} className={styles.checkboxLabel}>
           <input
             type="checkbox"
             value={choice.value}
             checked={selectedValues.has(choice.value)}
             onChange={(e) => handleCheckboxChange(choice.value, e.target.checked)}
           />
-          <span className="checkbox-custom"></span>
-          <span className="checkbox-text">{choice.label}</span>
+          <span className={styles.checkboxCustom}></span>
+          <span className={styles.checkboxText}>{choice.label}</span>
         </label>
       ))}
     </div>  

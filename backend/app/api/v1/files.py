@@ -2,7 +2,7 @@ import uuid
 from typing import List
 import asyncio
 
-from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
@@ -11,8 +11,10 @@ from app.core.db import get_db
 # --- CORRECTION : Utiliser la dépendance du cookie ---
 from app.api.dependencies import get_current_user_from_cookie
 from app.domain.user.models import User
-from app.domain.dataset import models, schemas 
-from app.domain.dataset.services import FileService, TaskService
+from app.domain.file import models, schemas
+from app.domain.file.services import FileService, TaskService
+from app.domain.file_preview.services import FilePreviewService
+from app.domain.file_preview.schemas import FilePreviewChunk
 from loguru import logger
 
 router = APIRouter(
@@ -22,6 +24,7 @@ router = APIRouter(
 )
 
 file_service = FileService()
+preview_service = FilePreviewService()
 
 # --- Dépendance de sécurité unifiée ---
 
@@ -43,7 +46,7 @@ async def get_current_file_for_owner(
 
 @router.get(
     "/{file_id}",
-    response_model=schemas.FileDetailOut,
+    response_model=schemas.FileOut,
     summary="Obtenir les détails d'un fichier"
 )
 async def get_file_details(
@@ -130,4 +133,18 @@ async def stream_file_status(
             }
     # Indique explicitement le content-type SSE (précaution pour Vite)
     return EventSourceResponse(event_generator(), headers={"Content-Type": "text/event-stream"})
+
+
+@router.get(
+    "/{file_id}/preview",
+    response_model=FilePreviewChunk,
+    summary="Obtenir un aperçu (chunk) d'un fichier"
+)
+async def get_file_preview(
+    file: models.File = Depends(get_current_file_for_owner),
+    chunk_index: int = Query(0, ge=0),
+    chunk_size: int = Query(100, ge=1, le=10_000),
+):
+    """Retourne un aperçu paginé par chunk du contenu du fichier."""
+    return preview_service.get_preview(file, chunk_index=chunk_index, chunk_size=chunk_size)
 

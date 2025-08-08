@@ -10,7 +10,9 @@ from app.core.db import get_db
 from app.api.dependencies import get_current_user_from_cookie, PaginationParams
 from app.domain.user.models import User
 from app.domain.dataset import models, schemas
-from app.domain.dataset.services import DatasetService, FileService, TaskService
+from app.domain.file import schemas as file_schemas
+from app.domain.dataset.services import DatasetService
+from app.domain.file.services import FileService, TaskService
 from loguru import logger
 
 # --- Initialisation du routeur ---
@@ -94,7 +96,7 @@ async def delete_dataset(
 
 @router.post(
     "/{dataset_id}/files",
-    response_model=schemas.FileOut,
+    response_model=file_schemas.FileOut,
     status_code=status.HTTP_201_CREATED,
     summary="Uploader un nouveau fichier dans un dataset"
 )
@@ -121,7 +123,7 @@ async def upload_file_to_dataset(
 
 @router.get(
     "/{dataset_id}/files",
-    response_model=List[schemas.FileOut],
+    response_model=List[file_schemas.FileOut],
     summary="Lister les fichiers d'un dataset"
 )
 async def list_files_in_dataset(

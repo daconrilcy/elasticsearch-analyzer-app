@@ -20,3 +20,5 @@ class User(Base):
     role = Column(SQLAlchemyEnum(UserRole), default=UserRole.USER)
 
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
+    datasets = relationship("Dataset", back_populates="owner", cascade="all, delete-orphan")
+    files = relationship("File", back_populates="uploader", cascade="all, delete-orphan")

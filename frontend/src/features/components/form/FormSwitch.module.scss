@@ -1,0 +1,22 @@
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.switch-slider {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  margin-right: 8px;
+  transition: background 0.2s ease;
+}
+
+.switch-text {
+  color: #e0e5f0;
+  font-size: 0.9rem;
+}
+
+

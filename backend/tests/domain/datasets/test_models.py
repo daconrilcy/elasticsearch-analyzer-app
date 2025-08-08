@@ -1,10 +1,12 @@
 import uuid
-from app.domain.dataset.models import FileStatus, IngestionStatus, Dataset, UploadedFile, SchemaMapping
+from app.domain.dataset.models import Dataset
+from app.domain.file.models import FileStatus, IngestionStatus, File
+from app.domain.mapping.models import Mapping
 
 def test_file_status_enum_values():
     assert FileStatus.PENDING.value == "pending"
     assert FileStatus.PARSING.value == "parsing"
-    assert FileStatus.PARSED.value == "parsed"
+    assert FileStatus.READY.value == "ready"
     assert FileStatus.ERROR.value == "error"
 
 def test_ingestion_status_enum_values():
@@ -24,9 +26,9 @@ def test_dataset_model_fields():
     assert ds.description == "desc"
     assert ds.owner_id is not None
 
-def test_uploaded_file_model_fields():
+def test_file_model_fields():
     ds_id = uuid.uuid4()
-    file = UploadedFile(
+    file = File(
         id=uuid.uuid4(),
         dataset_id=ds_id,
         filename_original="a.csv",
@@ -44,10 +46,10 @@ def test_uploaded_file_model_fields():
     assert file.size_bytes == 100
     assert file.uploader_id is not None
 
-def test_schema_mapping_model_fields():
+def test_mapping_model_fields():
     ds_id = uuid.uuid4()
     file_id = uuid.uuid4()
-    mapping = SchemaMapping(
+    mapping = Mapping(
         id=uuid.uuid4(),
         dataset_id=ds_id,
         name="my mapping",

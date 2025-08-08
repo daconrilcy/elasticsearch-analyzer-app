@@ -24,6 +24,7 @@
 @use 'components/login-page' as *;
 @use 'components/UploadCard' as *;
 @use 'components/Review' as *;
+@use 'components/FileList' as *;
 
 // --- Global Styles for React Flow ---
 .reactflow-wrapper {

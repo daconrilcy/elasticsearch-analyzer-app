@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files
 from app.core.db import engine, Base, get_db
 from app.core.logging_config import setup_logging
+import app.domain  # Assure l'import de tous les modèles SQLAlchemy (User, Dataset, File, Mapping)
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from app.core.exceptions import AppException
