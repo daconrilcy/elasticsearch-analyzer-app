@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 // --- CORRECTION : L'import du store est séparé de l'import du type ---
 import { useProjectStore, useGraphStore, useAuthStore } from '../store';
 import type { ProjectListItem } from '@/types/api.v1'; // Le type est importé depuis sa source
+import styles from './Header.module.scss'
 
 // Icône de déconnexion (inchangée)
 const PowerIcon = () => (
@@ -49,7 +50,7 @@ export function Header() {
     };
 
     return (
-        <header className="app-header">
+        <header className={styles.appHeader}>
             {isAnalyzerPage ? (
                 <>
                     <div className="project-title">
