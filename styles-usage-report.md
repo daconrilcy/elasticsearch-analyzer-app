@@ -32,19 +32,23 @@
 ## Classes defined but not used
 
 - analysis-step
+- backButton
 - button-secondary
 - button-success
 - checkbox-group-container
 - checkbox-label
 - clear-button
 - closeButton
+- configPanel
 - danger
 - dataset-hub
 - dataset-list-page
+- deleteButton
 - error-text
 - exclusive-choice-container
 - exclusive-choice-content
 - exclusive-choice-radios
+- fieldDescription
 - file-actions
 - file-display
 - file-info
@@ -62,6 +66,7 @@
 - file-upload-container
 - flow-editor-main
 - form-file-wrapper
+- formGroup
 - formInput
 - ghost
 - initial-text
@@ -71,11 +76,9 @@
 - login-page-container
 - logoutButton
 - main-content
-- modal-content
-- modal-content input
-- modal-content textarea
-- modal-footer
-- modal-overlay
+- metaItem
+- metaLabel
+- metaValue
 - modalBody
 - modalContent
 - modalFooter
@@ -85,9 +88,15 @@
 - navSeparator
 - node-content
 - node-header
+- nodeMeta
 - page-container
 - page-content
 - pageTitle
+- panelContent
+- panelFooter
+- panelHeader
+- paramsSection
+- placeholderPanel
 - primary
 - project-selector
 - projectActions
@@ -113,6 +122,12 @@
 - switch-label
 - switch-slider
 - switch-text
+- tag-char-filter
+- tag-default
+- tag-error
+- tag-input
+- tag-token-filter
+- tag-tokenizer
 - titleIcon
 - token
 - upload-button
@@ -157,5 +172,4 @@
 
 ## Duplicate rules across different files (same declarations)
 
-- (.primary in `src/components/Modal.module.scss`) ↔ (.primary in `src/pages/DatasetListPage.module.scss`)
-- (.pageTitle in `src/pages/DatasetDetail.module.scss`) ↔ (.projectTitle in `src/pages/DatasetDetail.module.scss`) ↔ (.files-section in `src/features/components/FileList.module.scss`) ↔ (.mappings-section in `src/features/components/FileList.module.scss`) ↔ (.projectTitle in `src/features/layout/Header.module.scss`) ↔ (.projectActions in `src/features/layout/Header.module.scss`) ↔ (.userInfo in `src/features/layout/Header.module.scss`) ↔ (.username in `src/features/layout/Header.module.scss`) ↔ (.logoutButton in `src/features/layout/Header.module.scss`) ↔ (.pageTitle in `src/features/layout/Header.module.scss`) ↔ (.projectActionsPlaceholder in `src/features/layout/Header.module.scss`) ↔ (.navButton in `src/features/layout/IconSidebar.module.scss`)
+- (.configPanel in `src/App.module.scss`) ↔ (.placeholderPanel in `src/App.module.scss`) ↔ (.pageTitle in `src/pages/DatasetDetail.module.scss`) ↔ (.projectTitle in `src/pages/DatasetDetail.module.scss`) ↔ (.projectTitle in `src/features/layout/Header.module.scss`) ↔ (.projectActions in `src/features/layout/Header.module.scss`) ↔ (.userInfo in `src/features/layout/Header.module.scss`) ↔ (.username in `src/features/layout/Header.module.scss`) ↔ (.logoutButton in `src/features/layout/Header.module.scss`) ↔ (.pageTitle in `src/features/layout/Header.module.scss`) ↔ (.projectActionsPlaceholder in `src/features/layout/Header.module.scss`) ↔ (.navButton in `src/features/layout/IconSidebar.module.scss`) ↔ (.panelHeader in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.backButton in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.panelContent in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.nodeMeta in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.metaItem in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.metaLabel in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.metaValue in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.formGroup in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.paramsSection in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.fieldDescription in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.panelFooter in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.deleteButton in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.placeholderPanel in `src/features/components/ConfigurationPanel.module.scss`) ↔ (.files-section in `src/features/components/FileList.module.scss`) ↔ (.mappings-section in `src/features/components/FileList.module.scss`)
