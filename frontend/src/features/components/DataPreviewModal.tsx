@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './DataPreviewModal.module.scss'
 
 interface DataPreviewModalProps {
   isOpen: boolean;
@@ -13,13 +14,13 @@ export const DataPreviewModal: React.FC<DataPreviewModalProps> = ({ isOpen, onCl
   const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <header>
           <h3>Aperçu de {filename}</h3>
-          <button onClick={onClose} className="close-button">&times;</button>
+          <button onClick={onClose} className={styles.closeButton}>&times;</button>
         </header>
-        <div className="modal-body">
+        <div className={styles.modalBody}>
           {data.length > 0 ? (
             <table>
               <thead>

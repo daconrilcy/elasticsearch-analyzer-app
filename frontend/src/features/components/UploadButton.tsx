@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import styles from './UploadButton.module.scss'
 
 interface UploadButtonProps {
   onUpload: (file: File) => void;
@@ -34,7 +35,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({ onUpload, isLoading 
         style={{ display: 'none' }} // L'input est invisible
         accept=".csv, .xlsx, .xls, .json" // Limiter les types de fichiers
       />
-      <button onClick={handleClick} disabled={isLoading}>
+      <button onClick={handleClick} disabled={isLoading} className={styles.uploadButton}>
         {isLoading ? 'Envoi en cours...' : 'Uploader un Fichier'}
       </button>
     </>
