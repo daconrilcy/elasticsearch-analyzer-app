@@ -19,22 +19,16 @@ frontend/src/
   - classes: `.back-button`, `.field-description`, `.form-group`, `.no-params-message`, `.panel-header`, `.params-section`
 - **CustomNode** (`features/components/CustomNode.tsx`): → `features/components/CustomNode.module.scss`
   - classes: `.custom-node-`
-- **FileList** (`features/components/FileList.tsx`): → `features/components/FileList.module.scss`
-  - classes: `.files-section`
 - **FileListItem** (`features/components/FileListItem.tsx`): → `features/components/FileListItem.module.scss`
-  - classes: `.button`, `.status-`
+  - classes: `.status-`
 - **FormExclusiveChoice** (`features/components/form/FormExclusiveChoice.tsx`): → `features/components/form/FormExclusiveChoice.module.scss`
   - classes: `.radio-label`, `.radio-text`
 - **ResultPanel** (`features/components/ResultPanel.tsx`): → `features/components/ResultPanel.module.scss`
   - classes: `.placeholder`, `.step-tag`, `.tag-`, `.validation-issues`
 - **Sidebar** (`features/components/Sidebar.tsx`): → `features/components/Sidebar.module.scss`
-  - classes: `.char-filter`, `.title-icon`, `.token-filter`, `.tokenizer`
+  - classes: `.char-filter`, `.token-filter`, `.tokenizer`
 - **TargetNode** (`features/components/TargetNode.tsx`): → `features/components/TargetNode.module.scss`
   - classes: `.nodrag`
-- **Header** (`features/layout/Header.tsx`): → `features/layout/Header.module.scss`
-  - classes: `.action-button`, `.logout-button`, `.page-title`, `.primary`, `.project-actions`, `.project-actions-placeholder`, `.project-selector`, `.project-title`, `.user-info`, `.username`
-- **IconSidebar** (`features/layout/IconSidebar.tsx`): → `features/layout/IconSidebar.module.scss`
-  - classes: `.nav-button`, `.nav-separator`
 - **LoginPage** (`pages/auth/LoginPage.tsx`): → `pages/auth/LoginPage.module.scss`
   - classes: `.login-subtitle`, `.login-title`
 - **RegisterPage** (`pages/auth/RegisterPage.tsx`): → `pages/auth/RegisterPage.module.scss`
@@ -44,7 +38,6 @@ frontend/src/
 
 ## Shared styles (used by ≥ 2 components) → `src/components/`
 
-- **.files-section** → components: `features/components/FileList.tsx`, `pages/DatasetDetail.tsx`
 - **.login-title** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **.login-subtitle** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 

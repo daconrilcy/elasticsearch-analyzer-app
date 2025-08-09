@@ -34,6 +34,12 @@
 .analysis-step { background-color: #f0f4fb; box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8); border-radius: 16px; border: 1px solid #eef2f7; padding: 16px; transition: all 0.2s; }
 .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .step-tag { padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: $font-weight-bold; color: white; }
+.tag-input { background: linear-gradient(120deg, #5d69f3 0%, #9747ff 100%); }
+.tag-char-filter { background: linear-gradient(120deg, #30cfd0 0%, #330867 100%); }
+.tag-tokenizer { background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%); }
+.tag-token-filter { background: linear-gradient(135deg, #fb923c 0%, #f472b6 100%); }
+.tag-error { background: linear-gradient(120deg, #f43f5e 0%, #c026d3 100%); }
+.tag-default { background-color: #a0aec0; }
 .step-name-text { font-weight: $font-weight-medium; color: $text-secondary; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .step-output { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px; border-top: 1px solid #eef2f7; }
 .token { background-color: white; border-radius: 8px; padding: 6px 10px; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; color: $text-primary; box-shadow: 0 2px 4px rgba($shadow-color, 0.5); }

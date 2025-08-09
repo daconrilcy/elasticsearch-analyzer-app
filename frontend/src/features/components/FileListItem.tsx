@@ -42,13 +42,13 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
           </span>
         </div>
         <div className={styles.fileActions}>
-          <button onClick={() => setIsPreviewOpen(true)} disabled={file.status !== FileStatus.READY} className={btn.button}>Aperçu</button>
+          <button onClick={() => setIsPreviewOpen(true)} disabled={file.status !== FileStatus.READY} className={`${btn.button} ${btn.ghost}`}>Aperçu</button>
           {file.mapping_id ? (
             <Link to={`/mappings/${file.mapping_id}`} className={btn.button}>Voir Mapping</Link>
           ) : (
-            <button onClick={() => onCreateMapping(file)} disabled={file.status !== FileStatus.READY} className={btn.button}>Créer Mapping</button>
+            <button onClick={() => onCreateMapping(file)} disabled={file.status !== FileStatus.READY} className={`${btn.button} ${btn.primary}`}>Créer Mapping</button>
           )}
-          <button onClick={() => setIsExpanded(!isExpanded)} className={btn.button}>{isExpanded ? 'Moins' : 'Détails'}</button>
+          <button onClick={() => setIsExpanded(!isExpanded)} className={`${btn.button} ${btn.ghost}`}>{isExpanded ? 'Moins' : 'Détails'}</button>
         </div>
       </div>
 
@@ -63,8 +63,8 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
             <li className={styles.fileHash}><strong>Hash (SHA-256):</strong> <span>{file.hash || 'N/A'}</span></li>
           </ul>
           <div className={styles.detailsActions}>
-             <button className={styles.downloadButton}>Télécharger</button>
-             <button className={styles.deleteButton} onClick={() => onDelete(file.id)}>Supprimer</button>
+             <button className={btn.button}>Télécharger</button>
+             <button className={`${btn.button} ${btn.danger}`} onClick={() => onDelete(file.id)}>Supprimer</button>
           </div>
         </div>
       )}
