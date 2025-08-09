@@ -1,5 +1,7 @@
 @use '../../styles/abstracts/variables' as *;
 @use '../../styles/abstracts/mixins' as *;
+.validation-issues { background: #fff3cd; color: #7a5b00; border: 1px solid #ffe69c; border-radius: 12px; padding: 12px 14px; }
+.placeholder { color: $text-secondary; font-style: italic; }
 
 .result-panel {
   position: absolute;

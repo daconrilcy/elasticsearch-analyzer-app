@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { useProjectStore, useGraphStore, useAuthStore } from '../store';
 import type { ProjectListItem } from '@/types/api.v1'; // Le type est importé depuis sa source
 import styles from './Header.module.scss'
+import btn from '../../components/Button.module.scss'
 
 // Icône de déconnexion (inchangée)
 const PowerIcon = () => (
@@ -53,30 +54,30 @@ export function Header() {
         <header className={styles.appHeader}>
             {isAnalyzerPage ? (
                 <>
-                    <div className="project-title">
+                    <div className={styles.projectTitle}>
                         <input type="text" value={currentProject.name} onChange={(e) => setCurrentProjectName(e.target.value)} placeholder="Nom du projet" />
                     </div>
-                    <div className="project-actions">
-                        <select className="project-selector" onChange={(e) => { if (e.target.value) { loadProject(Number(e.target.value)); } }} value={currentProject.id || ''}>
+                    <div className={styles.projectActions}>
+                        <select className={btn.select} onChange={(e) => { if (e.target.value) { loadProject(Number(e.target.value)); } }} value={currentProject.id || ''}>
                             <option value="" disabled>Charger un projet...</option>
                             {projectList.map((p: ProjectListItem) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                         </select>
-                        <button onClick={exportCurrentProject} className="action-button" disabled={currentProject.id === null}>Exporter</button>
-                        <button onClick={handleSave} className="action-button">Sauvegarder</button>
-                        <button onClick={handleCreateNew} className="action-button primary">Nouveau Projet</button>
+                        <button onClick={exportCurrentProject} className={btn.button} disabled={currentProject.id === null}>Exporter</button>
+                        <button onClick={handleSave} className={btn.button}>Sauvegarder</button>
+                        <button onClick={handleCreateNew} className={`${btn.button} ${btn.primary}`}>Nouveau Projet</button>
                     </div>
                 </>
             ) : (
                 <>
-                    <div className="page-title">
+                    <div className={styles.pageTitle}>
                         <h1>Gestion des Données</h1>
                     </div>
-                    <div className="project-actions-placeholder"></div>
+                    <div className={styles.projectActionsPlaceholder}></div>
                 </>
             )}
-            <div className="user-info">
-                {user && <span className="username">Bienvenue, {user.username}</span>}
-                <button onClick={handleLogout} className="logout-button">
+            <div className={styles.userInfo}>
+                {user && <span className={styles.username}>Bienvenue, {user.username}</span>}
+                <button onClick={handleLogout} className={styles.logoutButton}>
                     <PowerIcon />
                     <span>Logout</span>
                 </button>

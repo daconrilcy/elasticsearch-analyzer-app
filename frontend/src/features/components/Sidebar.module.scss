@@ -49,8 +49,9 @@
   margin-bottom: $spacing-unit * 2;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  .title-icon { font-size: 1.2rem; color: $accent-color; }
 }
+
+.titleIcon { font-size: 1.2rem; color: $accent-color; }
 
 .sidebar-node {
   width: 100%;

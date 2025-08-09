@@ -45,7 +45,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
 
         <div className={styles.sidebarSection}>
           <h4 className={styles.sidebarSectionTitle}>
-            <span className="title-icon">🎨</span>
+            <span className={styles.titleIcon}>🎨</span>
             <span>Character Filters</span>
           </h4>
           {availableCharFilters.map(cf => (
@@ -63,7 +63,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
 
         <div className={styles.sidebarSection}>
           <h4 className={styles.sidebarSectionTitle}>
-            <span className="title-icon">🧩</span>
+            <span className={styles.titleIcon}>🧩</span>
             <span>Tokenizer</span>
           </h4>
           {availableTokenizers.map(t => {
@@ -84,7 +84,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
 
         <div className={styles.sidebarSection}>
           <h4 className={styles.sidebarSectionTitle}>
-            <span className="title-icon">⚙️</span>
+            <span className={styles.titleIcon}>⚙️</span>
             <span>Token Filters</span>
           </h4>
           {availableTokenFilters.map(tf => {

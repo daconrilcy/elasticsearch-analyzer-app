@@ -1,4 +1,5 @@
 import React from 'react';
+import section from './FileList.module.scss'
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import type { FileDetail, FileOut } from '../../types/api.v1';
@@ -34,7 +35,7 @@ export const FileList: React.FC<FileListProps> = ({ datasetId, files, onCreateMa
 
   if (!files.length) {
     return (
-      <section className="files-section">
+      <section className={section.filesSection}>
         <h3>Fichiers</h3>
         <p>Aucun fichier n'a été uploadé dans ce dataset.</p>
       </section>
@@ -42,7 +43,7 @@ export const FileList: React.FC<FileListProps> = ({ datasetId, files, onCreateMa
   }
 
   return (
-    <section className="files-section">
+    <section className={section.filesSection}>
       <h3>Fichiers</h3>
       <ul>
         {files.map((file) => (

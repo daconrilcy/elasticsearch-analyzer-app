@@ -34,7 +34,7 @@ export const IconSidebar: React.FC = () => {
                 <li>
                     <Link to="/analyzer" title="Éditeur d'analyseur">
                         <button 
-                            className={`nav-button ${isAnalyzerPage ? 'active' : ''}`}
+                            className={`${styles.navButton} ${isAnalyzerPage ? 'active' : ''}`}
                         >
                             <AnalyzerIcon />
                         </button>
@@ -43,7 +43,7 @@ export const IconSidebar: React.FC = () => {
                 <li>
                     <Link to="/datasets" title="Importer des données">
                         <button 
-                            className={`nav-button ${!isAnalyzerPage ? 'active' : ''}`}
+                            className={`${styles.navButton} ${!isAnalyzerPage ? 'active' : ''}`}
                         >
                             <UploadIcon />
                         </button>
@@ -53,7 +53,7 @@ export const IconSidebar: React.FC = () => {
 
             {isAnalyzerPage && (
                 <ul>
-                    <li><hr className="nav-separator" /></li>
+                    <li><hr className={styles.navSeparator} /></li>
                     <li>
                         <button
                             className={activePanel === 'nodes' ? 'active' : ''}
