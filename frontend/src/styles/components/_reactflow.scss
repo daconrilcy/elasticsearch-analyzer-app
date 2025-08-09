@@ -27,16 +27,10 @@
 }
 
 .react-flow__handle {
-    position: absolute !important;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 4px solid $accent-color;
-    transition: all 0.2s ease;
-    z-index: 10;
+  width: 12px;
+  height: 12px;
+  background: $bg-panel;
+  border: 2px solid $border-color;
+  border-radius: 999px;
 }
-.react-flow__edge-path {
-    stroke: $accent-color-edge;
-    stroke-width: 4.5;
-    filter: drop-shadow(0 0 5px rgba($accent-color-edge, 0.7));
-}
+.react-flow__edge-path { stroke: $accent-color-edge; stroke-width: 2.5; }

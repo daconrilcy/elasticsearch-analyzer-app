@@ -25,6 +25,7 @@ import { DatasetDetailPage } from './pages/DatasetDetail';
 
 import 'reactflow/dist/style.css';
 import styles from './App.module.scss'
+import confPanel from './features/components/ConfigurationPanel.module.scss'
 
 const nodeTypes = {
     input: CustomNode,
@@ -45,7 +46,7 @@ function AnalyzerPage() {
     const selectedNode = useMemo(() => graph.nodes.find((node: CustomNodeType) => node.id === selectedNodeId), [graph.nodes, selectedNodeId]);
 
     const ConfigPlaceholder = ({ isVisible }: { isVisible: boolean }) => (
-        <aside className={`config-panel placeholder-panel ${isVisible ? 'visible' : ''}`}>
+        <aside className={`${confPanel.configPanel} ${confPanel.placeholderPanel} ${isVisible ? 'visible' : ''}`}>
             <h3>Configuration</h3>
             <p>Sélectionnez un nœud pour voir ses options.</p>
         </aside>
