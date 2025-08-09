@@ -1,7 +1,7 @@
-@use '../../styles/abstracts/variables' as *;
-@use '../../styles/abstracts/mixins' as *;
+@use '../../styles/utils/variables' as *;
+@use '../../styles/utils/mixins' as *;
 
-.app-header {
+.appHeader {
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -14,7 +14,7 @@
   padding: $spacing-unit * 1.5 $spacing-unit * 3;
   width: 100%;
 
-  .project-title input {
+  .projectTitle input {
     font-size: 1.4rem;
     font-weight: $font-weight-bold;
     color: #223344;
@@ -25,20 +25,34 @@
     transition: all 0.2s ease;
     min-width: 300px;
     outline: none;
-    &::placeholder { color: #9ab0c9; }
-    &:focus { background: rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 2px rgba($accent-color, 0.2); }
+    
+    &::placeholder { 
+      color: #9ab0c9; 
+    }
+    
+    &:focus { 
+      background: rgba(255, 255, 255, 0.8); 
+      box-shadow: 0 0 0 2px rgba($accent-color, 0.2); 
+    }
   }
 
-  .project-actions { display: flex; align-items: center; gap: $spacing-unit * 2; }
+  .projectActions { 
+    display: flex; 
+    align-items: center; 
+    gap: $spacing-unit * 2; 
+  }
 
-  .user-info {
+  .userInfo {
     display: flex;
     align-items: center;
     gap: $spacing-unit * 2;
 
-    .username { font-weight: $font-weight-medium; color: #3d4f60; }
+    .username { 
+      font-weight: $font-weight-medium; 
+      color: #3d4f60; 
+    }
 
-    .logout-button {
+    .logoutButton {
       display: flex;
       align-items: center;
       gap: $spacing-unit;
@@ -52,22 +66,30 @@
       cursor: pointer;
       transition: all 0.25s ease;
       box-shadow: 0 4px 12px rgba($shadow-color, 0.5);
-      svg { width: 16px; height: 16px; stroke: white; }
-      &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba($shadow-color, 0.8); filter: brightness(1.1); }
+      
+      svg { 
+        width: 16px; 
+        height: 16px; 
+        stroke: white; 
+      }
+      
+      &:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 20px rgba($shadow-color, 0.8); 
+        filter: brightness(1.1); 
+      }
     }
   }
 
-  .page-title h1 { font-size: 1.4rem; font-weight: 700; color: #223344; }
+  .pageTitle h1 { 
+    font-size: 1.4rem; 
+    font-weight: 700; 
+    color: #223344; 
+  }
 
-  .project-actions-placeholder { flex-grow: 1; }
+  .projectActionsPlaceholder { 
+    flex-grow: 1; 
+  }
 }
-
-.projectTitle { }
-.projectActions { }
-.userInfo { }
-.username { }
-.logoutButton { }
-.pageTitle { }
-.projectActionsPlaceholder { }
 
 

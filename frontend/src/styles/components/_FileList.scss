@@ -1,11 +1,23 @@
-@use '../abstracts/variables' as *;
-@use '../abstracts/mixins' as *;
+@use '../utils/variables' as *;
+@use '../utils/mixins' as *;
 @use 'sass:color';
 @use 'sass:math';
 
 // moved (component styles) to CSS Module: features/components/FileListItem.module.scss
 // keep only section layout styles here if used globally
 .files-section {
+  h3 { margin-bottom: $spacing-unit * 2; }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-unit * 2;
+  }
+}
+
+.mappings-section {
   h3 { margin-bottom: $spacing-unit * 2; }
   ul {
     list-style: none;

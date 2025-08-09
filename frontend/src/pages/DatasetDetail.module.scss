@@ -1,13 +1,53 @@
-.dataset-hub {
-  header { display: flex; align-items: center; gap: 16px; }
-  header h1 { margin: 0; }
-  main { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.datasetHub {
+  header { 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; 
+  }
+  
+  header h1 { 
+    margin: 0; 
+  }
+  
+  main { 
+    display: grid; 
+    grid-template-columns: 1fr; 
+    gap: 16px; 
+  }
 }
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
 
-.pageTitle { }
-.projectTitle { }
-.projectActions { display: flex; align-items: center; gap: 12px; }
-.projectActionsPlaceholder { flex: 1; }
+.card { 
+  background: #fff; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 12px; 
+  padding: 16px; 
+}
+
+.projectActions { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+}
+
+.projectActionsPlaceholder { 
+  flex: 1; 
+}
+
+.loadingFullscreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.1rem;
+  color: #6b7280;
+}
+
+.filesSection {
+  // Styles spécifiques pour la section des fichiers
+}
+
+.mappingsSection {
+  // Styles spécifiques pour la section des mappings
+}
 
 

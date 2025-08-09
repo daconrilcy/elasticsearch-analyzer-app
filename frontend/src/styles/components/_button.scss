@@ -1,5 +1,5 @@
-@use '../abstracts/variables' as *;
-@use '../abstracts/mixins' as *;
+@use '../utils/variables' as *;
+@use '../utils/mixins' as *;
 
 // Style de base pour tous les boutons d'action et le sélecteur
 .action-button, .project-selector {

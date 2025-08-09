@@ -18,6 +18,7 @@ import type {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import modal from '../../components/Modal.module.scss'
+import styles from './CreateMappingModal.module.scss'
 
 import { createMapping, getFileDetails } from '@/features/apiClient';
 import type { FileDetailOut, MappingCreate, MappingRule, FileOut } from '@/types/api.v1';
@@ -118,15 +119,17 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
             ) : fileDetails ? (
               <>
                 <main className={modal.modalBody}>
-                   <p>Fichier source : <strong>{fileDetails.filename_original}</strong></p>
-                   <input
-                    type="text"
-                     className={modal.formInput}
-                    value={mappingName}
-                    onChange={(e) => setMappingName(e.target.value)}
-                    placeholder="Nom du mapping"
-                    />
-                  <div className={modal.modalBody} style={{ height: '400px', border: '1px solid #ccc', marginTop: '1rem' }}>
+                   <p className={styles['file-info']}>Fichier source : <strong>{fileDetails.filename_original}</strong></p>
+                   <div className={styles['mapping-form']}>
+                     <input
+                      type="text"
+                       className={styles['mapping-name-input']}
+                      value={mappingName}
+                      onChange={(e) => setMappingName(e.target.value)}
+                      placeholder="Nom du mapping"
+                      />
+                   </div>
+                  <div className={styles['flow-container']}>
                     <ReactFlow
                       nodes={nodes}
                       edges={edges}
@@ -140,7 +143,7 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
                       <Background />
                     </ReactFlow>
                   </div>
-                   <button onClick={handleAddTargetNode} style={{ marginTop: '10px' }}>
+                   <button onClick={handleAddTargetNode} className={styles['add-target-button']}>
                      Ajouter un champ cible
                    </button>
                 </main>

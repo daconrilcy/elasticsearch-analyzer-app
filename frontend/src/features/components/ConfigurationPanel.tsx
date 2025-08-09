@@ -40,7 +40,7 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
 
   const renderParamsForm = () => {
     if (!componentDef?.params?.elements) {
-      return <p className="no-params-message">Aucun paramètre n'est configurable.</p>;
+      return <p className={styles.noParamsMessage}>Aucun paramètre n'est configurable.</p>;
     }
 
     const { elements, exclusive: isExclusive } = componentDef.params;
@@ -49,7 +49,7 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
     if (isExclusive) {
       // Si les paramètres sont exclusifs, on rend notre nouveau composant conteneur
       return (
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <FormExclusiveChoice
             paramDef={{ elements }}
             value={node.data.params || {}}
@@ -68,10 +68,10 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
       const shouldShowLabel = param.field.component !== 'switch';
 
       return (
-        <div className="form-group" key={param.name}>
+        <div className={styles.formGroup} key={param.name}>
           {shouldShowLabel && <label>{param.field.label}</label>}
           <FormField paramDef={param} value={currentValue} onChange={handleChange} />
-          {param.field.description && shouldShowLabel && <p className="field-description">{param.field.description}</p>}
+          {param.field.description && shouldShowLabel && <p className={styles.fieldDescription}>{param.field.description}</p>}
         </div>
       );
     });
@@ -81,8 +81,8 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
 
   return (
     <aside className={`${styles.configPanel} ${isVisible ? 'visible' : ''}`}>
-      <div className="panel-header">
-        <button onClick={() => setSelectedNodeId(null)} className="back-button"><BackIcon /><span>Retour</span></button>
+      <div className={styles.panelHeader}>
+        <button onClick={() => setSelectedNodeId(null)} className={styles.backButton}><BackIcon /><span>Retour</span></button>
         <h2>Configuration</h2>
       </div>
       <div className={styles.panelContent}>
@@ -94,7 +94,7 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
           <label htmlFor="nodeLabel">Label du Nœud</label>
           <input id="nodeLabel" type="text" value={node.data.label || ''} onChange={handleLabelChange} placeholder="Ex: Filtre français" />
         </section>
-        <section className="params-section">
+        <section className={styles.paramsSection}>
           <h3>Paramètres</h3>
           {renderParamsForm()}
         </section>

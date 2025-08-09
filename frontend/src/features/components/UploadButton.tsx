@@ -35,7 +35,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({ onUpload, isLoading 
         style={{ display: 'none' }} // L'input est invisible
         accept=".csv, .xlsx, .xls, .json" // Limiter les types de fichiers
       />
-      <button onClick={handleClick} disabled={isLoading} className={styles.uploadButton}>
+      <button onClick={handleClick} disabled={isLoading} className={styles['upload-button']}>
         {isLoading ? 'Envoi en cours...' : 'Uploader un Fichier'}
       </button>
     </>

@@ -1,10 +1,58 @@
-.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modalContent { background: #fff; border-radius: 12px; width: min(900px, 96vw); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
-.modalHeader { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e5e7eb; }
-.modalBody { padding: 16px; overflow: auto; }
-.formInput { display: block; width: 100%; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; margin-top: 8px; }
-.modalFooter { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #e5e7eb; }
-.closeButton { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-.primary { background: #3b82f6; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.modalOverlay { 
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0,0,0,0.5); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000; 
+}
+
+.modalContent { 
+  background: #fff; 
+  border-radius: 12px; 
+  width: min(900px, 96vw); 
+  max-height: 90vh; 
+  overflow: hidden; 
+  display: flex; 
+  flex-direction: column; 
+}
+
+.modalHeader { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 12px 16px; 
+  border-bottom: 1px solid #e5e7eb; 
+}
+
+.modalBody { 
+  padding: 16px; 
+  overflow: auto; 
+}
+
+.formInput { 
+  display: block; 
+  width: 100%; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 10px; 
+  padding: 10px 12px; 
+  margin-top: 8px; 
+}
+
+.modalFooter { 
+  display: flex; 
+  justify-content: flex-end; 
+  gap: 8px; 
+  padding: 12px 16px; 
+  border-top: 1px solid #e5e7eb; 
+}
+
+.closeButton { 
+  background: none; 
+  border: none; 
+  font-size: 1.5rem; 
+  cursor: pointer; 
+}
 
 

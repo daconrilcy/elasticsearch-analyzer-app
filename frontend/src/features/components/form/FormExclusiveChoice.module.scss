@@ -1,11 +1,11 @@
-.exclusive-choice-container {
+.exclusiveChoiceContainer {
   padding: 12px;
   background-color: rgba(0, 0, 0, 0.15);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.exclusive-choice-radios {
+.exclusiveChoiceRadios {
   display: flex;
   margin-bottom: 16px;
   background-color: rgba(0, 0, 0, 0.2);
@@ -43,7 +43,7 @@
   }
 }
 
-.exclusive-choice-content {
+.exclusiveChoiceContent {
   margin-top: 8px;
   transition: all 0.3s ease;
 }

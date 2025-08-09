@@ -30,10 +30,10 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
   };
 
   return (
-    <div className={styles.loginPageContainer}>
-      <div className={styles.loginFormWrapper}>
-        <h1 className="login-title">Créer un Compte</h1>
-        <p className="login-subtitle">Rejoignez la plateforme pour créer vos analyseurs</p>
+    <div className={styles.registerPageContainer}>
+      <div className={styles.registerFormWrapper}>
+        <h1 className={styles.loginTitle}>Créer un Compte</h1>
+        <p className={styles.loginSubtitle}>Rejoignez la plateforme pour créer vos analyseurs</p>
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="username">Nom d'utilisateur</label>
@@ -68,7 +68,7 @@ export const RegisterPage = ({ onSwitchToLogin }: RegisterPageProps) => {
               placeholder="Choisissez un mot de passe sécurisé"
             />
           </div>
-          <button type="submit" className={styles.loginButton} disabled={isLoading}>
+          <button type="submit" className={styles.registerButton} disabled={isLoading}>
             {isLoading ? 'Inscription...' : 'S\'inscrire'}
           </button>
         </form>

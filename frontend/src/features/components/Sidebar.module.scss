@@ -1,5 +1,5 @@
-@use '../../styles/abstracts/variables' as *;
-@use '../../styles/abstracts/mixins' as *;
+@use '../../styles/utils/variables' as *;
+@use '../../styles/utils/mixins' as *;
 
 .sidebar {
   position: absolute;
@@ -23,7 +23,12 @@
   visibility: hidden;
   transform: translateX(-20px) scale(0.98);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  &.visible { opacity: 1; visibility: visible; transform: translateX(0) scale(1); }
+  &.visible,
+  &:global(.visible) { 
+    opacity: 1; 
+    visibility: visible; 
+    transform: translateX(0) scale(1); 
+  }
 }
 
 .sidebar-content-scrollable {
@@ -66,9 +71,9 @@
   text-align: center;
   box-shadow: 0 6px 15px rgba($shadow-color, 0.6);
   backdrop-filter: blur(4px);
-  &.char-filter { background: $gradient-char-filter; }
+  &.charFilter { background: $gradient-char-filter; }
   &.tokenizer { background: $gradient-tokenizer; }
-  &.token-filter { background: $gradient-token-filter; }
+  &.tokenFilter { background: $gradient-token-filter; }
   &:hover { transform: translateY(-4px) scale(1.03); filter: brightness(1.15) saturate(1.1); }
   &.disabled {
     background: rgba(240, 244, 251, 0.7);

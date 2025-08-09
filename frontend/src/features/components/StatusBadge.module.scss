@@ -1,5 +1,5 @@
-@use '../../styles/abstracts/variables' as *;
-@use '../../styles/abstracts/mixins' as *;
+@use '../../styles/utils/variables' as *;
+@use '../../styles/utils/mixins' as *;
 @use 'sass:color';
 
 .status-badge {

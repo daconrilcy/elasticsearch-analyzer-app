@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './FormTextarea.module.scss';
 
 interface FormTextareaProps {
   // La valeur peut être une simple chaîne ou un tableau de chaînes pour les listes
@@ -29,6 +30,7 @@ export const FormTextarea = ({ value, onChange, fieldDef }: FormTextareaProps) =
 
   return (
     <textarea
+      className={styles['form-textarea']}
       value={displayValue}
       placeholder={fieldDef.placeholder}
       onChange={handleChange}

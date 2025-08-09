@@ -34,7 +34,7 @@ export const IconSidebar: React.FC = () => {
                 <li>
                     <Link to="/analyzer" title="Éditeur d'analyseur">
                         <button 
-                            className={`${styles.navButton} ${isAnalyzerPage ? 'active' : ''}`}
+                            className={`${styles.navButton} ${isAnalyzerPage ? styles.active : ''}`}
                         >
                             <AnalyzerIcon />
                         </button>
@@ -43,7 +43,7 @@ export const IconSidebar: React.FC = () => {
                 <li>
                     <Link to="/datasets" title="Importer des données">
                         <button 
-                            className={`${styles.navButton} ${!isAnalyzerPage ? 'active' : ''}`}
+                            className={`${styles.navButton} ${!isAnalyzerPage ? styles.active : ''}`}
                         >
                             <UploadIcon />
                         </button>
@@ -56,7 +56,7 @@ export const IconSidebar: React.FC = () => {
                     <li><hr className={styles.navSeparator} /></li>
                     <li>
                         <button
-                            className={activePanel === 'nodes' ? 'active' : ''}
+                            className={activePanel === 'nodes' ? styles.active : ''}
                             onClick={() => togglePanel('nodes')}
                             title="Ajouter un nœud"
                         >
@@ -65,7 +65,7 @@ export const IconSidebar: React.FC = () => {
                     </li>
                     <li>
                         <button
-                            className={activePanel === 'config' ? 'active' : ''}
+                            className={activePanel === 'config' ? styles.active : ''}
                             onClick={() => togglePanel('config')}
                             title="Configuration"
                         >
@@ -74,7 +74,7 @@ export const IconSidebar: React.FC = () => {
                     </li>
                     <li>
                         <button
-                            className={activePanel === 'results' ? 'active' : ''}
+                            className={activePanel === 'results' ? styles.active : ''}
                             onClick={() => togglePanel('results')}
                             title="Résultats"
                         >

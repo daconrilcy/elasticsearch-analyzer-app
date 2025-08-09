@@ -32,7 +32,7 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
   }
 
   return (
-    <li className={`${styles.fileListItem} status-${file.status}`}>
+            <li className={`${styles.fileListItem} ${styles[`status${file.status.charAt(0).toUpperCase() + file.status.slice(1)}`]}`}>
       <div className={styles.fileItemMain}>
         <StatusBadge status={file.status} />
         <div className={styles.fileInfo}>

@@ -1,6 +1,6 @@
-// 1. Abstracts (Variables, Mixins) - Chargés mais pas directement émis 
-@use 'abstracts/variables' as *;
-@use 'abstracts/mixins' as *;
+// 1. Utils (Variables, Mixins) - Chargés mais pas directement émis 
+@use 'utils/variables' as *;
+@use 'utils/mixins' as *;
 // 2. Base Styles (Reset, Typography)
 @use 'base/reset' as *;
 @use 'base/typography' as *;

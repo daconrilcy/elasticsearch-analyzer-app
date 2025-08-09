@@ -67,7 +67,7 @@ export const DatasetDetailPage: React.FC = () => {
         }
     };
 
-    if (isLoading) return <div className="loading-fullscreen">Chargement du dataset...</div>;
+    if (isLoading) return <div className={styles.loadingFullscreen}>Chargement du dataset...</div>;
     if (isError) return <div>Erreur: {error.message}</div>;
     if (!dataset) return <div>Dataset non trouvé.</div>;
 
@@ -86,14 +86,14 @@ export const DatasetDetailPage: React.FC = () => {
                 />
             </header>
             <main>
-                <section className={`files-section card`}>
+                <section className={`${styles.filesSection} ${styles.card}`}>
                     <FileList
                         datasetId={dataset.id}
                         files={sortedFiles as FileDetail[]}
                         onCreateMapping={handleCreateMappingClick}
                     />
                 </section>
-                <section className={`mappings-section card`}>
+                <section className={`${styles.mappingsSection} ${styles.card}`}>
                     <MappingList mappings={dataset.mappings || []} />
                 </section>
             </main>

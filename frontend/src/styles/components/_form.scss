@@ -1,5 +1,5 @@
-@use '../abstracts/variables' as *;
-@use '../abstracts/mixins' as *;
+@use '../utils/variables' as *;
+@use '../utils/mixins' as *;
 
 .form-group {
   margin-bottom: $spacing-unit * 1.5;

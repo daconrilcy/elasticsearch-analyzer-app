@@ -47,7 +47,7 @@ export const FormExclusiveChoice = ({ value, onChange, paramDef }: ExclusiveChoi
           const uniqueKey = `${param.name}_${param.type}`;
           
           return (
-            <label key={uniqueKey} className="radio-label">
+            <label key={uniqueKey} className={styles.radioLabel}>
               <input
                 type="radio"
                 name={paramDef.elements.map(p => p.name).join('-')}
@@ -55,7 +55,7 @@ export const FormExclusiveChoice = ({ value, onChange, paramDef }: ExclusiveChoi
                 checked={activeOptionType === param.type}
                 onChange={() => handleChoiceChange(param.type, param.name)}
               />
-              <span className="radio-text">{param.field.label}</span>
+              <span className={styles.radioText}>{param.field.label}</span>
             </label>
           );
         })}

@@ -9,6 +9,8 @@ interface FormInputProps {
   };
 }
 
+import styles from './FormInput.module.scss';
+
 export const FormInput = ({ value, onChange, fieldDef }: FormInputProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Convertir en nombre si le type est 'number', sinon garder en string
@@ -20,6 +22,7 @@ export const FormInput = ({ value, onChange, fieldDef }: FormInputProps) => {
 
   return (
     <input
+      className={styles['form-input']}
       type={fieldDef.itemType || 'text'}
       value={value ?? ''} // Utiliser ?? '' pour s'assurer que la valeur n'est jamais null/undefined
       placeholder={fieldDef.placeholder}

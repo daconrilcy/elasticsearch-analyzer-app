@@ -38,7 +38,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
   }, [graph.nodes]);
 
   return (
-    <aside className={`${styles.sidebar} ${isVisible ? 'visible' : ''}`}>
+    <aside className={`${styles.sidebar} ${isVisible ? styles.visible : ''}`}>
       {/* Ce conteneur enfant est la clé de la solution */}
       <div className={styles.sidebarContentScrollable}>
         <p className={styles.sidebarDescription}>Glissez un de ces nœuds sur le canvas.</p>
@@ -51,7 +51,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
           {availableCharFilters.map(cf => (
             <div
               key={cf.name}
-              className={`${styles.sidebarNode} char-filter`}
+              className={`${styles.sidebarNode} ${styles.charFilter}`}
               title={cf.description}
               onDragStart={(event) => onDragStart(event, 'char_filter', cf.name, false)}
               draggable
@@ -71,7 +71,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
             return (
               <div
                 key={t.name}
-                className={`${styles.sidebarNode} tokenizer ${isDisabled ? 'disabled' : ''}`}
+                className={`${styles.sidebarNode} ${styles.tokenizer} ${isDisabled ? styles.disabled : ''}`}
                 onDragStart={(event) => onDragStart(event, 'tokenizer', t.name, isDisabled)}
                 draggable={!isDisabled}
                 title={isDisabled ? "Un seul tokenizer est autorisé." : t.description}
@@ -92,7 +92,7 @@ export function Sidebar({ isVisible }: SidebarProps) {
             return (
               <div
                 key={tf.name}
-                className={`${styles.sidebarNode} token-filter ${isDisabled ? 'disabled' : ''}`}
+                className={`${styles.sidebarNode} ${styles.tokenFilter} ${isDisabled ? styles.disabled : ''}`}
                 onDragStart={(event) => onDragStart(event, 'token_filter', tf.name, isDisabled)}
                 draggable={!isDisabled}
                 title={isDisabled ? `Requiert un tokenizer compatible.` : tf.description}

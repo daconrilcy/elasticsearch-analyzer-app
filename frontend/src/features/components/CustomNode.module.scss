@@ -1,5 +1,5 @@
-@use '../../styles/abstracts/variables' as *;
-@use '../../styles/abstracts/mixins' as *;
+@use '../../styles/utils/variables' as *;
+@use '../../styles/utils/mixins' as *;
 
 .custom-node {
   position: relative;
@@ -56,6 +56,10 @@
   .custom-node {
     box-shadow: 0 0 0 3px rgba($accent-color, 0.4), 0 12px 28px rgba($shadow-color, 0.8);
   }
+}
+
+.selected {
+  box-shadow: 0 0 0 3px rgba($accent-color, 0.4), 0 12px 28px rgba($shadow-color, 0.8);
 }
 
 

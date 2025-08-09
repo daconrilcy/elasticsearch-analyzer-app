@@ -11,7 +11,7 @@ export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const isOutputNode = kind === 'output';
 
   return (
-    <div className={`${styles.customNode} custom-node-${kind} ${selected ? 'selected' : ''}`}>
+    <div className={`${styles.customNode} custom-node-${kind} ${selected ? styles.selected : ''}`}>
       {!isOutputNode && (
         <Handle type="source" position={Position.Right} />
       )}

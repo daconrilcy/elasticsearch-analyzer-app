@@ -1,7 +1,7 @@
-@use '../../styles/abstracts/variables' as *;
-@use '../../styles/abstracts/mixins' as *;
+@use '../../styles/utils/variables' as *;
+@use '../../styles/utils/mixins' as *;
 
-.icon-sidebar {
+.iconSidebar {
   background: linear-gradient(135deg, hsla(224, 24%, 35%, 0.9) 0%, hsla(224, 24%, 21%, 0.95) 100%);
   padding: $spacing-unit * 2;
   display: flex;
@@ -41,17 +41,29 @@
       transition: fill 0.2s ease-in-out;
     }
 
-    &:hover { background: hsl(216, 25%, 30%); transform: scale(1.1); }
+    &:hover { 
+      background: hsl(216, 25%, 30%); 
+      transform: scale(1.1); 
+    }
+    
+    &:global(.active),
     &.active {
       background: radial-gradient(circle, #45f5dd 0%, #3b82f6 10%, #4e5b7e 100%);
       box-shadow: 0 2px 20px rgba(59, 130, 246, 0.8);
       border-color: hsl(216, 91%, 68%);
-      svg { fill: white; }
+      
+      svg { 
+        fill: white; 
+      }
     }
   }
 }
 
-.navButton { }
-.navSeparator { border: 0; height: 1px; width: 100%; background: rgba(255,255,255,0.15); }
+.navSeparator { 
+  border: 0; 
+  height: 1px; 
+  width: 100%; 
+  background: rgba(255,255,255,0.15); 
+}
 
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './FormSelect.module.scss';
 
 interface SelectChoice {
   label: string;
@@ -30,6 +31,7 @@ export const FormSelect = ({ value, onChange, fieldDef }: FormSelectProps) => {
 
   return (
     <select
+      className={styles['form-select']}
       value={value ?? (fieldDef.multiple ? [] : '')} // Assurer une valeur par défaut correcte
       onChange={handleChange}
       multiple={fieldDef.multiple}

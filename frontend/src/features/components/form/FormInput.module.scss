@@ -1,0 +1,33 @@
+@use '../../../styles/utils/variables' as *;
+@use '../../../styles/utils/mixins' as *;
+
+.form-input {
+  width: 100%;
+  padding: $spacing-unit * 1.5;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: 1rem;
+  color: $text-primary;
+  background-color: $bg-panel;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $accent-color;
+    box-shadow: 0 0 0 2px rgba($accent-color, 0.2);
+  }
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+
+  &[type="number"] {
+    -moz-appearance: textfield;
+    
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}

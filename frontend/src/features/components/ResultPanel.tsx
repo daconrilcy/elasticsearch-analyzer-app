@@ -35,7 +35,7 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
 
     if (validationIssues.length > 0) {
       return (
-        <div className="validation-issues">
+        <div className={styles.validationIssues}>
           <h4>Actions requises :</h4>
           <ul>
             {validationIssues.map((issue, index) => (
@@ -47,7 +47,7 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
     }
     
     if (analysisSteps.length === 0) {
-        return <div className="placeholder">Les résultats de l'analyse s'afficheront ici.</div>
+        return <div className={styles.placeholder}>Les résultats de l'analyse s'afficheront ici.</div>
     }
 
     return (
@@ -58,7 +58,7 @@ export function ResultPanel({ isVisible }: { isVisible: boolean }) {
           return (
             <div key={index} className={styles.analysisStep}>
               <div className={styles.stepHeader}>
-                <span className={`step-tag tag-${stepType}`}>{stepLabel}</span>
+                <span className={`${styles.stepTag} ${styles[`tag${stepType.charAt(0).toUpperCase() + stepType.slice(1)}`]}`}>{stepLabel}</span>
                 <span className={styles.stepNameText}>{step.step_name}</span>
               </div>
               <div className={styles.stepOutput}>

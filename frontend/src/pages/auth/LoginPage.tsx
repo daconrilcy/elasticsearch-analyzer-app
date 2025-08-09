@@ -29,8 +29,8 @@ export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
   return (
     <div className={styles.loginPageContainer}>
       <div className={styles.loginFormWrapper}>
-        <h1 className="login-title">Analyzer UI</h1>
-        <p className="login-subtitle">Connectez-vous pour accéder à vos projets</p>
+        <h1 className={styles.loginTitle}>Analyzer UI</h1>
+        <p className={styles.loginSubtitle}>Connectez-vous pour accéder à vos projets</p>
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="username">Nom d'utilisateur</label>
