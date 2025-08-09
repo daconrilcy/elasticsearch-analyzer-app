@@ -15,6 +15,7 @@ import { FileStatus } from '@/types/api.v1';
 import type { FileOut, DatasetDetailOut, FileDetail } from '@/types/api.v1';
 import { ApiError } from '@/features/errors';
 import { useSSEFileStatus } from "@/hooks/useSSEFileStatus";
+import styles from './DatasetDetail.module.scss'
 
 export const DatasetDetailPage: React.FC = () => {
     const { datasetId } = useParams<{ datasetId: string }>();
@@ -75,7 +76,7 @@ export const DatasetDetailPage: React.FC = () => {
     });
 
     return (
-        <div className="dataset-hub">
+        <div className={styles.datasetHub}>
             <header>
                 <h1>{dataset.name}</h1>
                 <p>{dataset.description || 'Pas de description.'}</p>
@@ -85,14 +86,14 @@ export const DatasetDetailPage: React.FC = () => {
                 />
             </header>
             <main>
-                <section className="files-section card">
+                <section className={`files-section card`}>
                     <FileList
                         datasetId={dataset.id}
                         files={sortedFiles as FileDetail[]}
                         onCreateMapping={handleCreateMappingClick}
                     />
                 </section>
-                <section className="mappings-section card">
+                <section className={`mappings-section card`}>
                     <MappingList mappings={dataset.mappings || []} />
                 </section>
             </main>
