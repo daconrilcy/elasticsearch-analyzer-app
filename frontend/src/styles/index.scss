@@ -4,9 +4,8 @@
 // 2. Base Styles (Reset, Typography)
 @use 'base/reset' as *;
 @use 'base/typography' as *;
-// 3. Layout (Header, Sidebar, Panels)
-// moved: app, header, sidebar, result-panel, icon-sidebar → CSS Modules
-@use 'layout/panels' as *;
+// 3. Layout (Header, Sidebar)
+// moved: app, header, sidebar, panels, result-panel, icon-sidebar → CSS Modules
 
 // 4. Components (Buttons, Nodes, Forms)
 @use 'components/button' as *;

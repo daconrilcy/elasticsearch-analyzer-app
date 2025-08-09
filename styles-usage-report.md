@@ -7,10 +7,8 @@
 - **button**: selectors in _not found in SCSS_ → components: `features/components/FileListItem.tsx`
 - **card**: selectors in `src/pages/DatasetDetail.module.scss` → components: `pages/DatasetDetail.tsx`
 - **char-filter**: selectors in _not found in SCSS_ → components: `features/components/Sidebar.tsx`
-- **close-button**: selectors in `src/features/components/CreateMappingModal.module.scss` → components: `features/components/DataPreviewModal.tsx`
-- **config-panel**: selectors in _not found in SCSS_ → components: `App.tsx`, `features/components/ConfigurationPanel.tsx`
+- **config-panel**: selectors in _not found in SCSS_ → components: `App.tsx`
 - **custom-node-**: selectors in _not found in SCSS_ → components: `features/components/CustomNode.tsx`
-- **delete-button**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **field-description**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **files-section**: selectors in _not found in SCSS_ → components: `features/components/FileList.tsx`, `pages/DatasetDetail.tsx`
 - **form-group**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
@@ -19,20 +17,11 @@
 - **login-title**: selectors in _not found in SCSS_ → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **logout-button**: selectors in _not found in SCSS_ → components: `features/layout/Header.tsx`
 - **mappings-section**: selectors in _not found in SCSS_ → components: `pages/DatasetDetail.tsx`
-- **meta-item**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
-- **meta-label**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
-- **meta-value**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
-- **modal-body**: selectors in `src/features/components/CreateMappingModal.module.scss` → components: `features/components/DataPreviewModal.tsx`
-- **modal-content**: selectors in `src/pages/DatasetListPage.module.scss`, `src/features/components/CreateMappingModal.module.scss` → components: `features/components/DataPreviewModal.tsx`
-- **modal-overlay**: selectors in `src/pages/DatasetListPage.module.scss`, `src/features/components/CreateMappingModal.module.scss` → components: `features/components/DataPreviewModal.tsx`
 - **nav-button**: selectors in _not found in SCSS_ → components: `features/layout/IconSidebar.tsx`
 - **nav-separator**: selectors in _not found in SCSS_ → components: `features/layout/IconSidebar.tsx`
 - **no-params-message**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
-- **node-meta**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **nodrag**: selectors in _not found in SCSS_ → components: `features/components/TargetNode.tsx`
 - **page-title**: selectors in _not found in SCSS_ → components: `features/layout/Header.tsx`
-- **panel-content**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
-- **panel-footer**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **panel-header**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **params-section**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **placeholder**: selectors in _not found in SCSS_ → components: `features/components/ResultPanel.tsx`
@@ -62,6 +51,7 @@
 - checkbox-group-container
 - checkbox-label
 - clear-button
+- close-button
 - dataset-hub
 - dataset-list-page
 - error-text
@@ -92,10 +82,17 @@
 - login-form-wrapper
 - login-page-container
 - main-content
+- modal-body
+- modal-body table
+- modal-body td
+- modal-body th
+- modal-content
+- modal-content header
 - modal-content input
 - modal-content textarea
 - modal-footer
 - modal-header
+- modal-overlay
 - node-content
 - node-header
 - page-container
@@ -120,12 +117,14 @@
 - switch-slider
 - switch-text
 - token
+- upload-button
+- upload-button:disabled
 - upload-card__subtitle
 - upload-card__title
 
 ## Classes used but not defined in local SCSS
 
-- **config-panel** → components: `App.tsx`, `features/components/ConfigurationPanel.tsx`
+- **config-panel** → components: `App.tsx`
 - **placeholder-panel** → components: `App.tsx`
 - **files-section** → components: `features/components/FileList.tsx`, `pages/DatasetDetail.tsx`
 - **mappings-section** → components: `pages/DatasetDetail.tsx`
@@ -134,14 +133,7 @@
 - **field-description** → components: `features/components/ConfigurationPanel.tsx`
 - **panel-header** → components: `features/components/ConfigurationPanel.tsx`
 - **back-button** → components: `features/components/ConfigurationPanel.tsx`
-- **panel-content** → components: `features/components/ConfigurationPanel.tsx`
-- **node-meta** → components: `features/components/ConfigurationPanel.tsx`
-- **meta-item** → components: `features/components/ConfigurationPanel.tsx`
-- **meta-label** → components: `features/components/ConfigurationPanel.tsx`
-- **meta-value** → components: `features/components/ConfigurationPanel.tsx`
 - **params-section** → components: `features/components/ConfigurationPanel.tsx`
-- **panel-footer** → components: `features/components/ConfigurationPanel.tsx`
-- **delete-button** → components: `features/components/ConfigurationPanel.tsx`
 - **custom-node-** → components: `features/components/CustomNode.tsx`
 - **button** → components: `features/components/FileListItem.tsx`
 - **status-** → components: `features/components/FileListItem.tsx`
@@ -180,4 +172,5 @@
 
 ## Duplicate rules across different files (same declarations)
 
-- None
+- (.modal-overlay in `src/features/components/CreateMappingModal.module.scss`) ↔ (.modal-overlay in `src/features/components/DataPreviewModal.module.scss`)
+- (.primary in `src/features/components/CreateMappingModal.module.scss`) ↔ (.upload-button in `src/features/components/UploadButton.module.scss`)

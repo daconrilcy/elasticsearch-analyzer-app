@@ -16,11 +16,9 @@ frontend/src/
 - **App** (`App.tsx`): → `App.module.scss`
   - classes: `.config-panel`, `.placeholder-panel`
 - **ConfigurationPanel** (`features/components/ConfigurationPanel.tsx`): → `features/components/ConfigurationPanel.module.scss`
-  - classes: `.back-button`, `.config-panel`, `.delete-button`, `.field-description`, `.form-group`, `.meta-item`, `.meta-label`, `.meta-value`, `.no-params-message`, `.node-meta`, `.panel-content`, `.panel-footer`, `.panel-header`, `.params-section`
+  - classes: `.back-button`, `.field-description`, `.form-group`, `.no-params-message`, `.panel-header`, `.params-section`
 - **CustomNode** (`features/components/CustomNode.tsx`): → `features/components/CustomNode.module.scss`
   - classes: `.custom-node-`
-- **DataPreviewModal** (`features/components/DataPreviewModal.tsx`): → `features/components/DataPreviewModal.module.scss`
-  - classes: `.close-button`, `.modal-body`, `.modal-content`, `.modal-overlay`
 - **FileList** (`features/components/FileList.tsx`): → `features/components/FileList.module.scss`
   - classes: `.files-section`
 - **FileListItem** (`features/components/FileListItem.tsx`): → `features/components/FileListItem.module.scss`
@@ -46,7 +44,6 @@ frontend/src/
 
 ## Shared styles (used by ≥ 2 components) → `src/components/`
 
-- **.config-panel** → components: `App.tsx`, `features/components/ConfigurationPanel.tsx`
 - **.files-section** → components: `features/components/FileList.tsx`, `pages/DatasetDetail.tsx`
 - **.login-title** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **.login-subtitle** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
