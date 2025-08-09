@@ -5,6 +5,7 @@ import { findComponentDefinition } from '../../registry/componentRegistry';
 import { FormField } from './FormField';
 import { FormExclusiveChoice } from './form/FormExclusiveChoice'; // <-- AJOUTER L'IMPORT
 import { type CustomNode } from '@/shared/types/analyzer.d';
+import styles from './ConfigurationPanel.module.scss'
 
 // --- Icônes ---
 const BackIcon = () => ( <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> );
@@ -79,17 +80,17 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
   const canBeDeleted = node.data.kind !== 'input' && node.data.kind !== 'output';
 
   return (
-    <aside className={`config-panel ${isVisible ? 'visible' : ''}`}>
+    <aside className={`${styles.configPanel} ${isVisible ? 'visible' : ''}`}>
       <div className="panel-header">
         <button onClick={() => setSelectedNodeId(null)} className="back-button"><BackIcon /><span>Retour</span></button>
         <h2>Configuration</h2>
       </div>
-      <div className="panel-content">
-        <section className="node-meta">
-          <div className="meta-item"><span className="meta-label">Type:</span><span className="meta-value">{node.data.kind}</span></div>
-          <div className="meta-item"><span className="meta-label">Nom:</span><span className="meta-value">{node.data.name}</span></div>
+      <div className={styles.panelContent}>
+        <section className={styles.nodeMeta}>
+          <div className={styles.metaItem}><span className={styles.metaLabel}>Type:</span><span className={styles.metaValue}>{node.data.kind}</span></div>
+          <div className={styles.metaItem}><span className={styles.metaLabel}>Nom:</span><span className={styles.metaValue}>{node.data.name}</span></div>
         </section>
-        <section className="form-group">
+        <section className={styles.formGroup}>
           <label htmlFor="nodeLabel">Label du Nœud</label>
           <input id="nodeLabel" type="text" value={node.data.label || ''} onChange={handleLabelChange} placeholder="Ex: Filtre français" />
         </section>
@@ -99,8 +100,8 @@ export function ConfigurationPanel({ node, isVisible }: ConfigurationPanelProps)
         </section>
       </div>
       {canBeDeleted && (
-        <div className="panel-footer">
-          <button onClick={handleDelete} className="delete-button"><DeleteIcon /><span>Supprimer le Nœud</span></button>
+        <div className={styles.panelFooter}>
+          <button onClick={handleDelete} className={styles.deleteButton}><DeleteIcon /><span>Supprimer le Nœud</span></button>
         </div>
       )}
     </aside>

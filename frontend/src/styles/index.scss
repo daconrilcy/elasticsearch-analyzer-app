@@ -5,23 +5,14 @@
 @use 'base/reset' as *;
 @use 'base/typography' as *;
 // 3. Layout (Header, Sidebar, Panels)
-@use 'layout/app' as *;
-@use 'layout/header' as *;
-@use 'layout/sidebar' as *;
+// moved: app, header, sidebar, result-panel, icon-sidebar → CSS Modules
 @use 'layout/panels' as *;
-@use 'layout/result-panel' as *;
-@use 'layout/icon-sidebar' as *;
 
 // 4. Components (Buttons, Nodes, Forms)
-@use 'components/form-exclusive-choice' as *;
 @use 'components/button' as *;
-@use 'components/custom-node' as *;
 @use 'components/form' as *;
 @use 'components/reactflow' as *;
 @use 'components/input_output' as *;
-@use 'components/form-checkbox-group' as *;
-@use 'components/form-file' as *;
-@use 'components/login-page' as *;
 @use 'components/UploadCard' as *;
 @use 'components/Review' as *;
 @use 'components/FileList' as *;
