@@ -128,6 +128,16 @@
 - **placeholder-panel** → components: `App.tsx`
 - **files-section** → components: `features/components/FileList.tsx`, `pages/DatasetDetail.tsx`
 - **mappings-section** → components: `pages/DatasetDetail.tsx`
+- **project-title** → components: `features/layout/Header.tsx`
+- **project-actions** → components: `features/layout/Header.tsx`
+- **action-button** → components: `features/layout/Header.tsx`
+- **page-title** → components: `features/layout/Header.tsx`
+- **project-actions-placeholder** → components: `features/layout/Header.tsx`
+- **user-info** → components: `features/layout/Header.tsx`
+- **username** → components: `features/layout/Header.tsx`
+- **logout-button** → components: `features/layout/Header.tsx`
+- **nav-separator** → components: `features/layout/IconSidebar.tsx`
+- **nav-button** → components: `features/layout/IconSidebar.tsx`
 - **no-params-message** → components: `features/components/ConfigurationPanel.tsx`
 - **form-group** → components: `features/components/ConfigurationPanel.tsx`
 - **field-description** → components: `features/components/ConfigurationPanel.tsx`
@@ -145,16 +155,6 @@
 - **tokenizer** → components: `features/components/Sidebar.tsx`
 - **token-filter** → components: `features/components/Sidebar.tsx`
 - **nodrag** → components: `features/components/TargetNode.tsx`
-- **project-title** → components: `features/layout/Header.tsx`
-- **project-actions** → components: `features/layout/Header.tsx`
-- **action-button** → components: `features/layout/Header.tsx`
-- **page-title** → components: `features/layout/Header.tsx`
-- **project-actions-placeholder** → components: `features/layout/Header.tsx`
-- **user-info** → components: `features/layout/Header.tsx`
-- **username** → components: `features/layout/Header.tsx`
-- **logout-button** → components: `features/layout/Header.tsx`
-- **nav-separator** → components: `features/layout/IconSidebar.tsx`
-- **nav-button** → components: `features/layout/IconSidebar.tsx`
 - **login-title** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **login-subtitle** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **radio-label** → components: `features/components/form/FormExclusiveChoice.tsx`

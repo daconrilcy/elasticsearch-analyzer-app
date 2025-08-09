@@ -1,9 +1,0 @@
-@use '../abstracts/variables' as *;
-@use '../abstracts/mixins' as *;
-
-// --- PALETTE DE DÉGRADÉS UNIFIÉE ET MOINS SATURÉE ---
-$gradient-char-filter: linear-gradient(135deg, #8998e8 0%, #a480c2 100%);
-$gradient-tokenizer: linear-gradient(135deg, #63d4ff 0%, #8ca0e6 100%);
-$gradient-token-filter: linear-gradient(135deg, #ff9a5a 0%, #ff639e 100%);
-
-// moved to CSS Module: features/components/Sidebar.module.scss
