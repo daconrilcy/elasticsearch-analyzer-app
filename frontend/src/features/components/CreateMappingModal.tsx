@@ -121,7 +121,7 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
                    <p>Fichier source : <strong>{fileDetails.filename_original}</strong></p>
                    <input
                     type="text"
-                     className="form-input"
+                     className={modal.formInput}
                     value={mappingName}
                     onChange={(e) => setMappingName(e.target.value)}
                     placeholder="Nom du mapping"

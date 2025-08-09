@@ -5,6 +5,7 @@ import { FileStatus } from '../../types/api.v1';
 import { StatusBadge } from './StatusBadge';
 import { DataPreviewModal } from './DataPreviewModal';
 import styles from './FileListItem.module.scss'
+import btn from '../../components/Button.module.scss'
 
 interface FileListItemProps {
   file: FileDetail;
@@ -41,13 +42,13 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
           </span>
         </div>
         <div className={styles.fileActions}>
-          <button onClick={() => setIsPreviewOpen(true)} disabled={file.status !== FileStatus.READY}>Aperçu</button>
+          <button onClick={() => setIsPreviewOpen(true)} disabled={file.status !== FileStatus.READY} className={btn.button}>Aperçu</button>
           {file.mapping_id ? (
-            <Link to={`/mappings/${file.mapping_id}`} className="button">Voir Mapping</Link>
+            <Link to={`/mappings/${file.mapping_id}`} className={btn.button}>Voir Mapping</Link>
           ) : (
-            <button onClick={() => onCreateMapping(file)} disabled={file.status !== FileStatus.READY}>Créer Mapping</button>
+            <button onClick={() => onCreateMapping(file)} disabled={file.status !== FileStatus.READY} className={btn.button}>Créer Mapping</button>
           )}
-          <button onClick={() => setIsExpanded(!isExpanded)}>{isExpanded ? 'Moins' : 'Détails'}</button>
+          <button onClick={() => setIsExpanded(!isExpanded)} className={btn.button}>{isExpanded ? 'Moins' : 'Détails'}</button>
         </div>
       </div>
 
