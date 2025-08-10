@@ -42,3 +42,6 @@ class MappingOut(MappingBase):
     updated_at: datetime
     index_name: Optional[str]
     model_config = ConfigDict(from_attributes=True)
+
+
+

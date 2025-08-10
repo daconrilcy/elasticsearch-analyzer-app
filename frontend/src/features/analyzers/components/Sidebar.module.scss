@@ -1,0 +1,89 @@
+@use '../../../app/utils/variables' as *;
+@use '../../../app/utils/mixins' as *;
+
+.sidebar {
+  position: absolute;
+  top: 90px;
+  left: 24px;
+  z-index: 20;
+  width: 324px;
+  max-height: calc(100% - 114px);
+  border-radius: 28px;
+  @include glass-panel;
+  background: rgba(247, 249, 252, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(118, 134, 159, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: ($spacing-unit * 2);
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-20px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  &.visible,
+  &:global(.visible) { 
+    opacity: 1; 
+    visibility: visible; 
+    transform: translateX(0) scale(1); 
+  }
+}
+
+.sidebar-content-scrollable {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: ($spacing-unit * 2);
+}
+
+.sidebar-description { font-size: 0.95rem; color: $text-secondary; margin-bottom: $spacing-unit * 4; }
+
+.sidebar-section { display: flex; flex-direction: column; gap: 16px; }
+
+.sidebar-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-unit * 1.5;
+  font-size: 1rem;
+  font-weight: $font-weight-bold;
+  color: #223344;
+  margin-top: $spacing-unit * 4;
+  margin-bottom: $spacing-unit * 2;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.titleIcon { font-size: 1.2rem; color: $accent-color; }
+
+.sidebar-node {
+  width: 100%;
+  padding: 16px 22px;
+  border-radius: 50px;
+  cursor: grab;
+  font-weight: $font-weight-bold;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: center;
+  box-shadow: 0 6px 15px rgba($shadow-color, 0.6);
+  backdrop-filter: blur(4px);
+  &.charFilter { background: $gradient-char-filter; }
+  &.tokenizer { background: $gradient-tokenizer; }
+  &.tokenFilter { background: $gradient-token-filter; }
+  &:hover { transform: translateY(-4px) scale(1.03); filter: brightness(1.15) saturate(1.1); }
+  &.disabled {
+    background: rgba(240, 244, 251, 0.7);
+    backdrop-filter: blur(4px);
+    color: #9ab0c9;
+    cursor: not-allowed;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    text-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+}
+
+

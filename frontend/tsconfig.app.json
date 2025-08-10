@@ -28,7 +28,11 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@shared/*": ["../../shared-contract/*"]
+      "@app/*": ["app/*"],
+      "@pages/*": ["pages/*"],
+      "@shared/*": ["shared/*"],
+      "@features/*": ["features/*"],
+      "@shared-contract/*": ["../../shared-contract/*"]
     }
   },
   "include": ["src"]

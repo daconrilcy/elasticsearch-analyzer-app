@@ -5,7 +5,6 @@
 - **back-button**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **card**: selectors in `src/pages/DatasetDetail.module.scss` → components: `pages/DatasetDetail.tsx`
 - **char-filter**: selectors in _not found in SCSS_ → components: `features/components/Sidebar.tsx`
-- **config-panel**: selectors in _not found in SCSS_ → components: `App.tsx`
 - **custom-node-**: selectors in _not found in SCSS_ → components: `features/components/CustomNode.tsx`
 - **field-description**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **files-section**: selectors in `src/features/components/FileList.module.scss` → components: `pages/DatasetDetail.tsx`
@@ -19,7 +18,6 @@
 - **panel-header**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **params-section**: selectors in _not found in SCSS_ → components: `features/components/ConfigurationPanel.tsx`
 - **placeholder**: selectors in `src/features/components/ResultPanel.module.scss` → components: `features/components/ResultPanel.tsx`
-- **placeholder-panel**: selectors in _not found in SCSS_ → components: `App.tsx`
 - **radio-label**: selectors in _not found in SCSS_ → components: `features/components/form/FormExclusiveChoice.tsx`
 - **radio-text**: selectors in _not found in SCSS_ → components: `features/components/form/FormExclusiveChoice.tsx`
 - **status-**: selectors in _not found in SCSS_ → components: `features/components/FileListItem.tsx`
@@ -29,118 +27,112 @@
 - **tokenizer**: selectors in _not found in SCSS_ → components: `features/components/Sidebar.tsx`
 - **validation-issues**: selectors in _not found in SCSS_ → components: `features/components/ResultPanel.tsx`
 
+### CSS Modules usage (styles.*)
+
+- **analysisStep** → components: `features/components/ResultPanel.tsx`
+- **appContainer** → components: `App.tsx`
+- **appHeader** → components: `features/layout/Header.tsx`
+- **checkboxCustom** → components: `features/components/form/FormCheckboxGroup.tsx`
+- **checkboxGroupContainer** → components: `features/components/form/FormCheckboxGroup.tsx`
+- **checkboxLabel** → components: `features/components/form/FormCheckboxGroup.tsx`
+- **checkboxText** → components: `features/components/form/FormCheckboxGroup.tsx`
+- **clearButton** → components: `features/components/form/FormFile.tsx`
+- **datasetHub** → components: `pages/DatasetDetail.tsx`
+- **datasetListPage** → components: `pages/DatasetListPage.tsx`
+- **deleteButton** → components: `features/components/ConfigurationPanel.tsx`
+- **detailsActions** → components: `features/components/FileListItem.tsx`
+- **exclusiveChoiceContainer** → components: `features/components/form/FormExclusiveChoice.tsx`
+- **exclusiveChoiceContent** → components: `features/components/form/FormExclusiveChoice.tsx`
+- **exclusiveChoiceRadios** → components: `features/components/form/FormExclusiveChoice.tsx`
+- **fileActions** → components: `features/components/FileListItem.tsx`
+- **fileDisplay** → components: `features/components/form/FormFile.tsx`
+- **fileHash** → components: `features/components/FileListItem.tsx`
+- **fileInfo** → components: `features/components/FileListItem.tsx`
+- **fileInputToggle** → components: `features/components/form/FormFile.tsx`
+- **fileItemDetails** → components: `features/components/FileListItem.tsx`
+- **fileItemError** → components: `features/components/FileListItem.tsx`
+- **fileItemMain** → components: `features/components/FileListItem.tsx`
+- **fileMeta** → components: `features/components/FileListItem.tsx`
+- **fileName** → components: `features/components/FileListItem.tsx`, `features/components/form/FormFile.tsx`
+- **filePlaceholder** → components: `features/components/form/FormFile.tsx`
+- **fileSelect** → components: `features/components/form/FormFile.tsx`
+- **fileUploadContainer** → components: `features/components/form/FormFile.tsx`
+- **flowEditorMain** → components: `App.tsx`
+- **formFileWrapper** → components: `features/components/form/FormFile.tsx`
+- **formGroup** → components: `features/components/ConfigurationPanel.tsx`, `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
+- **icon** → components: `features/components/StatusBadge.tsx`
+- **iconSidebar** → components: `features/layout/IconSidebar.tsx`
+- **initialText** → components: `features/components/ResultPanel.tsx`
+- **inputTextarea** → components: `features/components/CustomNode.tsx`
+- **loadingContainer** → components: `features/components/ResultPanel.tsx`
+- **loadingFullscreen** → components: `App.tsx`
+- **loginButton** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
+- **loginFormWrapper** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
+- **loginPageContainer** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
+- **logoutButton** → components: `features/layout/Header.tsx`
+- **mainContent** → components: `App.tsx`
+- **metaItem** → components: `features/components/ConfigurationPanel.tsx`
+- **metaLabel** → components: `features/components/ConfigurationPanel.tsx`
+- **metaValue** → components: `features/components/ConfigurationPanel.tsx`
+- **navSeparator** → components: `features/layout/IconSidebar.tsx`
+- **nodeContent** → components: `features/components/CustomNode.tsx`
+- **nodeHeader** → components: `features/components/CustomNode.tsx`
+- **nodeMeta** → components: `features/components/ConfigurationPanel.tsx`
+- **pageContainer** → components: `App.tsx`
+- **pageContent** → components: `App.tsx`
+- **pageTitle** → components: `features/layout/Header.tsx`
+- **panelContent** → components: `features/components/ConfigurationPanel.tsx`
+- **panelFooter** → components: `features/components/ConfigurationPanel.tsx`
+- **projectActions** → components: `features/layout/Header.tsx`
+- **projectActionsPlaceholder** → components: `features/layout/Header.tsx`
+- **projectTitle** → components: `features/layout/Header.tsx`
+- **resultPanelHeader** → components: `features/components/ResultPanel.tsx`
+- **sidebarContentScrollable** → components: `features/components/Sidebar.tsx`
+- **sidebarDescription** → components: `features/components/Sidebar.tsx`
+- **sidebarSection** → components: `features/components/Sidebar.tsx`
+- **sidebarSectionTitle** → components: `features/components/Sidebar.tsx`
+- **stepHeader** → components: `features/components/ResultPanel.tsx`
+- **stepNameText** → components: `features/components/ResultPanel.tsx`
+- **stepOutput** → components: `features/components/ResultPanel.tsx`
+- **stepsContainer** → components: `features/components/ResultPanel.tsx`
+- **stepsContainerScrollable** → components: `features/components/ResultPanel.tsx`
+- **switchFormLink** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
+- **switchLabel** → components: `features/components/form/FormSwitch.tsx`
+- **switchSlider** → components: `features/components/form/FormSwitch.tsx`
+- **switchText** → components: `features/components/form/FormSwitch.tsx`
+- **titleIcon** → components: `features/components/Sidebar.tsx`
+- **token** → components: `features/components/ResultPanel.tsx`
+- **uploadButton** → components: `features/components/UploadButton.tsx`
+- **userInfo** → components: `features/layout/Header.tsx`
+- **username** → components: `features/layout/Header.tsx`
+
 ## Classes defined but not used
 
-- analysis-step
-- backButton
 - button-secondary
 - button-success
-- checkbox-group-container
-- checkbox-label
-- clear-button
 - closeButton
-- configPanel
 - danger
-- dataset-hub
-- dataset-list-page
-- deleteButton
 - error-text
-- exclusive-choice-container
-- exclusive-choice-content
-- exclusive-choice-radios
-- fieldDescription
-- file-actions
-- file-display
-- file-info
-- file-input-text
-- file-input-toggle
-- file-item
-- file-item-details
-- file-item-error
-- file-item-main
 - file-item__name
 - file-item__remove-btn
 - file-item__size
-- file-placeholder
-- file-select
-- file-upload-container
-- flow-editor-main
-- form-file-wrapper
-- formGroup
 - formInput
 - ghost
-- initial-text
-- input-textarea
-- loading-container
-- login-form-wrapper
-- login-page-container
-- logoutButton
-- main-content
-- metaItem
-- metaLabel
-- metaValue
 - modalBody
 - modalContent
 - modalFooter
 - modalHeader
 - modalOverlay
-- navButton
-- navSeparator
-- node-content
-- node-header
-- nodeMeta
-- page-container
-- page-content
-- pageTitle
-- panelContent
-- panelFooter
-- panelHeader
-- paramsSection
-- placeholderPanel
 - primary
 - project-selector
-- projectActions
-- projectActionsPlaceholder
-- projectTitle
 - react-flow__edge-path
 - react-flow__handle
-- react-flow__node.react-flow__node-input
-- react-flow__node.react-flow__node-output
-- result-panel
-- result-panel-header
 - select
-- sidebar-content-scrollable
-- sidebar-description
-- sidebar-node
-- sidebar-section
-- sidebar-section-title
-- step-header
-- step-name-text
-- step-output
-- steps-container
-- steps-container-scrollable
-- switch-label
-- switch-slider
-- switch-text
-- tag-char-filter
-- tag-default
-- tag-error
-- tag-input
-- tag-token-filter
-- tag-tokenizer
-- titleIcon
-- token
-- upload-button
-- upload-button:disabled
 - upload-card__subtitle
 - upload-card__title
-- userInfo
-- username
 
 ## Classes used but not defined in local SCSS
 
-- **config-panel** → components: `App.tsx`
-- **placeholder-panel** → components: `App.tsx`
 - **no-params-message** → components: `features/components/ConfigurationPanel.tsx`
 - **form-group** → components: `features/components/ConfigurationPanel.tsx`
 - **field-description** → components: `features/components/ConfigurationPanel.tsx`
@@ -148,13 +140,8 @@
 - **back-button** → components: `features/components/ConfigurationPanel.tsx`
 - **params-section** → components: `features/components/ConfigurationPanel.tsx`
 - **custom-node-** → components: `features/components/CustomNode.tsx`
-- **status-** → components: `features/components/FileListItem.tsx`
 - **validation-issues** → components: `features/components/ResultPanel.tsx`
 - **tag-** → components: `features/components/ResultPanel.tsx`
-- **char-filter** → components: `features/components/Sidebar.tsx`
-- **tokenizer** → components: `features/components/Sidebar.tsx`
-- **token-filter** → components: `features/components/Sidebar.tsx`
-- **nodrag** → components: `features/components/TargetNode.tsx`
 - **login-title** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **login-subtitle** → components: `pages/auth/LoginPage.tsx`, `pages/auth/RegisterPage.tsx`
 - **radio-label** → components: `features/components/form/FormExclusiveChoice.tsx`

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../../features/store/authStore';
+import { useAuthStore } from '@shared/lib';
 import styles from './RegisterPage.module.scss'
 
 

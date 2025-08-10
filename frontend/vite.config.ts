@@ -14,7 +14,9 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: path.resolve(__dirname, 'src') },
-      { find: '@shared', replacement: path.resolve(__dirname, '../shared-contract') }
+      { find: '@shared', replacement: path.resolve(__dirname, 'src/shared') },
+      { find: '@features', replacement: path.resolve(__dirname, 'src/features') },
+      { find: '@pages', replacement: path.resolve(__dirname, 'src/pages') }
     ]
   },
   // 👇 Ajoutez cette section pour rediriger les appels API vers le backend

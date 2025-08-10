@@ -1,0 +1,110 @@
+//src/pages/DatasetDetail.tsx
+
+import React, { useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
+import { getDatasetDetails, uploadFile } from '@shared/lib';
+import { FileList } from '@features/files';
+import { MappingList } from '@features/mappings';
+import { UploadButton } from '@features/files';
+import { CreateMappingModal } from '@features/mappings';
+
+import { FileStatus } from '@shared/types';
+import type { FileOut, DatasetDetailOut, FileDetail } from '@shared/types';
+import { ApiError } from '@shared/lib';
+import { useSSEFileStatus } from "@shared/hooks";
+import styles from './DatasetDetail.module.scss'
+
+export const DatasetDetailPage: React.FC = () => {
+    const { datasetId } = useParams<{ datasetId: string }>();
+    if (!datasetId) {
+        return <div>ID de dataset manquant.</div>;
+    }
+    const queryClient = useQueryClient();
+
+    const { data: dataset, isLoading, isError, error } = useQuery<DatasetDetailOut, Error>({
+        queryKey: ['dataset', datasetId],
+        queryFn: () => getDatasetDetails(datasetId),
+    });
+
+    const processingFiles = useMemo(() =>
+        dataset?.files.filter(file =>
+            file.status === FileStatus.PARSING || file.status === FileStatus.PENDING
+        ) || [],
+        [dataset?.files]
+    );
+
+    // --- CORRECTION : Passe tous les arguments requis au hook ---
+    useSSEFileStatus({ processingFiles, datasetId, queryClient });
+
+    const uploadMutation = useMutation({
+        mutationFn: (file: File) => uploadFile(datasetId, file),
+        onMutate: () => {
+            toast.loading('Upload en cours...', { id: 'upload-toast' });
+        },
+        onSuccess: () => {
+            toast.success('Fichier téléversé ! Le traitement commence.', { id: 'upload-toast' });
+            queryClient.invalidateQueries({ queryKey: ['dataset', datasetId] });
+        },
+        onError: (error) => {
+            let errorMessage = "Une erreur inattendue est survenue.";
+            if (error instanceof ApiError) {
+                errorMessage = error.message;
+            }
+            toast.error(errorMessage, { id: 'upload-toast' });
+        },
+    });
+
+    const [selectedFileForMapping, setSelectedFileForMapping] = useState<FileOut | null>(null);
+
+    const handleCreateMappingClick = (file: FileOut) => {
+        if (file.status === FileStatus.READY) {
+            setSelectedFileForMapping(file);
+        } else {
+            toast.error("Le fichier doit avoir le statut 'Ready' pour créer un mapping.");
+        }
+    };
+
+    if (isLoading) return <div className={styles.loadingFullscreen}>Chargement du dataset...</div>;
+    if (isError) return <div>Erreur: {error.message}</div>;
+    if (!dataset) return <div>Dataset non trouvé.</div>;
+
+    const sortedFiles = [...(dataset.files || [])].sort((a, b) => {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    return (
+        <div className={styles.datasetHub}>
+            <header>
+                <h1>{dataset.name}</h1>
+                <p>{dataset.description || 'Pas de description.'}</p>
+                <UploadButton
+                    onUpload={(file) => uploadMutation.mutate(file)}
+                    isLoading={uploadMutation.isPending}
+                />
+            </header>
+            <main>
+                <section className={`${styles.filesSection} ${styles.card}`}>
+                    <FileList
+                        datasetId={dataset.id}
+                        files={sortedFiles as FileDetail[]}
+                        onCreateMapping={handleCreateMappingClick}
+                    />
+                </section>
+                <section className={`${styles.mappingsSection} ${styles.card}`}>
+                    <MappingList mappings={dataset.mappings || []} />
+                </section>
+            </main>
+            {selectedFileForMapping && (
+                <CreateMappingModal
+                    isOpen={!!selectedFileForMapping}
+                    onClose={() => setSelectedFileForMapping(null)}
+                    file={selectedFileForMapping}
+                    datasetId={dataset.id || ''}
+                />
+            )}
+        </div>
+    );
+};

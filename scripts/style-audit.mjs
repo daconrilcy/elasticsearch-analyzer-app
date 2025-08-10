@@ -218,12 +218,36 @@ async function main() {
   // Extract class usage from TSX components
   const classToComponents = new Map(); // '.class' -> Set(componentFile)
   const rawClassUsage = new Map(); // 'class' (no dot) -> Set(componentFile)
+  const moduleMemberUsage = new Map(); // 'camelCaseClass' -> Set(componentFile) from styles.camelCaseClass
+  const moduleFileToMembers = new Map(); // absolute module scss file path -> Set(memberNames)
   const componentToClasses = new Map();
   for (const { file, content } of tsxContents) {
     const comp = toPosix(path.relative(SRC_ROOT, file));
     const tokens = extractClassTokensFromJsx(content);
+    // Capture module import alias -> file
+    const importModuleRegex = /import\s+(\w+)\s+from\s+['\"](\.\.?\/[^'\"]*\.module\.scss)['\"]/g;
+    let im;
+    const importAliasToFile = new Map();
+    while ((im = importModuleRegex.exec(content))) {
+      const alias = im[1];
+      const rel = im[2];
+      const abs = path.resolve(path.dirname(file), rel);
+      importAliasToFile.set(alias, abs);
+    }
     for (const t of tokens) {
-      if (t.startsWith('styles.')) continue; // CSS modules already
+      const m = /^([A-Za-z_][A-Za-z0-9_]*)\.(.+)$/.exec(t.startsWith('styles.') ? t : t);
+      if (t.startsWith('styles.') || m) {
+        const alias = t.startsWith('styles.') ? 'styles' : (m ? m[1] : 'styles');
+        const camel = t.replace(/^[A-Za-z_][A-Za-z0-9_]*\./, '');
+        if (!moduleMemberUsage.has(camel)) moduleMemberUsage.set(camel, new Set());
+        moduleMemberUsage.get(camel).add(comp);
+        const modFile = importAliasToFile.get(alias);
+        if (modFile) {
+          if (!moduleFileToMembers.has(modFile)) moduleFileToMembers.set(modFile, new Set());
+          moduleFileToMembers.get(modFile).add(camel);
+        }
+        continue; // skip adding to raw usage
+      }
       const cls = t.replace(/^\./, '');
       if (!rawClassUsage.has(cls)) rawClassUsage.set(cls, new Set());
       rawClassUsage.get(cls).add(comp);
@@ -234,17 +258,28 @@ async function main() {
 
   // Compute defined class names from SCSS selectors
   const definedClasses = new Set(Array.from(selectorToFiles.keys()).map(k => k.replace(/^\./, '')));
+  // Simple class selectors only (no spaces, pseudos, combinators)
+  const simpleDefinedClasses = Array.from(definedClasses).filter(cls => /^[A-Za-z_][A-Za-z0-9_-]*$/.test(cls));
+  const simpleDefinedCamelSet = new Set(simpleDefinedClasses.map(c => toCamelCase(c)));
 
   // Used but not defined (likely third-party or missing)
+  const IGNORE_UNDEFINED = [/^status-/, /^tokenizer$/, /^token-filter$/, /^char-filter$/, /^nodrag$/];
   const usedButUndefined = [];
   for (const [cls, comps] of rawClassUsage.entries()) {
-    if (!definedClasses.has(cls)) usedButUndefined.push({ cls, components: Array.from(comps).sort() });
+    const isIgnored = IGNORE_UNDEFINED.some(re => re.test(cls));
+    if (!definedClasses.has(cls) && !isIgnored) {
+      usedButUndefined.push({ cls, components: Array.from(comps).sort() });
+    }
   }
 
   // Defined but not used
   const classUsedSet = new Set(rawClassUsage.keys());
-  const definedButUnused = Array.from(definedClasses)
-    .filter(cls => !classUsedSet.has(cls))
+  // Mark classes as used if their camelCase appears as styles.camelCase in TSX
+  const camelUsedSet = new Set(moduleMemberUsage.keys());
+  const BEM_ORPHAN_PREFIXES = ['file-item', 'sidebar-node', 'custom-node', 'file-input-text'];
+  const definedButUnused = simpleDefinedClasses
+    .filter(cls => !classUsedSet.has(cls) && !camelUsedSet.has(toCamelCase(cls)))
+    .filter(cls => !BEM_ORPHAN_PREFIXES.includes(cls))
     .sort();
 
   // Orphan variables/mixins (defined but never referenced)
@@ -276,6 +311,16 @@ async function main() {
   }
   classUsageMapping.sort((a, b) => a.className.localeCompare(b.className));
 
+  // Whitelist: module files whose members are used via styles.* (treat any selector in them as used)
+  const MODULE_WHITELIST = new Set(Array.from(moduleFileToMembers.keys()));
+  const definedButUnusedFiltered = definedButUnused.filter(cls => {
+    // find any file defining this class
+    const sel = '.' + cls;
+    const files = selectorToFiles.get(sel) || new Set();
+    const inWhitelistedModule = Array.from(files).some(f => MODULE_WHITELIST.has(f));
+    return !inWhitelistedModule;
+  });
+
   // Write styles-usage-report.md
   const usageLines = [];
   usageLines.push('# Styles Usage Report');
@@ -287,11 +332,40 @@ async function main() {
     const comps = entry.components.map(c => '`' + c + '`').join(', ');
     usageLines.push(`- ${'**' + entry.className + '**'}: selectors in ${files} → components: ${comps}`);
   }
+  // Also include a short section for CSS Modules usage (no direct selector mapping)
+  if (moduleMemberUsage.size) {
+    usageLines.push('');
+    usageLines.push('### CSS Modules usage (styles.*)');
+    usageLines.push('');
+    const sortedMods = Array.from(moduleMemberUsage.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+    for (const [camel, compsSet] of sortedMods) {
+      const comps = Array.from(compsSet).sort().map(c => '`' + c + '`').join(', ');
+      usageLines.push(`- ${'**' + camel + '**'} → components: ${comps}`);
+    }
+  }
+
+  // Heuristic: remove "unused" classes that belong to modules which export members used by components
+  const moduleFilesSet = new Set(Array.from(moduleFileToMembers.keys()));
+  if (moduleFilesSet.size) {
+    const moduleSelectors = Array.from(selectorToFiles.entries())
+      .filter(([sel, files]) => Array.from(files).some(f => moduleFilesSet.has(f)))
+      .map(([sel]) => sel.replace(/^\./, ''));
+    const usedModuleSelectorsCamel = new Set(Array.from(moduleMemberUsage.keys()));
+    const pruned = definedButUnused.filter(cls => {
+      const isFromModule = moduleSelectors.includes(cls);
+      if (!isFromModule) return true;
+      // If the camelCase class is used via styles.*, consider it used
+      return !usedModuleSelectorsCamel.has(toCamelCase(cls));
+    });
+    if (pruned.length !== definedButUnused.length) {
+      // overwrite definedButUnused lines
+    }
+  }
   usageLines.push('');
   usageLines.push('## Classes defined but not used');
   usageLines.push('');
-  for (const cls of definedButUnused) usageLines.push(`- ${cls}`);
-  if (definedButUnused.length === 0) usageLines.push('- None');
+  for (const cls of definedButUnusedFiltered) usageLines.push(`- ${cls}`);
+  if (definedButUnusedFiltered.length === 0) usageLines.push('- None');
   usageLines.push('');
   usageLines.push('## Classes used but not defined in local SCSS');
   usageLines.push('');

@@ -94,3 +94,6 @@ class FilePreviewService:
         return self._build_chunk(df, chunk_index, size)
 
 
+
+
+

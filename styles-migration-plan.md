@@ -13,8 +13,6 @@ frontend/src/
 
 ## Component → Module mapping
 
-- **App** (`App.tsx`): → `App.module.scss`
-  - classes: `.config-panel`, `.placeholder-panel`
 - **ConfigurationPanel** (`features/components/ConfigurationPanel.tsx`): → `features/components/ConfigurationPanel.module.scss`
   - classes: `.back-button`, `.field-description`, `.form-group`, `.no-params-message`, `.panel-header`, `.params-section`
 - **CustomNode** (`features/components/CustomNode.tsx`): → `features/components/CustomNode.module.scss`

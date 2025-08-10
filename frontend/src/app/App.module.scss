@@ -1,0 +1,53 @@
+@use './utils/variables' as *;
+@use './utils/mixins' as *;
+
+.appContainer {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: $bg-main;
+  padding: $spacing-unit * 2;
+  gap: $spacing-unit * 2;
+  box-sizing: border-box;
+}
+
+.pageContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-unit * 2;
+  overflow: hidden;
+}
+
+.pageContent {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.flowEditorMain {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: $spacing-unit * 2;
+  overflow: hidden;
+}
+
+.mainContent {
+  flex-grow: 1;
+  border-radius: $border-radius-xl;
+  overflow: hidden;
+  @include soft-shadow;
+}
+
+.loadingFullscreen {
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  height: 100vh; 
+  width: 100vw;
+}
+
+

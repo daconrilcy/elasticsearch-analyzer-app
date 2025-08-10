@@ -43,3 +43,6 @@ class FileOut(BaseModel):
     preview_data: Optional[List[Dict[str, Any]]] = Field(None, description="Un échantillon des premières lignes de données.")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+
