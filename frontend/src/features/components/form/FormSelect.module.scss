@@ -1,5 +1,6 @@
 @use '../../../styles/utils/variables' as *;
 @use '../../../styles/utils/mixins' as *;
+@use 'sass:math';
 
 .form-select {
   width: 100%;
@@ -24,7 +25,7 @@
     option {
       padding: $spacing-unit;
       margin: 2px 0;
-      border-radius: $border-radius-md / 2;
+      border-radius: math.div($border-radius-md, 2);
 
       &:checked {
         background-color: $accent-color;

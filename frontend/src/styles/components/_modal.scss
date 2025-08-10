@@ -1,4 +1,7 @@
-.modalOverlay { 
+@use '../utils/variables' as *;
+@use '../utils/mixins' as *;
+
+.modal-overlay { 
   position: fixed; 
   inset: 0; 
   background: rgba(0,0,0,0.5); 
@@ -8,7 +11,7 @@
   z-index: 1000; 
 }
 
-.modalContent { 
+.modal-content { 
   background: #fff; 
   border-radius: 12px; 
   width: min(900px, 96vw); 
@@ -18,7 +21,7 @@
   flex-direction: column; 
 }
 
-.modalHeader { 
+.modal-header { 
   display: flex; 
   align-items: center; 
   justify-content: space-between; 
@@ -26,12 +29,12 @@
   border-bottom: 1px solid #e5e7eb; 
 }
 
-.modalBody { 
+.modal-body { 
   padding: 16px; 
   overflow: auto; 
 }
 
-.formInput { 
+.form-input { 
   display: block; 
   width: 100%; 
   border: 1px solid #e5e7eb; 
@@ -40,7 +43,7 @@
   margin-top: 8px; 
 }
 
-.modalFooter { 
+.modal-footer { 
   display: flex; 
   justify-content: flex-end; 
   gap: 8px; 
@@ -48,11 +51,9 @@
   border-top: 1px solid #e5e7eb; 
 }
 
-.closeButton { 
+.close-button { 
   background: none; 
   border: none; 
   font-size: 1.5rem; 
   cursor: pointer; 
 }
-
-

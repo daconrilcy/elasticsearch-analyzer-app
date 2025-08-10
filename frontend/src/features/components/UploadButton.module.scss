@@ -1,5 +1,6 @@
 @use '../../styles/utils/variables' as *;
 @use '../../styles/utils/mixins' as *;
+@use 'sass:color';
 
 .upload-button {
   padding: $spacing-unit * 1.5 $spacing-unit * 2;
@@ -16,7 +17,7 @@
   gap: $spacing-unit;
   
   &:hover:not(:disabled) {
-    background: darken($accent-color, 10%);
+    background: color.adjust($accent-color, $lightness: -10%);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }

@@ -4,8 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getDatasets, createDataset } from '@/features/apiClient';
 import toast from 'react-hot-toast';
 import styles from './DatasetListPage.module.scss'
-import btn from '../components/Button.module.scss'
-import modal from '../components/Modal.module.scss'
 
 // Define props for the modal component to resolve 'any' type errors.
 interface CreateDatasetModalProps {
@@ -30,14 +28,14 @@ const CreateDatasetModal: React.FC<CreateDatasetModalProps> = ({ isOpen, onClose
     if (!isOpen) return null;
 
     return (
-        <div className={modal.modalOverlay}>
-            <div className={modal.modalContent}>
+        <div className="modal-overlay">
+            <div className="modal-content">
                 <h2>Créer un nouveau Dataset</h2>
                 <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Nom du dataset" />
                 <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optionnel)" />
-                <div className={modal.modalFooter}>
+                <div className="modal-footer">
                     <button onClick={onClose}>Annuler</button>
-                    <button onClick={handleSubmit} className={modal.primary}>Créer</button>
+                    <button onClick={handleSubmit} className="primary">Créer</button>
                 </div>
             </div>
         </div>
@@ -72,7 +70,7 @@ export const DatasetListPage: React.FC = () => {
         <div className={styles.datasetListPage}>
             <header>
                 <h1>Vos Datasets</h1>
-                <button className={`${btn.button} ${btn.primary}`} onClick={() => setIsModalOpen(true)} disabled={createMutation.isPending}>
+                <button className="button primary" onClick={() => setIsModalOpen(true)} disabled={createMutation.isPending}>
                     Créer un nouveau dataset
                 </button>
             </header>

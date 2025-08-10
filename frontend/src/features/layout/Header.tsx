@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { useProjectStore, useGraphStore, useAuthStore } from '../store';
 import type { ProjectListItem } from '@/types/api.v1'; // Le type est importé depuis sa source
 import styles from './Header.module.scss'
-import btn from '../../components/Button.module.scss'
 
 // Icône de déconnexion (inchangée)
 const PowerIcon = () => (
@@ -58,13 +57,13 @@ export function Header() {
                         <input type="text" value={currentProject.name} onChange={(e) => setCurrentProjectName(e.target.value)} placeholder="Nom du projet" />
                     </div>
                     <div className={styles.projectActions}>
-                        <select className={btn.select} onChange={(e) => { if (e.target.value) { loadProject(Number(e.target.value)); } }} value={currentProject.id || ''}>
+                        <select className="select" onChange={(e) => { if (e.target.value) { loadProject(Number(e.target.value)); } }} value={currentProject.id || ''}>
                             <option value="" disabled>Charger un projet...</option>
                             {projectList.map((p: ProjectListItem) => (<option key={p.id} value={p.id}>{p.name}</option>))}
                         </select>
-                        <button onClick={exportCurrentProject} className={btn.button} disabled={currentProject.id === null}>Exporter</button>
-                        <button onClick={handleSave} className={btn.button}>Sauvegarder</button>
-                        <button onClick={handleCreateNew} className={`${btn.button} ${btn.primary}`}>Nouveau Projet</button>
+                        <button onClick={exportCurrentProject} className="button" disabled={currentProject.id === null}>Exporter</button>
+                        <button onClick={handleSave} className="button">Sauvegarder</button>
+                        <button onClick={handleCreateNew} className="button primary">Nouveau Projet</button>
                     </div>
                 </>
             ) : (

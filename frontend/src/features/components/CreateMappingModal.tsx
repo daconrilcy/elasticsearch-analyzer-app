@@ -17,7 +17,6 @@ import type {
   NodeTypes,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import modal from '../../components/Modal.module.scss'
 import styles from './CreateMappingModal.module.scss'
 
 import { createMapping, getFileDetails } from '@/features/apiClient';
@@ -108,17 +107,17 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
     if (!isOpen) return null;
 
     return (
-        <div className={modal.modalOverlay}>
-          <div className={modal.modalContent}>
-            <header className={modal.modalHeader}>
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <header className="modalHeader">
               <h2>Créer un Mapping</h2>
-              <button onClick={onClose} className={modal.closeButton}>&times;</button>
+              <button onClick={onClose} className="closeButton">&times;</button>
             </header>
             {isFileLoading ? (
               <div>Chargement des détails du fichier...</div>
             ) : fileDetails ? (
               <>
-                <main className={modal.modalBody}>
+                <main className="modalBody">
                    <p className={styles['file-info']}>Fichier source : <strong>{fileDetails.filename_original}</strong></p>
                    <div className={styles['mapping-form']}>
                      <input
@@ -147,9 +146,9 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
                      Ajouter un champ cible
                    </button>
                 </main>
-                <footer className={modal.modalFooter}>
+                <footer className="modalFooter">
                   <button onClick={onClose} disabled={createMappingMutation.isPending}>Annuler</button>
-                  <button onClick={handleSaveMapping} className={modal.primary} disabled={createMappingMutation.isPending}>
+                  <button onClick={handleSaveMapping} className="primary" disabled={createMappingMutation.isPending}>
                     {createMappingMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                   </button>
                 </footer>
