@@ -1,65 +1,185 @@
 @use '../../styles/utils/variables' as *;
 @use '../../styles/utils/mixins' as *;
 
+/* ========= Node container (ne clippe jamais les handles) ========= */
 .custom-node {
+  /* tokens CSS (définis par data-kind en dessous) */
+  --grad-node: #{$gradient-tokenizer};
+  --accent-node: #{$node-tokenizer-accent};
+  --node-radius: 24px;
+
   position: relative;
-  border-radius: $border-radius-node;
-  color: white;
-  min-width: 180px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  isolation: isolate;
+  min-width: 200px;
+  border-radius: var(--node-radius);
+  color: $text-on-glass;
+  text-align: left;
+
+  overflow: visible;      /* pas de clipping pour les handles */
+  will-change: transform;
+
+  /* glow externe doux */
+  box-shadow:
+    0 12px 32px rgba(15, 23, 42, 0.16),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+/* ========= Wrapper visuel : clip décor, pas les handles ========= */
+.visual {
+  position: relative;
+  border-radius: inherit;
   overflow: hidden;
-  @include interactive-shadow;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  padding: 14px 18px;
+  background: var(--grad-node);      /* gradient centralisé */
+  background-blend-mode: overlay;
+
+  /* Verre : flou + saturation, bordure claire */
+  backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.05);
+  -webkit-backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.05);
+  border: 1px solid $glass-border-color;
+
+  /* Relief interne subtil */
+  box-shadow:
+    inset 0 1px 0 #{$glass-inner-highlight},
+    inset 0 -10px 28px #{$glass-inner-shadow};
+
+  /* Halo coloré (glow) */
+  &::after {
+    content: "";
+    position: absolute; inset: -16px;
+    border-radius: inherit;
+    background:
+      radial-gradient(120% 120% at 10% 50%, color-mix(in srgb, var(--accent-node) 22%, transparent), transparent 60%),
+      radial-gradient(120% 120% at 90% 50%, color-mix(in srgb, var(--accent-node) 22%, transparent), transparent 60%);
+    filter: blur(18px);
+    z-index: 0; pointer-events: none;
+  }
+
+  /* contenu au-dessus du verre */
+  > * { position: relative; z-index: 1; }
 }
 
-/* Variantes de couleur par type (classes globales côté TSX) */
-:global(.custom-node-input) { background: $gradient-input; }
-:global(.custom-node-output) { background: $gradient-output; }
-:global(.custom-node-char_filter) { background: $gradient-char-filter; }
-:global(.custom-node-tokenizer) { background: $gradient-tokenizer; }
-:global(.custom-node-token_filter) { background: $gradient-token-filter; }
+/* ========= Handles React Flow — jamais clippés ========= */
+.custom-node :global(.react-flow__handle) {
+  position: absolute;
+  z-index: 3; /* > .visual et > edges */
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.18);
+  top: 50%; transform: translateY(-50%);
+}
+.custom-node :global(.react-flow__handle-left)  { left:  -14px !important; }
+.custom-node :global(.react-flow__handle-right) { right: -14px !important; }
+.custom-node :global(.react-flow__handle)::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+}
+.custom-node :global(.react-flow__handle:focus-visible) {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.65), 0 0 0 6px rgba(255,255,255,0.9);
+}
 
-.node-header {
-  position: relative;
-  padding: 18px 24px;
+/* ========= Palette par type (définit les tokens CSS) ========= */
+[data-kind='input'] {
+  --grad-node: #{$gradient-input};
+  --accent-node: #{$node-input-accent};
+  --node-radius: 22px;
+}
+[data-kind='output'] {
+  --grad-node: #{$gradient-output};
+  --accent-node: #{$node-output-accent};
+  --node-radius: 22px;
+}
+[data-kind='tokenizer'] {
+  --grad-node: #{$gradient-tokenizer};
+  --accent-node: #{$node-tokenizer-accent};
+  --node-radius: 18px;
+}
+[data-kind='token_filter'] {
+  --grad-node: #{$gradient-token-filter};
+  --accent-node: #{$node-tokenfilter-accent};
+  --node-radius: 26px;
+}
+[data-kind='char_filter'] {
+  --grad-node: #{$gradient-char-filter};
+  --accent-node: #{$node-charfilter-accent};
+  --node-radius: 24px;
+}
+
+/* ========= Bande d'accent gauche (douce) ========= */
+.typeBar {
+  position: absolute; inset: 0 auto 0 0;
+  width: 16px; z-index: 1;
+  border-top-left-radius: inherit; border-bottom-left-radius: inherit;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent-node) 36%, transparent) 0%,
+    rgba(0,0,0,0) 95%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* ========= Contenu ========= */
+.nodeHeader {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  strong {
-    font-weight: $font-weight-bold;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
+  flex-direction: column;     /* sous-titre sur nouvelle ligne */
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 4px 8px;
+}
+.nodeHeader strong {
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  color: $text-on-glass;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.45); /* lisibilité ++ */
+}
+.typeSubtitle {
+  display: block;             /* nouvelle ligne */
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-on-glass-sub;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.40);
+  opacity: 0.98;
 }
 
-.node-content { padding: 0 16px 16px 16px; }
-
-.input-textarea {
-  width: 100%;
-  height: 80px;
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  font-family: $font-family-sans;
-  font-size: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.95);
-  resize: none;
-  &:focus { outline: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6); }
+.nodeContent { padding: 4px 0 2px; }
+.inputTextarea {
+  width: 100%; height: 80px; resize: none;
+  border: none; border-radius: 12px; padding: 12px;
+  font-family: $font-family-sans; font-size: 1rem;
+  background-color: rgba(0, 0, 0, 0.22);
+  color: $text-on-glass;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  &:focus { outline: none; box-shadow: inset 0 0 0 2px rgba(255,255,255,.55); }
 }
 
-/* Effet sélection ReactFlow */
-:global(.react-flow__node.selected),
-:global(.react-flow__node:focus-visible) {
-  .custom-node {
-    box-shadow: 0 0 0 3px rgba($accent-color, 0.4), 0 12px 28px rgba($shadow-color, 0.8);
-  }
+/* ========= Hover : intensité & saturation ========= */
+.custom-node:hover .visual {
+  backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.18);
+  -webkit-backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -12px 30px rgba(0, 0, 0, 0.12);
+}
+.custom-node:hover .visual::after { filter: blur(20px); }
+
+/* ========= États ========= */
+:global(.react-flow__node.selected) .visual,
+:global(.react-flow__node:focus-visible) .visual {
+  backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.24);
+  -webkit-backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.24);
 }
 
-.selected {
-  box-shadow: 0 0 0 3px rgba($accent-color, 0.4), 0 12px 28px rgba($shadow-color, 0.8);
+/* ========= Dark mode ========= */
+:global(html.theme-dark) .custom-node .visual {
+  backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.02) brightness(0.95);
+  -webkit-backdrop-filter: blur(#{$glass-blur-strength}) saturate(1.02) brightness(0.95);
 }
 
-
+/* ========= Motion-safe ========= */
+@media (prefers-reduced-motion: reduce) {
+  .visual { transition: none; }
+}

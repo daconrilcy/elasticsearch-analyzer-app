@@ -1,6 +1,6 @@
 // 1. Color Palette
 $bg-main: #f7f9fc; // Blanc cassé
-$bg-panel: rgba(255, 255, 255, 0.5); // Verre plus translucide
+$bg-panel: rgba(255, 255, 255, 0.15); // Verre très translucide (glassmorphism)
 $text-primary: #1a202c;
 $text-secondary: #5a6474;
 $border-color: rgba(255, 255, 255, 0.7);
@@ -11,21 +11,45 @@ $accent-glow: rgba($accent-color, 0.7);
 $danger-color: rgba(255, 0, 0, 1);
 $success-color: rgba(0,255,0, 1);
 
-// 2. Gradients (plus doux et orientés)
-$gradient-char-filter: linear-gradient(120deg, #30cfd0 0%, #330867 100%);
-$gradient-button-primary: linear-gradient(120deg, #5d69f3 0%, #9747ff 100%);
-$gradient-input: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-$gradient-tokenizer: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
-$gradient-token-filter: linear-gradient(135deg, #38bdf8 0%, #34d399 100%); // Même que tokenizer pour l'exemple
-$gradient-output: linear-gradient(135deg, #fb923c 0%, #f472b6 100%);
+// Lisibilité sur verre
+$text-on-glass: rgba(255, 255, 255, 0.98);
+$text-on-glass-sub: rgba(255, 255, 255, 0.95);
 
+// 2. Nodes — couleurs intenses + accents (INPUT ≠ OUTPUT)
+$node-input-c1:  #ff4d4d; // rouge vif
+$node-input-c2:  #ff9900; // orange intense
+$node-input-accent: #ff5c33;
+
+$node-output-c1: #8e2de2; // violet profond
+$node-output-c2: #ff6ec4; // rose éclatant
+$node-output-accent: #d94fc7;
+
+$node-tokenizer-c1: #0099ff;
+$node-tokenizer-c2: #00f2fe;
+$node-tokenizer-accent: #00bfff;
+
+$node-tokenfilter-c1: #00cc66;
+$node-tokenfilter-c2: #00ffcc;
+$node-tokenfilter-accent: #00e6a8;
+
+$node-charfilter-c1:  #ffcc00;
+$node-charfilter-c2:  #ff9900;
+$node-charfilter-accent: #ffb84d;
+
+// 2.b Gradients (dérivés des couleurs ci-dessus)
+$gradient-input:        linear-gradient(135deg, #{$node-input-c1} 0%, #{$node-input-c2} 100%);
+$gradient-output:       linear-gradient(135deg, #{$node-output-c1} 0%, #{$node-output-c2} 100%);
+$gradient-tokenizer:    linear-gradient(135deg, #{$node-tokenizer-c1} 0%, #{$node-tokenizer-c2} 100%);
+$gradient-token-filter: linear-gradient(135deg, #{$node-tokenfilter-c1} 0%, #{$node-tokenfilter-c2} 100%);
+$gradient-char-filter:  linear-gradient(135deg, #{$node-charfilter-c1} 0%, #{$node-charfilter-c2} 100%);
+$gradient-button-primary: linear-gradient(120deg, #5d69f3 0%, #9747ff 100%);
 
 // 3. Typography
 $font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 $font-weight-medium: 500;
 $font-weight-bold: 700;
 
-// 3. Sizing & Spacing
+// 4. Sizing & Spacing
 $border-radius-xl: 24px;
 $border-radius-lg: 16px;
 $border-radius-md: 12px;
@@ -37,3 +61,9 @@ $spacing-unit: 8px;
 // 5. Effects
 $box-shadow-soft: 0 8px 32px 0 $shadow-color;
 $backdrop-blur: blur(24px);
+
+// Verre & bordures
+$glass-blur-strength: 14px;
+$glass-border-color: rgba(255, 255, 255, 0.38);
+$glass-inner-highlight: rgba(255, 255, 255, 0.35);
+$glass-inner-shadow: rgba(0, 0, 0, 0.10);
