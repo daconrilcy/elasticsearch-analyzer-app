@@ -1,7 +1,8 @@
+// CustomNode.tsx
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { useAnalysisStore } from '../store/analysisStore';
 import type { NodeData } from '../../shared/types/analyzer.d';
-import styles from './CustomNode.module.scss'
+import styles from './CustomNode.module.scss';
 
 export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const { kind, label, name } = data;
@@ -11,28 +12,46 @@ export function CustomNode({ data, selected }: NodeProps<NodeData>) {
   const isOutputNode = kind === 'output';
 
   return (
-    <div className={`${styles.customNode} custom-node-${kind} ${selected ? styles.selected : ''}`}>
-      {!isOutputNode && (
-        <Handle type="source" position={Position.Right} />
-      )}
+    <div
+      data-kind={kind}
+      className={`${styles.customNode} ${selected ? 'selected' : ''}`}
+    >
+      {/* Handles -> en dehors du wrapper visuel */}
+      {!isInputNode && <Handle type="target" position={Position.Left} />}
+      {!isOutputNode && <Handle type="source" position={Position.Right} />}
 
-      <div className={styles.nodeHeader}>
-        {!isInputNode && (
-          <Handle type="target" position={Position.Left} />
-        )}
-        <strong>{label || name}</strong>
-      </div>
+      {/* Wrapper visuel qui clippe uniquement le décor */}
+      <div className={styles.visual}>
+        <span className={styles.typeBar} aria-hidden="true" />
 
-      {isInputNode && (
-        <div className={styles.nodeContent}>
-          <textarea
-            className={styles.inputTextarea}
-            value={inputText}
-            onChange={(evt) => setInputText(evt.target.value)}
-            placeholder="Saisissez votre texte ici..."
-          />
+        <div className={styles.nodeHeader}>
+          <strong>{label || name}</strong>
+          <span className={styles.typeSubtitle}>
+            {isInputNode
+              ? 'Input'
+              : isOutputNode
+              ? 'Output'
+              : kind === 'tokenizer'
+              ? 'Tokenizer'
+              : kind === 'token_filter'
+              ? 'Token Filter'
+              : kind === 'char_filter'
+              ? 'Char Filter'
+              : ''}
+          </span>
         </div>
-      )}
+
+        {isInputNode && (
+          <div className={styles.nodeContent}>
+            <textarea
+              className={styles.inputTextarea}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Saisissez votre texte ici..."
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
