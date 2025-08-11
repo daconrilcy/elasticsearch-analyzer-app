@@ -4,8 +4,8 @@
 .configPanel {
   position: absolute;
   top: 16px;
-  left: 24px;
-  z-index: 20;
+  left: 24px; // Ajusté car le contenu principal a maintenant une marge de 80px
+  z-index: 950;
   background: linear-gradient(135deg, hsla(220, 20%, 40%, 0.6) 0%, hsla(220, 22%, 5%, 0.5) 100%);
   border-radius: 32px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 1.5px 12px 0 rgba(0,0,0,0.12);

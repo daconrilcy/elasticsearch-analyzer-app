@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ReactFlow, { Controls, Background, ReactFlowProvider } from 'reactflow';
 import { Toaster } from 'react-hot-toast';
@@ -11,6 +11,7 @@ import { useDebouncedAnalysis, useFlowInteractions, useConnectionValidation } fr
 // --- Composants ---
 import { CustomNode, Sidebar, ResultPanel, ConfigurationPanel } from '@features/analyzers';
 import { Header, IconSidebar } from '@shared/ui';
+import { FilePreview } from '@features/preview';
 
 // --- Pages ---
 import { AuthPage } from '@pages/auth/AuthPage';
@@ -74,6 +75,42 @@ function AnalyzerPage() {
     );
 }
 
+function FilePreviewPage() {
+    const [fileId, setFileId] = useState<string>('');
+    const [inputValue, setInputValue] = useState<string>('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (inputValue.trim()) {
+            setFileId(inputValue.trim());
+        }
+    };
+
+    return (
+        <div className={styles.filePreviewPage}>
+            <div className={styles.filePreviewHeader}>
+                <h1>Prévisualisation de Fichiers</h1>
+                <p>Collez un UUID de fichier pour commencer la prévisualisation</p>
+                
+                <form onSubmit={handleSubmit} className={styles.fileIdForm}>
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Entrez l'UUID du fichier..."
+                        className={styles.fileIdInput}
+                    />
+                    <button type="submit" className={styles.fileIdButton}>
+                        Charger
+                    </button>
+                </form>
+            </div>
+            
+            {fileId && <FilePreview fileId={fileId} />}
+        </div>
+    );
+}
+
 function App() {
     const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
 
@@ -92,7 +129,6 @@ function App() {
                 ) : (
                     // --- CORRECTION : Nouvelle structure de mise en page globale ---
                     <div className={styles.appContainer}>
-                        <IconSidebar />
                         <div className={styles.pageContainer}>
                             <Header />
                             <main className={styles.pageContent}>
@@ -101,9 +137,11 @@ function App() {
                                     <Route path="/analyzer" element={<AnalyzerPage />} />
                                     <Route path="/datasets" element={<DatasetListPage />} />
                                     <Route path="/datasets/:datasetId" element={<DatasetDetailPage />} />
+                                    <Route path="/preview" element={<FilePreviewPage />} />
                                 </Routes>
                             </main>
                         </div>
+                        <IconSidebar />
                     </div>
                 )}
             </ReactFlowProvider>

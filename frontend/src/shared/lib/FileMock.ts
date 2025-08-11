@@ -2,7 +2,7 @@ import { FileStatus, type FileDetail } from '../types/api.v1';
 
 export const mockFiles: FileDetail[] = [
   {
-    id: '1',
+    id: '550e8400-e29b-41d4-a716-446655440001',
     filename_original: 'ventes_trimestre_1.csv',
     status: FileStatus.READY,
     version: 2,
@@ -21,7 +21,7 @@ export const mockFiles: FileDetail[] = [
     hash: 'cdkcskcd;slkcdl;ckdsl;ckds;lckd'
   },
   {
-    id: '2',
+    id: '550e8400-e29b-41d4-a716-446655440002',
     filename_original: 'inventaire_stock.xlsx',
     status: FileStatus.PARSING,
     version: 1,
@@ -36,7 +36,7 @@ export const mockFiles: FileDetail[] = [
     hash: 'sdokcdsockdsocdcpckds'
   },
   {
-    id: '3',
+    id: '550e8400-e29b-41d4-a716-446655440003',
     filename_original: 'clients_export_corrompu.csv',
     status: FileStatus.ERROR,
     version: 1,

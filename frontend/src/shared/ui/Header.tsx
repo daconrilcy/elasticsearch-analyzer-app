@@ -51,6 +51,9 @@ export function Header() {
 
     return (
         <header className={styles.appHeader}>
+            <div className={styles.faviconContainer}>
+                <img src="/favicon.ico" alt="Logo" className={styles.favicon} />
+            </div>
             {isAnalyzerPage ? (
                 <>
                     <div className={styles.projectTitle}>

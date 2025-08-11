@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { FileDetail, FileOut } from '@shared/types';
 import { FileStatus } from '@shared/types';
 import { StatusBadge } from '@features/analyzers';
-import { DataPreviewModal } from './DataPreviewModal';
+import { FilePreviewModal } from '@features/preview';
 import styles from './FileListItem.module.scss'
 
 interface FileListItemProps {
@@ -75,11 +75,11 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
         </div>
       )}
 
-      <DataPreviewModal 
+      <FilePreviewModal 
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
+        fileId={file.id}
         filename={file.filename_original}
-        data={file.preview_data || []}
       />
     </li>
   );

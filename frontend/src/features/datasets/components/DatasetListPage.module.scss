@@ -1,9 +1,88 @@
-.dataset-list-page {
-  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  header h1 { margin: 0; }
-  main ul { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-  main li { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
-  main a { color: inherit; text-decoration: none; }
+.datasetListPage {
+  header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 16px;
+    margin-left: 80px; // Marge pour éviter la superposition avec le favicon
+  }
+  header h1 { 
+    margin: 0; 
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  main { 
+    margin-left: 80px; // Marge pour le contenu principal
+    margin-top: 24px;
+  }
+  main ul { 
+    list-style: none; 
+    padding: 0; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+    gap: 16px; 
+  }
+  main li { 
+    background: #fff; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 12px; 
+    padding: 16px; 
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+  main a { 
+    color: inherit; 
+    text-decoration: none; 
+  }
+}
+
+// Media queries pour la responsivité
+@media (max-width: 1200px) {
+  .datasetListPage {
+    header,
+    main {
+      margin-left: 70px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .datasetListPage {
+    header,
+    main {
+      margin-left: 60px;
+    }
+    
+    header h1 {
+      font-size: 1.5rem;
+    }
+    
+    main ul {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .datasetListPage {
+    header,
+    main {
+      margin-left: 50px;
+    }
+    
+    header h1 {
+      font-size: 1.3rem;
+    }
+    
+    main ul {
+      grid-template-columns: 1fr;
+    }
+  }
 }
 
 

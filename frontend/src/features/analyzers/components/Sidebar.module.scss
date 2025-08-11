@@ -3,11 +3,11 @@
 
 .sidebar {
   position: absolute;
-  top: 90px;
-  left: 24px;
-  z-index: 20;
+  top: 110px;
+  left: 24px; // Ajusté car le contenu principal a maintenant une marge de 80px
+  z-index: 950;
   width: 324px;
-  max-height: calc(100% - 114px);
+  max-height: calc(100% - 134px);
   border-radius: 28px;
   @include glass-panel;
   background: rgba(247, 249, 252, 0.7);
@@ -31,7 +31,7 @@
   }
 }
 
-.sidebar-content-scrollable {
+.sidebarContentScrollable {
   flex: 1 1 auto;
   width: 100%;
   height: 100%;

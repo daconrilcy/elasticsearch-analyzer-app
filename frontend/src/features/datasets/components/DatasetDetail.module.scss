@@ -3,16 +3,28 @@
     display: flex; 
     align-items: center; 
     gap: 16px; 
+    margin-left: 80px; // Marge pour éviter la superposition avec le favicon
+    margin-bottom: 24px;
   }
   
   header h1 { 
     margin: 0; 
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  header p {
+    margin: 8px 0 0 0;
+    color: #64748b;
+    font-size: 1.1rem;
   }
   
   main { 
     display: grid; 
     grid-template-columns: 1fr; 
     gap: 16px; 
+    margin-left: 80px; // Marge pour le contenu principal
   }
 }
 
@@ -48,6 +60,50 @@
 
 .mappingsSection {
   // Styles spécifiques pour la section des mappings
+}
+
+// Media queries pour la responsivité
+@media (max-width: 1200px) {
+  .datasetHub {
+    header,
+    main {
+      margin-left: 70px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .datasetHub {
+    header,
+    main {
+      margin-left: 60px;
+    }
+    
+    header h1 {
+      font-size: 1.5rem;
+    }
+    
+    header p {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .datasetHub {
+    header,
+    main {
+      margin-left: 50px;
+    }
+    
+    header h1 {
+      font-size: 1.3rem;
+    }
+    
+    header p {
+      font-size: 0.95rem;
+    }
+  }
 }
 
 
