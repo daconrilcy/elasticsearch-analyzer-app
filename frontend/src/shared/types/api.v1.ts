@@ -78,6 +78,7 @@ export interface FileDetail extends FileOut {
   hash: string;
   created_at: string;
   updated_at: string;
+  uploader_id: string;
   uploader_name: string;
   parsing_error?: string | null;
   line_count: number;

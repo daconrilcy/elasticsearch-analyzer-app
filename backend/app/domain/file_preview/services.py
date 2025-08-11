@@ -38,11 +38,15 @@ class FilePreviewService:
         else:
             rows = self._normalize_rows(df.iloc[start:end])
 
+        # Calculer si il y a plus de chunks après celui-ci
+        has_more = (chunk_index + 1) < total_chunks
+
         return FilePreviewChunk(
             chunk_index=chunk_index,
             chunk_size=chunk_size,
             total_rows=total_rows,
             total_chunks=total_chunks,
+            has_more=has_more,
             rows=rows,
         )
 

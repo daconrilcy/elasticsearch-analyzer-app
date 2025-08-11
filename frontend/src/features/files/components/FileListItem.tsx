@@ -30,6 +30,33 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
     return new Date(dateString).toLocaleString('fr-FR');
   }
 
+  const handleDownload = async () => {
+    try {
+      // Créer un lien de téléchargement temporaire
+      const response = await fetch(`/api/v1/files/${file.id}/download`, {
+        method: 'GET',
+        credentials: 'include', // Inclure les cookies d'authentification
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur de téléchargement: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.filename_original;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      alert('Erreur lors du téléchargement du fichier');
+    }
+  };
+
   return (
             <li className={`${styles.fileListItem} ${styles[`status${file.status.charAt(0).toUpperCase() + file.status.slice(1)}`]}`}>
       <div className={styles.fileItemMain}>
@@ -55,14 +82,14 @@ export const FileListItem: React.FC<FileListItemProps> = ({ file, onDelete, onRe
         <div className={styles.fileItemDetails}>
           <h4>Informations Techniques</h4>
           <ul>
-            <li><strong>Uploader:</strong> {file.uploader_name || 'N/A'}</li>
+            <li><strong>Uploadé par:</strong> {file.uploader_name || 'Utilisateur inconnu'}</li>
             <li><strong>Lignes:</strong> {file.line_count ?? 'N/A'}</li>
             <li><strong>Colonnes:</strong> {file.column_count ?? 'N/A'}</li>
             <li><strong>Dernière modification:</strong> {formatDate(file.updated_at)}</li>
             <li className={styles.fileHash}><strong>Hash (SHA-256):</strong> <span>{file.hash || 'N/A'}</span></li>
           </ul>
           <div className={styles.detailsActions}>
-             <button className="button">Télécharger</button>
+             <button className="button" onClick={handleDownload}>Télécharger</button>
              <button className="button danger" onClick={() => onDelete(file.id)}>Supprimer</button>
           </div>
         </div>

@@ -13,6 +13,7 @@ class FilePreviewChunk(BaseModel):
     chunk_size: int
     total_rows: Optional[int] = None
     total_chunks: Optional[int] = None
+    has_more: bool
     rows: List[Dict[str, Any]]
 
 

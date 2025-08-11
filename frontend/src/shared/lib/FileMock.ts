@@ -8,6 +8,7 @@ export const mockFiles: FileDetail[] = [
     version: 2,
     created_at: '2025-07-30T10:00:00Z',
     updated_at: '2025-07-30T10:05:00Z',
+    uploader_id: 'user-001',
     uploader_name: 'alice.dupont',
     size_bytes: 124000,
     line_count: 1500,
@@ -27,6 +28,7 @@ export const mockFiles: FileDetail[] = [
     version: 1,
     created_at: '2025-07-31T11:30:00Z',
     updated_at: '2025-07-31T11:31:00Z',
+    uploader_id: 'user-002',
     uploader_name: 'bob.martin',
     size_bytes: 875000,
     line_count: 0, // Inconnu pendant le parsing
@@ -42,6 +44,7 @@ export const mockFiles: FileDetail[] = [
     version: 1,
     created_at: '2025-07-31T14:00:00Z',
     updated_at: '2025-07-31T14:01:00Z',
+    uploader_id: 'user-001',
     uploader_name: 'alice.dupont',
     size_bytes: 56000,
     parsing_error: "Erreur à la ligne 54 : nombre de colonnes incorrect.",

@@ -53,6 +53,7 @@ class File(Base):
     version = Column(Integer, nullable=False)
     hash = Column(String, nullable=False, index=True)
     size_bytes = Column(Integer, nullable=False)
+    mime_type = Column(String, nullable=True)
     status = Column(SQLAlchemyEnum(FileStatus), nullable=False, default=FileStatus.PENDING)
     
     # Métadonnées extraites et statut d'ingestion

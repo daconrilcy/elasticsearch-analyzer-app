@@ -22,6 +22,7 @@ class FileOut(BaseModel):
     # Métadonnées et statistiques
     version: int = Field(description="Version du fichier au sein du dataset.")
     size_bytes: int = Field(description="Taille du fichier en octets.")
+    file_size: int = Field(alias="size_bytes", description="Taille du fichier en octets (alias pour compatibilité).")
     hash: str = Field(description="Hash SHA-256 du contenu du fichier.")
     line_count: Optional[int] = Field(None, description="Nombre de lignes détectées après parsing.")
     column_count: Optional[int] = Field(None, description="Nombre de colonnes détectées après parsing.")
@@ -30,7 +31,7 @@ class FileOut(BaseModel):
     uploader_id: uuid.UUID = Field(description="ID de l'utilisateur qui a uploadé le fichier.")
     uploader_name: Optional[str] = Field(None, description="Nom de l'utilisateur qui a uploadé le fichier.")
     created_at: datetime = Field(description="Date et heure de l'upload.")
-    updated_at: Optional[datetime] = Field(description="Date et heure de la dernière modification.")
+    updated_at: Optional[datetime] = Field(None, description="Date et heure de la dernière modification.")
     
     # Informations d'ingestion et de mapping
     ingestion_status: IngestionStatus = Field(description="Statut du processus d'ingestion dans Elasticsearch.")
@@ -41,6 +42,9 @@ class FileOut(BaseModel):
     # Données d'aperçu
     inferred_schema: Optional[Dict[str, Any]] = Field(None, description="Schéma de données inféré lors du parsing.")
     preview_data: Optional[List[Dict[str, Any]]] = Field(None, description="Un échantillon des premières lignes de données.")
+    
+    # Type MIME
+    mime_type: Optional[str] = Field(None, description="Type MIME du fichier.")
 
     model_config = ConfigDict(from_attributes=True)
 
