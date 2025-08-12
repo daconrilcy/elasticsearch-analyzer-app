@@ -1,8 +1,23 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Optional, Union
+from prometheus_client import Counter, Histogram, Gauge
 from .ops import (
     ExecIssue, OP_REGISTRY, eval_condition, _coalesce, _is_null
 )
+
+# Métriques Prometheus V2.1
+JP_HIT = Counter("jsonpath_cache_hits_total", "hits")
+JP_MISS = Counter("jsonpath_cache_misses_total", "misses")
+JP_TIME = Histogram("jsonpath_resolve_ms", "resolve time (ms)")
+JP_SIZE = Gauge("jsonpath_cache_size", "compiled expr count")
+
+OP_TIME = Histogram("mapping_op_ms", "op latency (ms)", ["op"])
+OP_BUDGET = Counter("mapping_op_budget_exceeded_total", "budget exceeded")
+OP_BUDGET_LIMIT = 200
+
+ZIP_PAD = Counter("mapping_zip_pad_events_total", "zip padding used")
+OBJ_REC = Counter("mapping_objectify_records_total", "objects built")
+OBJ_MISS = Counter("mapping_objectify_missing_fields_total", "missing per object")
 
 # mapping alias -> canonique
 OP_ALIAS = {
@@ -26,11 +41,16 @@ def _resolve_input(inp: dict, row: dict, mapping: dict):
         try:
             cache = _get_jp_cache(mapping)
             expr = inp.get("expr")
-            cp = cache.get(expr)
-            if cp is None:
-                from jsonpath_ng import parse
-                cp = parse(expr)
-                cache[expr] = cp
+            with JP_TIME.time():
+                cp = cache.get(expr)
+                if cp is None:
+                    JP_MISS.inc()
+                    from jsonpath_ng import parse
+                    cp = parse(expr)
+                    cache[expr] = cp
+                    JP_SIZE.set(len(cache))
+                else:
+                    JP_HIT.inc()
             matches = [m.value for m in cp.find(row)]
             return matches if len(matches) > 1 else (matches[0] if matches else None)
         except Exception:
@@ -177,8 +197,9 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
     
     for name, kwargs, raw in plan:
         budget += 1
-        if budget > MAX_OPS_PER_ROW:
-            issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_BUDGET_EXCEEDED", msg=f"op budget per row exceeded ({budget} > {MAX_OPS_PER_ROW})"))
+        if budget > OP_BUDGET_LIMIT:
+            OP_BUDGET.inc()
+            issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_BUDGET_EXCEEDED", msg=f"op budget per row exceeded ({budget} > {OP_BUDGET_LIMIT})"))
             return None
         
         # --- OPS ARRAY-AWARE ---
@@ -257,7 +278,8 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
             cur = _coalesce(cur, globals_cfg)
         
         try:
-            cur = fn(cur, **k)  # type: ignore
+            with OP_TIME.labels(name).time():
+                cur = fn(cur, **k)  # type: ignore
         except Exception as e:
             issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_EXEC", msg=f"{name} failed: {e}"))
             cur = None

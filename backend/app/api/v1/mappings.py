@@ -21,11 +21,18 @@ from ...domain.mapping.schemas import (
     MappingVersionCreate, MappingVersionUpdate, MappingVersionOut,
     InferTypesOut, EstimateSizeOut, CheckIdsOut
 )
+from prometheus_client import Counter
 from ...core.db import get_db
+from ...core.es_client import get_es_client
 from ...domain.user.models import User
 from ..dependencies import get_current_user
 
 router = APIRouter(prefix="/mappings", tags=["mappings"])
+
+# Métriques Prometheus V2.1
+COMPILE_COUNT = Counter("mapping_compile_calls_total", "compile calls")
+APPLY_OK = Counter("mapping_apply_success_total", "apply OK", ["resource"])  # ilm|pipeline|index
+APPLY_FAIL = Counter("mapping_apply_fail_total", "apply FAIL", ["resource"])
 
 
 MAX_BODY = 5 * 1024 * 1024  # 5 MB
@@ -326,3 +333,79 @@ async def delete_mapping_version(
     service = MappingService()
     await service.remove_version(db, version_id, current_user)
     return {"message": "Version supprimée avec succès"}
+
+@router.post("/apply")
+async def apply_mapping(
+    body: dict,
+    current_user: User = Depends(get_current_user),
+    mapping_service: MappingService = Depends(),
+    es_client = Depends(get_es_client)
+):
+    """Applique un mapping avec ILM et pipeline d'ingestion (idempotent)."""
+    try:
+        # Compilation du mapping
+        COMPILE_COUNT.inc()
+        compiled = mapping_service.compile(body, include_plan=False)
+        
+        ilm_policy = compiled.get("ilm_policy", {})
+        ingest_pipeline = compiled.get("ingest_pipeline", {})
+        settings = compiled.get("settings", {})
+        mappings = compiled.get("mappings", {})
+        
+        results = {}
+        
+        # 1. Création/Mise à jour de la politique ILM
+        if ilm_policy:
+            try:
+                r1 = es_client.ilm.put_lifecycle(
+                    name=ilm_policy["name"], 
+                    body=ilm_policy["policy"]
+                )
+                APPLY_OK.labels("ilm").inc()
+                results["ilm"] = {"status": "ok", "result": r1}
+            except Exception as e:
+                APPLY_FAIL.labels("ilm").inc()
+                results["ilm"] = {"status": "error", "error": str(e)}
+        
+        # 2. Création/Mise à jour du pipeline d'ingestion
+        if ingest_pipeline:
+            try:
+                r2 = es_client.ingest.put_pipeline(
+                    id=ingest_pipeline["name"], 
+                    body=ingest_pipeline["pipeline"]
+                )
+                APPLY_OK.labels("pipeline").inc()
+                results["pipeline"] = {"status": "ok", "result": r2}
+            except Exception as e:
+                APPLY_FAIL.labels("pipeline").inc()
+                results["pipeline"] = {"status": "error", "error": str(e)}
+        
+        # 3. Création/Mise à jour de l'index
+        try:
+            index_body = {
+                "settings": settings,
+                "mappings": mappings
+            }
+            r3 = es_client.indices.create(
+                index=body["index"], 
+                body=index_body, 
+                ignore=400  # Ignore si l'index existe déjà
+            )
+            APPLY_OK.labels("index").inc()
+            results["index"] = {"status": "ok", "result": r3}
+        except Exception as e:
+            APPLY_FAIL.labels("index").inc()
+            results["index"] = {"status": "error", "error": str(e)}
+        
+        return {
+            "ok": True,
+            "message": "Mapping appliqué avec succès",
+            "results": results
+        }
+        
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": str(e),
+            "message": "Erreur lors de l'application du mapping"
+        }

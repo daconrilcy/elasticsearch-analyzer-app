@@ -118,6 +118,8 @@ class CompileOut(BaseModel):
     mappings: Dict[str, Any]
     execution_plan: Optional[List[Dict[str, Any]]] = None
     compiled_hash: Optional[str] = None
+    ingest_pipeline: Optional[Dict[str, Any]] = None
+    ilm_policy: Optional[Dict[str, Any]] = None
 
 
 # --- Schémas pour le versioning des mappings ---
