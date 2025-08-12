@@ -146,6 +146,43 @@ def _post_validate(instance: Dict[str, Any]) -> List[ValidationIssue]:
                 path=f"/fields/{idx}/pipeline", 
                 msg=f"pipeline has {len(pipeline)} operations (max: 200)"
             ))
+        
+        # Nouvelles validations V2.2
+        field_type = f.get("type", "")
+        
+        # ignore_above → autorisé seulement sur keyword
+        if f.get("ignore_above") and field_type != "keyword":
+            errors.append(ValidationIssue(
+                code="E_IGNORE_ABOVE_INVALID_TYPE", 
+                path=f"/fields/{idx}/ignore_above", 
+                msg=f"ignore_above is only allowed on keyword fields, not on {field_type}"
+            ))
+        
+        # null_value → interdit sur text
+        if f.get("null_value") and field_type == "text":
+            errors.append(ValidationIssue(
+                code="E_NULL_VALUE_INVALID_TYPE", 
+                path=f"/fields/{idx}/null_value", 
+                msg="null_value is not allowed on text fields"
+            ))
+        
+        # copy_to → pas de self-target
+        copy_to = f.get("copy_to", [])
+        for copy_idx, copy_target in enumerate(copy_to):
+            if copy_target == f["target"]:
+                errors.append(ValidationIssue(
+                    code="E_COPY_TO_SELF", 
+                    path=f"/fields/{idx}/copy_to/{copy_idx}", 
+                    msg=f"copy_to cannot target self: '{copy_target}'"
+                ))
+            
+            # Vérification des collisions avec multi_fields réservés
+            if any(m.get("name") == "raw" for m in mf) and copy_target == f"{f['target']}.raw":
+                errors.append(ValidationIssue(
+                    code="E_COPY_TO_COLLISION", 
+                    path=f"/fields/{idx}/copy_to/{copy_idx}", 
+                    msg=f"copy_to target '{copy_target}' conflicts with reserved multi_field"
+                ))
 
     # Vérification de la politique d'ID
     if not instance.get("id_policy"):

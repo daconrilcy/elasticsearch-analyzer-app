@@ -325,6 +325,70 @@ def op_objectify(current, fields: dict, resolver=None, fill=None, strict: bool=F
         res.append(obj)
     return res
 
+# Nouvelles opérations V2.2
+def _as_list(v):
+    """Convertit une valeur en liste."""
+    return v if isinstance(v, list) else ([] if v is None else [v])
+
+def op_filter(current, cond: dict, **k):
+    """Filtre un tableau selon une condition."""
+    from .ops import eval_condition  # réutilise eval_condition existant
+    arr = _as_list(current)
+    out = []
+    for x in arr:
+        probe = x
+        if isinstance(x, dict) and "by" in cond:  # optionnel si on étend cond
+            probe = x.get(cond["by"])
+        if eval_condition(cond, probe, k.get("globals") or {}):
+            out.append(x)
+    return out
+
+def op_slice(current, start=0, end=None, **_):
+    """Extrait une portion d'un tableau."""
+    arr = _as_list(current)
+    return arr[start:end] if end is not None else arr[start:]
+
+def op_unique(current, by=None, **_):
+    """Supprime les doublons d'un tableau."""
+    arr = _as_list(current)
+    seen, out = set(), []
+    for x in arr:
+        key = x if by is None else (x.get(by) if isinstance(x, dict) else None)
+        try:
+            h = key if isinstance(key, (int, float, str, bool, type(None))) else str(key)
+        except Exception:
+            h = str(key)
+        if h not in seen:
+            seen.add(h)
+            out.append(x)
+    return out
+
+def _to_num(s):
+    """Convertit une valeur en nombre."""
+    if s is None:
+        return None
+    try:
+        return float(str(s).replace(",", "."))
+    except:
+        return None
+
+def op_sort(current, by=None, order="asc", numeric=False, missing_last=True, **_):
+    """Trie un tableau."""
+    arr = _as_list(current)
+    
+    def keyfn(x):
+        v = x.get(by) if (by and isinstance(x, dict)) else x
+        if numeric:
+            n = _to_num(v)
+            return (1, None) if n is None and missing_last else (0, n if n is not None else float("-inf"))
+        return (1, None) if v is None and missing_last else (0, str(v))
+    
+    rev = (order == "desc")
+    try:
+        return sorted(arr, key=keyfn, reverse=rev)
+    except Exception:
+        return arr
+
 def eval_condition(cond: Dict[str, Any], probe: Any, globals: Dict[str, Any]) -> bool:
     t = cond.get("type") or next(iter(cond.keys()), None)  # tolère forme courte
     # formes courtes: {"gt": 5}, {"lt": 10}, {"contains":"abc"}, {"is_numeric": true}
@@ -385,4 +449,9 @@ OP_REGISTRY = {
     "regex_extract": op_regex_extract,
     "zip": op_zip,
     "objectify": op_objectify,
+    # Nouvelles opérations V2.2
+    "filter": op_filter,
+    "slice": op_slice,
+    "unique": op_unique,
+    "sort": op_sort,
 }

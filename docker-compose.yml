@@ -47,6 +47,8 @@ services:
       - "9090:9090"
     volumes:
       - ./backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./backend/prometheus-rules.yml:/etc/prometheus/prometheus-rules.yml:ro
+      - ./backend/prometheus_rules_v21.yml:/etc/prometheus/prometheus_rules_v21.yml:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

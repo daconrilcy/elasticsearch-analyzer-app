@@ -1,0 +1,150 @@
+groups:
+  - name: mapping_dsl_v21_alerts
+    rules:
+      # Alertes de performance
+      - alert: MappingCompileHighLatency
+        expr: histogram_quantile(0.95, sum(rate(mapping_compile_calls_total[5m])) by (le)) > 100
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Latence de compilation élevée"
+          description: "La latence P95 de compilation des mappings dépasse 100ms depuis {{ $labels.instance }}"
+          value: "{{ $value }}ms"
+
+      - alert: MappingApplyFailureRate
+        expr: rate(mapping_apply_fail_total[5m]) / (rate(mapping_apply_success_total[5m]) + rate(mapping_apply_fail_total[5m])) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Taux d'échec d'apply élevé"
+          description: "Le taux d'échec des opérations d'apply dépasse 5% depuis {{ $labels.instance }}"
+          value: "{{ $value | humanizePercentage }}"
+
+      # Alertes de cache JSONPath
+      - alert: JSONPathCacheHitRatioLow
+        expr: rate(jsonpath_cache_hits_total[5m]) / (rate(jsonpath_cache_hits_total[5m]) + rate(jsonpath_cache_misses_total[5m])) < 0.7
+        for: 3m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Ratio de cache JSONPath faible"
+          description: "Le ratio de hits du cache JSONPath est inférieur à 70% depuis {{ $labels.instance }}"
+          value: "{{ $value | humanizePercentage }}"
+
+      - alert: JSONPathCacheSizeHigh
+        expr: jsonpath_cache_size > 500
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Taille du cache JSONPath élevée"
+          description: "Le cache JSONPath contient plus de 500 expressions compilées sur {{ $labels.instance }}"
+          value: "{{ $value }} expressions"
+
+      # Alertes d'opérations
+      - alert: MappingOpBudgetExceeded
+        expr: increase(mapping_op_budget_exceeded_total[15m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Budget d'opérations dépassé"
+          description: "Le budget d'opérations a été dépassé sur {{ $labels.instance }} dans les 15 dernières minutes"
+          value: "{{ $value }} dépassements"
+
+      - alert: MappingOpHighLatency
+        expr: histogram_quantile(0.95, sum(rate(mapping_op_ms_bucket[5m])) by (op,le)) > 100
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Latence d'opération élevée"
+          description: "L'opération {{ $labels.op }} a une latence P95 supérieure à 100ms sur {{ $labels.instance }}"
+          value: "{{ $value }}ms"
+
+      # Alertes de ressources
+      - alert: MappingZipPaddingHigh
+        expr: rate(mapping_zip_pad_events_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Événements de padding zip élevés"
+          description: "Plus de 10 événements de padding zip par seconde sur {{ $labels.instance }}"
+          value: "{{ $value }} événements/sec"
+
+      - alert: MappingObjectifyMissingFields
+        expr: rate(mapping_objectify_missing_fields_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Champs manquants objectify élevés"
+          description: "Plus de 5 champs manquants par seconde lors de l'objectify sur {{ $labels.instance }}"
+          value: "{{ $value }} champs/sec"
+
+      # Alertes de disponibilité
+      - alert: MappingMetricsUnavailable
+        expr: up{job="elasticsearch-analyzer-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Métriques de mapping indisponibles"
+          description: "Les métriques de mapping DSL ne sont plus disponibles sur {{ $labels.instance }}"
+
+      - alert: MappingCompileNoCalls
+        expr: rate(mapping_compile_calls_total[10m]) == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Aucune compilation de mapping"
+          description: "Aucune compilation de mapping n'a été effectuée depuis 10 minutes sur {{ $labels.instance }}"
+
+      # Alertes de santé générale
+      - alert: MappingPipelineTooLong
+        expr: increase(mapping_pipeline_too_long_total[15m]) > 0
+        for: 1m
+        labels:
+          severity: info
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Pipelines de mapping trop longs"
+          description: "Des pipelines de mapping dépassent la limite recommandée sur {{ $labels.instance }}"
+          value: "{{ $value }} pipelines"
+
+      - alert: MappingValidationErrors
+        expr: rate(mapping_validation_errors_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: mapping_dsl
+          version: v2.1
+        annotations:
+          summary: "Erreurs de validation de mapping"
+          description: "Des erreurs de validation de mapping sont détectées sur {{ $labels.instance }}"
+          value: "{{ $value }} erreurs/sec"

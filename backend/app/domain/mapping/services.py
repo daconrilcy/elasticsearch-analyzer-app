@@ -159,6 +159,14 @@ class MappingService:
             if f.get("options"): 
                 field_def.update({k: v for k, v in f["options"].items()})
             
+            # Nouvelles options V2.2
+            if f.get("copy_to"):
+                field_def["copy_to"] = f["copy_to"]
+            if f.get("ignore_above"):
+                field_def["ignore_above"] = f["ignore_above"]
+            if f.get("null_value"):
+                field_def["null_value"] = f["null_value"]
+            
             # multi_fields
             if f.get("multi_fields"):
                 field_def["fields"] = {}
@@ -182,7 +190,7 @@ class MappingService:
         
         # Calcul du hash du DSL normalisé pour idempotence
         dsl = dict(mapping)  # Copie défensive
-        dsl.setdefault("dsl_version", "2.1")  # Version V2.1 par défaut
+        dsl.setdefault("dsl_version", "2.2")  # Version V2.2 par défaut
         normalized = _normalized_dsl(dsl)
         compiled_hash = _sha256(normalized)
         
@@ -190,10 +198,17 @@ class MappingService:
         ingest = MappingService._gen_ingest_pipeline(mapping)
         ilm = MappingService._gen_ilm_policy(mapping)
         
+        # Nouvelles propriétés V2.2 : dynamic_templates et runtime_fields
+        mappings = {"properties": props}
+        if mapping.get("dynamic_templates"):
+            mappings["dynamic_templates"] = mapping["dynamic_templates"]
+        if mapping.get("runtime_fields"):
+            mappings["runtime"] = mapping["runtime_fields"]
+        
         # ⚠️ stocke compiled_hash quand tu persistes MappingVersion
         out = schemas.CompileOut(
             settings=settings, 
-            mappings={"properties": props}, 
+            mappings=mappings, 
             execution_plan=plan,
             compiled_hash=compiled_hash,
             ingest_pipeline=ingest,

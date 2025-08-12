@@ -1,16 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ton-org/mapping-dsl/2-0.schema.json",
-  "title": "Elasticsearch Mapping DSL Schema V2",
-  "description": "Schéma V2 pour la validation du DSL de mapping CSV/JSON vers index Elasticsearch avec support des containers (object/nested) et opérations array-aware",
+  "$id": "https://ton-org/mapping-dsl/2-2.schema.json",
+  "title": "Elasticsearch Mapping DSL Schema V2.2",
+  "description": "Schéma V2.2 pour la validation du DSL de mapping CSV/JSON vers index Elasticsearch avec support des containers (object/nested), opérations array-aware et options ES avancées",
   "type": "object",
   "required": ["index", "globals", "id_policy", "fields", "dsl_version"],
   "properties": {
     "dsl_version": {
       "type": "string",
-      "description": "Version du DSL (ex: '1.0', '1.1', '2.0')",
+      "description": "Version du DSL (ex: '1.0', '1.1', '2.0', '2.1', '2.2')",
       "pattern": "^\\d+\\.\\d+$",
-      "default": "2.0"
+      "default": "2.2"
     },
     "containers": {
       "type": "array",
@@ -174,7 +174,8 @@
                   "enum": [
                     "trim", "lower", "lowercase", "upper", "uppercase", "split", "regex_replace", "replace", "date_parse", 
                     "geo_parse", "cast", "map", "take", "join", "flatten", 
-                    "length", "literal", "regex_extract", "zip", "objectify"
+                    "length", "literal", "regex_extract", "zip", "objectify",
+                    "filter", "slice", "unique", "sort"
                   ],
                   "description": "Opération de transformation"
                 },
@@ -219,6 +220,19 @@
           "options": {
             "type": "object",
             "description": "Options spécifiques au type Elasticsearch"
+          },
+          "copy_to": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Champs cibles pour la copie des valeurs"
+          },
+          "ignore_above": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Longueur maximale pour les champs keyword"
+          },
+          "null_value": {
+            "description": "Valeur par défaut pour les champs null"
           },
           "multi_fields": {
             "type": "array",
@@ -282,6 +296,18 @@
           }
         }
       }
+    },
+    "dynamic_templates": {
+      "type": "array",
+      "items": {"type": "object"},
+      "description": "Templates dynamiques Elasticsearch",
+      "default": []
+    },
+    "runtime_fields": {
+      "type": "object",
+      "additionalProperties": {"type": "object"},
+      "description": "Champs runtime Elasticsearch",
+      "default": {}
     }
   },
   "definitions": {
@@ -491,6 +517,46 @@
             },
             "fill": {},
             "strict": {"type": "boolean", "default": false}
+          },
+          "additionalProperties": false
+        },
+        "OpFilter": {
+          "type": "object",
+          "required": ["op", "cond"],
+          "properties": {
+            "op": {"const": "filter"},
+            "cond": {"type": "object"}
+          },
+          "additionalProperties": false
+        },
+        "OpSlice": {
+          "type": "object",
+          "required": ["op"],
+          "properties": {
+            "op": {"const": "slice"},
+            "start": {"type": "integer", "default": 0},
+            "end": {"type": ["integer", "null"], "default": null}
+          },
+          "additionalProperties": false
+        },
+        "OpUnique": {
+          "type": "object",
+          "required": ["op"],
+          "properties": {
+            "op": {"const": "unique"},
+            "by": {"type": ["string", "null"], "default": null}
+          },
+          "additionalProperties": false
+        },
+        "OpSort": {
+          "type": "object",
+          "required": ["op"],
+          "properties": {
+            "op": {"const": "sort"},
+            "by": {"type": ["string", "null"], "default": null},
+            "order": {"enum": ["asc", "desc"], "default": "asc"},
+            "numeric": {"type": "boolean", "default": false},
+            "missing_last": {"type": "boolean", "default": true}
           },
           "additionalProperties": false
         }

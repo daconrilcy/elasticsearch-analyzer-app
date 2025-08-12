@@ -4,6 +4,7 @@ global:
 
 rule_files:
   - "prometheus-rules.yml"
+  - "prometheus_rules_v21.yml"
 
 scrape_configs:
   - job_name: 'elasticsearch-analyzer-api'

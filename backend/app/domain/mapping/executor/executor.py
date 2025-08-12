@@ -250,6 +250,68 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
                 cur = flat
             continue
         
+        # Nouvelles opérations V2.2
+        if name == "filter":
+            cond = raw.get("cond", {})
+            if isinstance(cur, list):
+                from .ops import eval_condition
+                out = []
+                for x in cur:
+                    probe = x
+                    if isinstance(x, dict) and "by" in cond:
+                        probe = x.get(cond["by"])
+                    if eval_condition(cond, probe, globals_cfg):
+                        out.append(x)
+                cur = out
+            continue
+        
+        if name == "slice":
+            start = raw.get("start", 0)
+            end = raw.get("end")
+            if isinstance(cur, list):
+                cur = cur[start:end] if end is not None else cur[start:]
+            continue
+        
+        if name == "unique":
+            by = raw.get("by")
+            if isinstance(cur, list):
+                seen, out = set(), []
+                for x in cur:
+                    key = x if by is None else (x.get(by) if isinstance(x, dict) else None)
+                    try:
+                        h = key if isinstance(key, (int, float, str, bool, type(None))) else str(key)
+                    except Exception:
+                        h = str(key)
+                    if h not in seen:
+                        seen.add(h)
+                        out.append(x)
+                cur = out
+            continue
+        
+        if name == "sort":
+            by = raw.get("by")
+            order = raw.get("order", "asc")
+            numeric = raw.get("numeric", False)
+            missing_last = raw.get("missing_last", True)
+            
+            if isinstance(cur, list):
+                def keyfn(x):
+                    v = x.get(by) if (by and isinstance(x, dict)) else x
+                    if numeric:
+                        try:
+                            n = float(str(v).replace(",", ".")) if v is not None else None
+                            return (1, None) if n is None and missing_last else (0, n if n is not None else float("-inf"))
+                        except:
+                            return (1, None) if missing_last else (0, float("-inf"))
+                    return (1, None) if v is None and missing_last else (0, str(v))
+                
+                rev = (order == "desc")
+                try:
+                    cur = sorted(cur, key=keyfn, reverse=rev)
+                except Exception:
+                    pass  # Garde la liste originale en cas d'erreur
+            continue
+        
         if name == "when":
             probe = _coalesce(cur if isinstance(cur, list) else [cur], globals_cfg)
             branch = raw.get("then", []) if eval_condition(raw.get("cond", {}), probe, globals_cfg) else raw.get("else", [])
