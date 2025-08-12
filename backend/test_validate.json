@@ -1,0 +1,13 @@
+{
+  "index": "test",
+  "globals": {},
+  "id_policy": {
+    "source": "id"
+  },
+  "fields": {
+    "id": {
+      "source": "id",
+      "type": "keyword"
+    }
+  }
+}

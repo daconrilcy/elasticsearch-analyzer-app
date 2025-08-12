@@ -1,0 +1,21 @@
+{
+  "mapping": {
+    "id_policy": {
+      "source": "id",
+      "on_conflict": "overwrite"
+    },
+    "fields": {
+      "id": {
+        "source": "id",
+        "type": "keyword"
+      }
+    }
+  },
+  "sample": {
+    "rows": [
+      {"id": "1"},
+      {"id": "1"},
+      {"id": "2"}
+    ]
+  }
+}

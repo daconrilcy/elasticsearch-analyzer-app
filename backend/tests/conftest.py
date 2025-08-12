@@ -7,6 +7,9 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
 # Attention à l'import de 'app' pour qu'il soit trouvable par pytest
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from main import app
 from app.core.db import Base, get_db
 

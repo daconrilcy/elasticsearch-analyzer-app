@@ -4,7 +4,8 @@
 from app.domain.user.models import User
 from app.domain.dataset.models import Dataset
 from app.domain.file.models import File, FileStatus, IngestionStatus
-from app.domain.mapping.models import Mapping
+from app.domain.mapping.models import Mapping, MappingVersion
+from app.domain.dictionary.models import Dictionary, DictionaryVersion
 
 
 

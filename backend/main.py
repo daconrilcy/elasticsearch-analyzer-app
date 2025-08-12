@@ -5,14 +5,22 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Imports des modules de l'application
-from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files
+from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files, mappings, dictionaries
 from app.core.db import engine, Base, get_db
 from app.core.logging_config import setup_logging
-import app.domain  # Assure l'import de tous les modèles SQLAlchemy (User, Dataset, File, Mapping)
+
+# Import explicite de tous les modèles SQLAlchemy dans le bon ordre
+from app.domain.user.models import User
+from app.domain.dataset.models import Dataset
+from app.domain.file.models import File, FileStatus, IngestionStatus
+from app.domain.mapping.models import Mapping, MappingVersion
+from app.domain.dictionary.models import Dictionary, DictionaryVersion
+from app.domain.project.models import Project
 from fastapi import FastAPI, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from app.core.exceptions import AppException
 from loguru import logger
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 # --- Métadonnées pour la documentation de l'API ---
 # Décrit chaque groupe d'endpoints pour une meilleure lisibilité dans la documentation auto-générée.
@@ -38,6 +46,14 @@ tags_metadata = [
         "description": "Gestion des fichiers de configuration pour les analyseurs (ex: stopwords).",
     },
     {
+        "name": "Mappings",
+        "description": "Gestion des mappings DSL avec validation, compilation et versioning.",
+    },
+    {
+        "name": "Dictionaries",
+        "description": "Gestion des dictionnaires (stopwords, synonymes) avec versioning.",
+    },
+    {
         "name": "Health Checks",
         "description": "Endpoints pour surveiller la santé et la disponibilité de l'application.",
     },
@@ -57,6 +73,55 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Tables de la base de données vérifiées/créées.")
+    
+    # Forcer la configuration des relations SQLAlchemy
+    from sqlalchemy.orm import configure_mappers
+    configure_mappers()
+    logger.info("Relations SQLAlchemy configurées.")
+
+    # Warm-up performance : précharger les mappings actifs et compiler les pipelines
+    try:
+        from app.domain.mapping.services import MappingService
+        from app.domain.mapping.models import MappingVersion
+        from sqlalchemy import select, text
+        
+        # Précharger les versions actives des mappings
+        async with engine.begin() as conn:
+            # Vérifier que la table existe avant de faire la requête
+            try:
+                await conn.execute(text("SELECT 1 FROM mapping_versions LIMIT 1"))
+            except Exception:
+                logger.info("Table mapping_versions n'existe pas encore, warm-up ignoré")
+                return
+                
+            result = await conn.execute(
+                select(MappingVersion).where(MappingVersion.is_active == True)
+            )
+            active_versions = result.fetchall()
+            
+        if active_versions:
+            logger.info(f"Warm-up : précompilation de {len(active_versions)} mappings actifs")
+            for version in active_versions:
+                try:
+                    # Calculer compiled_hash et compiler le mapping
+                    MappingService.compile(version.dsl_content, include_plan=False)
+                    
+                    # Warm-up des pipelines d'exécution
+                    from app.domain.mapping.executor import run_dry_run
+                    # Précompiler avec un échantillon minimal
+                    sample = {"rows": [{"test": "warmup"}]}
+                    run_dry_run(version.dsl_content, sample["rows"])
+                    
+                except Exception as e:
+                    logger.warning(f"Warm-up échoué pour mapping {version.id}: {e}")
+            
+            logger.info("Warm-up performance terminé")
+        else:
+            logger.info("Aucun mapping actif à précharger")
+            
+    except Exception as e:
+        logger.warning(f"Warm-up performance échoué : {e}")
+        # Ne pas faire échouer le démarrage si le warm-up échoue
 
     yield  # L'application s'exécute ici
 
@@ -123,6 +188,11 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
         logger.error(f"Readiness check échoué : impossible de se connecter à la base de données. Erreur: {e}")
         return {"status": "not_ready", "dependencies": {"database": "error"}}
 
+@app.get("/metrics", tags=["Monitoring"])
+async def metrics():
+    """Expose les métriques Prometheus pour la surveillance."""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
 
 # --- Inclusion des routeurs de l'API ---
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
@@ -131,6 +201,8 @@ app.include_router(files.router, prefix="/api/v1/files", tags=["Files"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["Projects"])
 app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"])
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
+app.include_router(mappings.router, prefix="/api/v1", tags=["Mappings"])
+app.include_router(dictionaries.router, prefix="/api/v1", tags=["Dictionaries"])
 
 if __name__ == "__main__":
     import os

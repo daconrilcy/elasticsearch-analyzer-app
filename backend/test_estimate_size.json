@@ -1,0 +1,36 @@
+{
+  "mapping": {
+    "fields": [
+      {
+        "target": "id",
+        "type": "keyword"
+      },
+      {
+        "target": "name",
+        "type": "text"
+      },
+      {
+        "target": "age",
+        "type": "long"
+      },
+      {
+        "target": "active",
+        "type": "boolean"
+      },
+      {
+        "target": "created",
+        "type": "date"
+      }
+    ]
+  },
+  "field_stats": [
+    {"target": "id", "avg_len": 1.0, "max_len": 1},
+    {"target": "name", "avg_len": 9.7, "max_len": 11},
+    {"target": "age", "avg_len": 2.0, "max_len": 2},
+    {"target": "active", "avg_len": 4.3, "max_len": 5},
+    {"target": "created", "avg_len": 10.0, "max_len": 10}
+  ],
+  "num_docs": 1000000,
+  "replicas": 1,
+  "target_shard_size_gb": 30
+}

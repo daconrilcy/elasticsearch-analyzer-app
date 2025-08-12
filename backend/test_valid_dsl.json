@@ -1,0 +1,80 @@
+{
+  "dsl_version": "1.0",
+  "index": "test_users",
+  "globals": {
+    "nulls": ["", "null", "NULL", "None"],
+    "bool_true": ["true", "1", "yes", "on"],
+    "bool_false": ["false", "0", "no", "off"],
+    "decimal_sep": ".",
+    "thousands_sep": ",",
+    "date_formats": ["yyyy-MM-dd", "epoch_millis"],
+    "default_tz": "UTC",
+    "empty_as_null": true,
+    "preview": {
+      "sample_size": 100
+    }
+  },
+  "id_policy": {
+    "from": ["id"],
+    "op": "concat",
+    "sep": ":",
+    "on_conflict": "overwrite"
+  },
+  "fields": [
+    {
+      "target": "id",
+      "type": "keyword",
+      "input": [
+        {
+          "kind": "column",
+          "name": "id"
+        }
+      ],
+      "pipeline": []
+    },
+    {
+      "target": "name",
+      "type": "text",
+      "input": [
+        {
+          "kind": "column",
+          "name": "name"
+        }
+      ],
+      "pipeline": []
+    },
+    {
+      "target": "age",
+      "type": "long",
+      "input": [
+        {
+          "kind": "column",
+          "name": "age"
+        }
+      ],
+      "pipeline": []
+    },
+    {
+      "target": "active",
+      "type": "boolean",
+      "input": [
+        {
+          "kind": "column",
+          "name": "active"
+        }
+      ],
+      "pipeline": []
+    },
+    {
+      "target": "created",
+      "type": "date",
+      "input": [
+        {
+          "kind": "column",
+          "name": "created"
+        }
+      ],
+      "pipeline": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "rows": [
+    {"id": "1", "name": "John Doe", "age": "25", "active": "true", "created": "2023-01-01"},
+    {"id": "2", "name": "Jane Smith", "age": "30", "active": "false", "created": "2023-01-02"},
+    {"id": "3", "name": "Bob Johnson", "age": "35", "active": "true", "created": "2023-01-03"}
+  ],
+  "globals": {
+    "date_formats": ["yyyy-MM-dd", "epoch_millis"]
+  }
+}

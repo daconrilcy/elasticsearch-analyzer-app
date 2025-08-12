@@ -1,0 +1,124 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Elasticsearch Analyzer Dashboard",
+    "tags": ["elasticsearch", "analyzer", "metrics"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Vérifications d'ID - Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "mapping_check_ids_total",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "auto"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Doublons d'ID détectés",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "mapping_check_ids_duplicates_total",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "auto"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Taux de doublons (%)",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "(mapping_check_ids_duplicates_total / mapping_check_ids_total) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "unit": "percent"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Métriques de vérification d'ID",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "mapping_check_ids_total",
+            "refId": "A",
+            "legendFormat": "Total vérifications"
+          },
+          {
+            "expr": "mapping_check_ids_duplicates_total",
+            "refId": "B",
+            "legendFormat": "Doublons détectés"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s"
+  }
+}

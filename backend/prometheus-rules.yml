@@ -1,0 +1,42 @@
+groups:
+- name: mapping-alerts
+  rules:
+  - alert: DryRunP95High
+    expr: histogram_quantile(0.95, sum(rate(dry_run_duration_ms_bucket[5m])) by (le)) > 1500
+    for: 10m
+    labels: 
+      severity: warning
+      service: mapping
+    annotations:
+      summary: "Dry-run P95 latency > 1.5s"
+      description: "Le 95ème percentile de latence des dry-runs dépasse 1.5s depuis 10 minutes"
+      
+  - alert: IDConflictsDetected
+    expr: increase(dry_run_issues_total{code="E_ID_CONFLICT"}[15m]) > 0
+    for: 5m
+    labels: 
+      severity: critical
+      service: mapping
+    annotations:
+      summary: "Conflits d'ID détectés dans les dry-runs"
+      description: "Des conflits d'ID ont été détectés dans les dry-runs depuis 15 minutes"
+      
+  - alert: MappingValidationErrors
+    expr: rate(mapping_validate_errors_total[5m]) > 0.1
+    for: 5m
+    labels: 
+      severity: warning
+      service: mapping
+    annotations:
+      summary: "Taux d'erreurs de validation élevé"
+      description: "Le taux d'erreurs de validation des mappings est élevé (> 0.1/s)"
+      
+  - alert: RegexGuardTriggered
+    expr: increase(dry_run_issues_total{code="E_REGEX_GUARD"}[10m]) > 5
+    for: 5m
+    labels: 
+      severity: warning
+      service: mapping
+    annotations:
+      summary: "Garde regex déclenchée fréquemment"
+      description: "Plus de 5 patterns regex suspects détectés en 10 minutes"

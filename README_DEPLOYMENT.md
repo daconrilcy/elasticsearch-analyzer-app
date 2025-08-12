@@ -48,6 +48,8 @@ volumes:
   shared_data:
   # Ajouter un volume pour les données de la BDD de l'analyseur
   analyzer_pg_data:
+  # Volume pour les données Prometheus
+  prometheus_data:
 
 services:
   nginx:
@@ -109,10 +111,67 @@ services:
     volumes:
       - analyzer_pg_data:/var/lib/postgresql/data
 
+  # --- NOUVEAU SERVICE : PROMETHEUS ---
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: vps_analyzer_prometheus
+    restart: always
+    networks:
+      - vps_shared_network
+    ports:
+      - "9090:9090"  # Exposer Prometheus pour l'accès externe si nécessaire
+    volumes:
+      - ./backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # ... (vos autres services: mercure, redis, etc.)
 
-Étape 2 : Configurer Nginx
+Étape 2 : Configurer Nginx et Prometheus
 Votre nginx.conf doit être mis à jour pour rediriger le trafic vers vos nouveaux services.
+
+**Configuration Prometheus pour la production :**
+
+En production Dockerisée, votre fichier `backend/prometheus.yml` doit utiliser les noms de services Docker au lieu des IPs :
+
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "prometheus-rules.yml"
+
+scrape_configs:
+  - job_name: 'elasticsearch-analyzer-api'
+    static_configs:
+      - targets: ['backend:8000']  # Nom du service Docker au lieu de l'IP
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093  # Nom du service Alertmanager si vous l'ajoutez
+```
 
 Ajoutez ces blocs location dans votre configuration de serveur :
 
@@ -134,6 +193,20 @@ location / {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+# Accès à Prometheus (optionnel, pour la surveillance)
+# ⚠️  ATTENTION : En production, protégez cet accès avec une authentification !
+location /prometheus/ {
+    proxy_pass http://prometheus:9090/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    
+    # Exemple de protection basique (à adapter selon vos besoins)
+    # auth_basic "Prometheus Access";
+    # auth_basic_user_file /etc/nginx/.htpasswd;
 }
 
 Étape 3 : Déployer

@@ -22,3 +22,6 @@ class User(Base):
     projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
     datasets = relationship("Dataset", back_populates="owner", cascade="all, delete-orphan")
     files = relationship("File", back_populates="uploader", cascade="all, delete-orphan")
+    mapping_versions = relationship("MappingVersion", back_populates="creator", cascade="all, delete-orphan")
+    dictionaries = relationship("Dictionary", back_populates="owner", cascade="all, delete-orphan")
+    dictionary_versions = relationship("DictionaryVersion", back_populates="creator", cascade="all, delete-orphan")
