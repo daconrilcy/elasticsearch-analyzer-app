@@ -182,16 +182,22 @@ class MappingService:
         
         # Calcul du hash du DSL normalisé pour idempotence
         dsl = dict(mapping)  # Copie défensive
-        dsl.setdefault("dsl_version", "2.0")  # Version V2 par défaut
+        dsl.setdefault("dsl_version", "2.1")  # Version V2.1 par défaut
         normalized = _normalized_dsl(dsl)
         compiled_hash = _sha256(normalized)
+        
+        # Génération automatique des pipelines d'ingestion et politiques ILM
+        ingest = MappingService._gen_ingest_pipeline(mapping)
+        ilm = MappingService._gen_ilm_policy(mapping)
         
         # ⚠️ stocke compiled_hash quand tu persistes MappingVersion
         out = schemas.CompileOut(
             settings=settings, 
             mappings={"properties": props}, 
             execution_plan=plan,
-            compiled_hash=compiled_hash
+            compiled_hash=compiled_hash,
+            ingest_pipeline=ingest,
+            ilm_policy=ilm
         )
         
         # Mesurer la durée de compilation
@@ -240,6 +246,36 @@ class MappingService:
         """Estime la taille de l'index et recommande le nombre de shards."""
         data = estimate_size(mapping, field_stats, num_docs, replicas, target_shard_gb)
         return EstimateSizeOut(**data)
+
+    @staticmethod
+    def _gen_ingest_pipeline(mapping: dict) -> dict:
+        """Génère un pipeline d'ingestion automatique."""
+        name = f"{mapping['index']}_ingest_v1"
+        procs = [
+            {"set": {"field": "_meta.ingested_at", "value": "{{_ingest.timestamp}}" }}
+        ]
+        # date processors (basique) pour les fields 'date'
+        for f in mapping.get("fields", []):
+            if f.get("type") == "date":
+                field = f["target"]
+                formats = f.get("format") or "ISO8601"
+                procs.append({"date": {"field": field, "target_field": field, "formats": formats.split("||")}})
+        return {"name": name, "pipeline": {"processors": procs, "on_failure": [{"set":{"field":"_meta.ingest_error","value":"{{_ingest.on_failure_message}}"}}]}}
+
+    @staticmethod
+    def _gen_ilm_policy(mapping: dict, target_shard_gb: int = 30) -> dict:
+        """Génère une politique ILM automatique."""
+        name = f"{mapping['index']}_ilm_v1"
+        policy = {
+          "policy": {
+            "phases": {
+              "hot":   {"actions": {"rollover": {"max_primary_shard_size": f"{target_shard_gb}gb", "max_age": "30d"}}},
+              "warm":  {"min_age": "30d","actions": {"forcemerge": {"max_num_segments": 1}}},
+              "delete":{"min_age": "180d","actions": {"delete": {}}}
+            }
+          }
+        }
+        return {"name": name, "policy": policy}
 
     # Méthodes de versioning
     async def get_with_versions(

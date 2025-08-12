@@ -174,7 +174,7 @@
                   "enum": [
                     "trim", "lower", "lowercase", "upper", "uppercase", "split", "regex_replace", "replace", "date_parse", 
                     "geo_parse", "cast", "map", "take", "join", "flatten", 
-                    "length", "literal", "regex_extract"
+                    "length", "literal", "regex_extract", "zip", "objectify"
                   ],
                   "description": "Opération de transformation"
                 },
@@ -444,16 +444,55 @@
       },
       "additionalProperties": false
     },
-    "OpRegexExtract": {
-      "type": "object",
-      "required": ["op", "pattern"],
-      "properties": {
-        "op": {"const": "regex_extract"},
-        "pattern": {"type": "string", "maxLength": 2000},
-        "group": {"type": "integer", "minimum": 0, "default": 1},
-        "flags": {"type": "string", "pattern": "^[ims]*$"}
-      },
-      "additionalProperties": false
-    }
+            "OpRegexExtract": {
+          "type": "object",
+          "required": ["op", "pattern"],
+          "properties": {
+            "op": {"const": "regex_extract"},
+            "pattern": {"type": "string", "maxLength": 2000},
+            "group": {"type": "integer", "minimum": 0, "default": 1},
+            "flags": {"type": "string", "pattern": "^[ims]*$"}
+          },
+          "additionalProperties": false
+        },
+        "OpZip": {
+          "type": "object",
+          "required": ["op", "with"],
+          "properties": {
+            "op": {"const": "zip"},
+            "with": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {"type": "object", "required": ["kind", "expr"], "properties": {"kind": {"const": "jsonpath"}, "expr": {"type": "string", "maxLength": 1000}}, "additionalProperties": false},
+                  {"type": "object", "required": ["kind", "name"], "properties": {"kind": {"const": "column"}, "name": {"type": "string"}}, "additionalProperties": false},
+                  {"type": "object", "required": ["kind", "value"], "properties": {"kind": {"const": "literal"}, "value": {}}, "additionalProperties": false}
+                ]
+              }
+            },
+            "fill": {}
+          },
+          "additionalProperties": false
+        },
+        "OpObjectify": {
+          "type": "object",
+          "required": ["op", "fields"],
+          "properties": {
+            "op": {"const": "objectify"},
+            "fields": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {"type": "object", "required": ["kind", "expr"], "properties": {"kind": {"const": "jsonpath"}, "expr": {"type": "string", "maxLength": 1000}}, "additionalProperties": false},
+                  {"type": "object", "required": ["kind", "name"], "properties": {"kind": {"const": "column"}, "name": {"type": "string"}}, "additionalProperties": false},
+                  {"type": "object", "required": ["kind", "value"], "properties": {"kind": {"const": "literal"}, "value": {}}, "additionalProperties": false}
+                ]
+              }
+            },
+            "fill": {},
+            "strict": {"type": "boolean", "default": false}
+          },
+          "additionalProperties": false
+        }
   }
 }

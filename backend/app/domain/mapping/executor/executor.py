@@ -11,6 +11,32 @@ OP_ALIAS = {
     "replace": "regex_replace"
 }
 
+def _get_jp_cache(mapping: dict) -> dict:
+    """Récupère le cache JSONPath du mapping."""
+    return mapping.setdefault("__jp_cache__", {})
+
+def _resolve_input(inp: dict, row: dict, mapping: dict):
+    """Résout un input avec cache JSONPath."""
+    kind = inp.get("kind")
+    if kind == "column":
+        return row.get(inp.get("name"))
+    if kind == "literal":
+        return inp.get("value")
+    if kind == "jsonpath":
+        try:
+            cache = _get_jp_cache(mapping)
+            expr = inp.get("expr")
+            cp = cache.get(expr)
+            if cp is None:
+                from jsonpath_ng import parse
+                cp = parse(expr)
+                cache[expr] = cp
+            matches = [m.value for m in cp.find(row)]
+            return matches if len(matches) > 1 else (matches[0] if matches else None)
+        except Exception:
+            return None
+    return None
+
 def _compile_pipeline(pipeline):
     """Compile un pipeline en plan d'exécution optimisé."""
     plan = []
@@ -97,43 +123,53 @@ def _place_value(doc: dict, target: str, value: Any, container_idx: dict):
         arr.append({})
     arr[0].update(value if isinstance(value, dict) else {"value": value})
 
-def _get_input_values(row, inputs):
+def _get_input_values(row, inputs, mapping=None):
     vals: List[Any] = []
     for inp in inputs:
-        kind = inp.get("kind")
-        if kind == "column":
-            vals.append(row.get(inp.get("name")))
-        elif kind == "literal":
-            vals.append(inp.get("value"))
-        elif kind == "jsonpath":
-            try:
-                from jsonpath_ng import parse
-                expr = parse(inp.get("expr"))
-                matches = [m.value for m in expr.find(row)]
-                # Pour JSONPath, on prend le premier match (qui peut être une liste)
-                result = matches[0] if matches else []
-                
-                # Si le résultat est une liste et qu'on veut tous les éléments individuels
-                # (comme pour $.tags qui retourne [['tag1', 'tag2']] mais on veut ['tag1', 'tag2'])
-                if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
-                    result = result[0]
-                
-                vals.append(result)
-            except Exception:
-                vals.append([])
+        if mapping:
+            # Utiliser le nouveau résolveur avec cache JSONPath
+            result = _resolve_input(inp, row, mapping)
+            # Si le résultat est une liste et qu'on veut tous les éléments individuels
+            # (comme pour $.tags qui retourne [['tag1', 'tag2']] mais on veut ['tag1', 'tag2'])
+            if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
+                result = result[0]
+            vals.append(result)
         else:
-            vals.append(None)
+            # Fallback vers l'ancienne logique pour compatibilité
+            kind = inp.get("kind")
+            if kind == "column":
+                vals.append(row.get(inp.get("name")))
+            elif kind == "literal":
+                vals.append(inp.get("value"))
+            elif kind == "jsonpath":
+                try:
+                    from jsonpath_ng import parse
+                    expr = parse(inp.get("expr"))
+                    matches = [m.value for m in expr.find(row)]
+                    # Pour JSONPath, on prend le premier match (qui peut être une liste)
+                    result = matches[0] if matches else []
+                    
+                    # Si le résultat est une liste et qu'on veut tous les éléments individuels
+                    # (comme pour $.tags qui retourne [['tag1', 'tag2']] mais on veut ['tag1', 'tag2'])
+                    if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
+                        result = result[0]
+                    
+                    vals.append(result)
+                except Exception:
+                    vals.append([])
+            else:
+                vals.append(None)
     
     # Si on a un seul input, on retourne directement la valeur au lieu d'une liste
     if len(vals) == 1:
         return vals[0]
     return vals
 
-def _run_branch(globals_cfg, dictionaries, cur, branch_ops, field, row_idx, issues):
+def _run_branch(globals_cfg, dictionaries, cur, branch_ops, field, row_idx, issues, mapping=None):
     """Exécute une branche conditionnelle."""
-    return _apply_compiled(globals_cfg, dictionaries, cur, _compile_pipeline(branch_ops), field, row_idx, issues)
+    return _apply_compiled(globals_cfg, dictionaries, cur, _compile_pipeline(branch_ops), field, row_idx, issues, mapping)
 
-def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, issues):
+def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, issues, mapping=None):
     """Exécute un pipeline compilé avec support des ops array-aware."""
     cur = current
     budget = 0
@@ -152,7 +188,7 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
                 out = []
                 for i, x in enumerate(cur):
                     try:
-                        result = _run_branch(globals_cfg, dictionaries, x, then, field, row_idx, issues)
+                        result = _run_branch(globals_cfg, dictionaries, x, then, field, row_idx, issues, mapping)
                         out.append(result)
                     except Exception as e:
                         issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_EXEC", msg=f"map failed: {e}"))
@@ -160,7 +196,7 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
                 cur = out
             else:
                 # scalar -> applique la sous-pipeline à l'élément
-                cur = _run_branch(globals_cfg, dictionaries, cur, then, field, row_idx, issues)
+                cur = _run_branch(globals_cfg, dictionaries, cur, then, field, row_idx, issues, mapping)
             continue
         
         if name == "take":
@@ -196,7 +232,7 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
         if name == "when":
             probe = _coalesce(cur if isinstance(cur, list) else [cur], globals_cfg)
             branch = raw.get("then", []) if eval_condition(raw.get("cond", {}), probe, globals_cfg) else raw.get("else", [])
-            cur = _run_branch(globals_cfg, dictionaries, cur, branch, field, row_idx, issues)
+            cur = _run_branch(globals_cfg, dictionaries, cur, branch, field, row_idx, issues, mapping)
             continue
         
         # --- OPS SCALAIRES / DÉFAUT ---
@@ -205,7 +241,8 @@ def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, is
             issues.append(ExecIssue(row=row_idx, field=field, code="W_OP_UNKNOWN", msg=f"unknown op '{name}'"))
             continue
         
-        k = {**kwargs, "globals": globals_cfg, "dictionaries": dictionaries}
+        k = {**kwargs, "globals": globals_cfg, "dictionaries": dictionaries,
+             "resolver": lambda spec: _resolve_input(spec, row, mapping) if mapping else None}
         
         if name in ("concat", "coalesce"):
             arg = cur if isinstance(cur, list) else [cur]
@@ -258,9 +295,9 @@ def execute_document(mapping, row, row_idx):
     
     for f in compiled:
         tgt, inputs, plan = f["target"], f["input"], f["plan"]
-        values = _get_input_values(row, inputs)
+        values = _get_input_values(row, inputs, mapping)
         cur = values
-        result = _apply_compiled(globals_cfg, dictionaries, cur, plan, tgt, row_idx, issues)
+        result = _apply_compiled(globals_cfg, dictionaries, cur, plan, tgt, row_idx, issues, mapping)
         
         # Placement des valeurs avec support des containers
         _place_value(doc, tgt, result, container_idx)

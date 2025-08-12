@@ -274,6 +274,57 @@ def op_regex_extract(value, pattern: str, group: int = 1, flags: str | None = No
     m = re.search(pattern, value, fl)
     return m.group(group) if m else None
 
+def _to_list(v):
+    """Convertit une valeur en liste."""
+    if v is None: 
+        return []
+    return v if isinstance(v, list) else [v]
+
+def op_zip(current, with_: list, resolver=None, fill=None, **_):
+    """Combine plusieurs listes en tuples indexés."""
+    base = _to_list(current)
+    arrays = [base]
+    for spec in with_ or []:
+        arrays.append(_to_list(resolver(spec) if resolver else None))
+    n = max((len(a) for a in arrays), default=0)
+    out = []
+    for i in range(n):
+        tpl = [(a[i] if i < len(a) else fill) for a in arrays]
+        out.append(tpl)
+    return out
+
+def op_objectify(current, fields: dict, resolver=None, fill=None, strict: bool=False, **_):
+    """Transforme des listes en objets structurés."""
+    # fields: {"phone": <input>, "email": <input>, ...}
+    cols = {k: _to_list(resolver(spec) if resolver else None) for k, spec in (fields or {}).items()}
+    
+    # si current est une liste de tuples (issue de zip), prioriser ça
+    if isinstance(current, list) and current and isinstance(current[0], (list, tuple)):
+        # on n'a pas les noms → si 'fields' est ordonné, les utiliser en clé
+        keys = list(fields.keys()) if fields else [f"f{i}" for i in range(len(current[0]))]
+        res = []
+        for tup in current:
+            obj = {}
+            for i, k in enumerate(keys):
+                obj[k] = tup[i] if i < len(tup) else fill
+            res.append(obj)
+        return res
+    
+    # sinon zippage par clés déclarées
+    n = max((len(v) for v in cols.values()), default=len(_to_list(current)))
+    res = []
+    for i in range(n):
+        obj = {}
+        for k, arr in cols.items():
+            if i < len(arr): 
+                obj[k] = arr[i]
+            else:
+                if strict: 
+                    return None  # ou raise pour E_OBJECTIFY_MISSING
+                obj[k] = fill
+        res.append(obj)
+    return res
+
 def eval_condition(cond: Dict[str, Any], probe: Any, globals: Dict[str, Any]) -> bool:
     t = cond.get("type") or next(iter(cond.keys()), None)  # tolère forme courte
     # formes courtes: {"gt": 5}, {"lt": 10}, {"contains":"abc"}, {"is_numeric": true}
@@ -332,4 +383,6 @@ OP_REGISTRY = {
     "length": op_length,
     "literal": op_literal,
     "regex_extract": op_regex_extract,
+    "zip": op_zip,
+    "objectify": op_objectify,
 }
