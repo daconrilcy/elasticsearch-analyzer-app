@@ -40,6 +40,7 @@ interface GraphState {
   deleteNode: (nodeId: string) => void;
   updateNodeData: (nodeId: string, data: Partial<NodeData>) => void;
   setGraph: (graph: AnalyzerGraph) => void;
+  resetGraph: () => void; // Nouvelle fonction pour réinitialiser
 }
 
 // --- Création du store ---
@@ -108,5 +109,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   setGraph: (graph: AnalyzerGraph) => {
     set({ graph });
+  },
+
+  resetGraph: () => {
+    set({ graph: initialGraph });
   },
 }));

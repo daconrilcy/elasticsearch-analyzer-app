@@ -140,11 +140,13 @@ app = FastAPI(
 origins = [
     "http://localhost:5173",  # Adresse par défaut de Vite
     "http://localhost:3000",  # Autre port de développement courant
+    "http://127.0.0.1:5173", # Alternative localhost
+    "http://127.0.0.1:3000", # Alternative localhost
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,  # Utiliser la liste spécifique au lieu de "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

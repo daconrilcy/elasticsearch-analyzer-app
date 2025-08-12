@@ -26,6 +26,9 @@ import { ApiError } from "@shared/lib";
 // --- CONFIGURATION CENTRALE ---
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
+// Variable pour éviter les appels multiples de forceLogout
+let isHandling401 = false;
+
 /**
  * Client fetch "intelligent" qui ajoute l'URL de base et le token d'authentification.
  * Gère de manière centralisée les erreurs et la déconnexion.
@@ -53,6 +56,22 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}): Pr
     // La gestion des erreurs reste essentielle
     if (!response.ok) {
         if (response.status === 401) {
+            // Éviter les appels multiples de forceLogout
+            if (!isHandling401) {
+                isHandling401 = true;
+                
+                // Import dynamique pour éviter les dépendances circulaires
+                import('@shared/lib').then(({ useAuthStore }) => {
+                    const { forceLogout } = useAuthStore.getState();
+                    forceLogout();
+                    
+                    // Réinitialiser le flag après un délai
+                    setTimeout(() => {
+                        isHandling401 = false;
+                    }, 1000);
+                }).catch(console.error);
+            }
+            
             throw new ApiError('Session expirée. Veuillez vous reconnecter.', 401);
         }
     
@@ -96,7 +115,19 @@ export const getCurrentUser = async (): Promise<User> => {
 export const logout = async (): Promise<void> => {
     // Envoie une requête au backend pour lui dire de supprimer le cookie.
     // On ne traite pas l'erreur ici, car même si elle échoue, le frontend doit se déconnecter.
-    await apiClient('/api/v1/auth/logout', { method: 'POST' }).catch(console.error);
+    try {
+        await apiClient('/api/v1/auth/logout', { method: 'POST' });
+    } catch (error) {
+        console.warn('Erreur lors de la déconnexion API:', error);
+    } finally {
+        // Nettoyer également les cookies côté client si possible
+        try {
+            // Tenter de supprimer le cookie côté client (peut ne pas fonctionner pour HttpOnly)
+            document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        } catch (e) {
+            // Ignorer les erreurs de nettoyage de cookie côté client
+        }
+    }
 };
 
 // Datasets

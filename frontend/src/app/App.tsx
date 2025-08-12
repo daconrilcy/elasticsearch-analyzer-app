@@ -113,8 +113,20 @@ function FilePreviewPage() {
 
 function App() {
     const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+    const { resetGraph } = useGraphStore();
+    const { resetUI } = useUIStore();
 
-    useEffect(() => { checkAuth(); }, [checkAuth]);
+    useEffect(() => { 
+        checkAuth(); 
+    }, [checkAuth]);
+
+    // Nettoyer l'état lors de la déconnexion
+    useEffect(() => {
+        if (!isAuthenticated && !isLoading) {
+            resetGraph();
+            resetUI();
+        }
+    }, [isAuthenticated, isLoading, resetGraph, resetUI]);
 
     if (isLoading) { return <div className={styles.loadingFullscreen}>Chargement...</div>; }
 

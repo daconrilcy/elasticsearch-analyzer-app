@@ -26,6 +26,17 @@ def _load_schema() -> Dict[str, Any]:
     return json.loads(data)
 
 
+def _get_schema() -> Dict[str, Any]:
+    """Récupère le schéma JSON (recharge à chaque appel pour les tests)."""
+    return _load_schema()
+
+
+def _get_validator() -> Draft202012Validator:
+    """Récupère un nouveau validateur avec le schéma actuel."""
+    schema = _get_schema()
+    return Draft202012Validator(schema)
+
+
 _SCHEMA = _load_schema()
 _JSON_VALIDATOR = Draft202012Validator(_SCHEMA)
 
@@ -33,7 +44,8 @@ _JSON_VALIDATOR = Draft202012Validator(_SCHEMA)
 def _jsonschema_validate(instance: Dict[str, Any]) -> List[ValidationIssue]:
     """Valide l'instance contre le schéma JSON."""
     errs: List[ValidationIssue] = []
-    for e in sorted(_JSON_VALIDATOR.iter_errors(instance), key=lambda e: e.path):
+    validator = _get_validator()  # Utilise le schéma fraîchement chargé
+    for e in sorted(validator.iter_errors(instance), key=lambda e: e.path):
         path = "/" + "/".join(str(p) for p in e.path)
         errs.append(ValidationIssue(code=e.validator.upper(), path=path, msg=e.message))
     return errs
@@ -119,6 +131,21 @@ def _post_validate(instance: Dict[str, Any]) -> List[ValidationIssue]:
                 path=f"/fields/{idx}", 
                 msg=f"'.raw' reserved collision on '{tgt}'"
             ))
+        
+        # Vérification de la limite d'opérations par pipeline
+        pipeline = f.get("pipeline", [])
+        if len(pipeline) > 50:
+            errors.append(ValidationIssue(
+                code="W_PIPELINE_TOO_LONG", 
+                path=f"/fields/{idx}/pipeline", 
+                msg=f"pipeline has {len(pipeline)} operations (recommended: ≤50, max: 200)"
+            ))
+        elif len(pipeline) > 200:
+            errors.append(ValidationIssue(
+                code="E_PIPELINE_TOO_LONG", 
+                path=f"/fields/{idx}/pipeline", 
+                msg=f"pipeline has {len(pipeline)} operations (max: 200)"
+            ))
 
     # Vérification de la politique d'ID
     if not instance.get("id_policy"):
@@ -148,7 +175,14 @@ def validate_mapping(mapping: Dict[str, Any]) -> Tuple[bool, List[ValidationIssu
     
     # Validation post-règles métier
     perrs = _post_validate(mapping)
-    if perrs:
-        return False, perrs
     
-    return True, []
+    # Séparer erreurs vs warnings
+    errors = [e for e in perrs if not e.code.startswith("W_")]
+    warnings = [e for e in perrs if e.code.startswith("W_")]
+    
+    # Seules les erreurs bloquent la validation
+    if errors:
+        return False, errors
+    
+    # Les warnings n'empêchent pas la validation de passer
+    return True, warnings

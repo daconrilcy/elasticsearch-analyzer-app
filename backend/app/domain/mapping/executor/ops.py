@@ -22,7 +22,12 @@ def _is_null(v: Any, globals: Dict[str, Any]) -> bool:
     if isinstance(v, str):
         if globals.get("empty_as_null", True) and v.strip() == "": return True
         return v in nulls
-    return v in nulls
+    # Gérer les types non-hashables (list, dict, etc.)
+    try:
+        return v in nulls
+    except TypeError:
+        # Pour les types non-hashables, on ne peut pas les comparer directement
+        return False
 
 def _coalesce(values: List[Any], globals: Dict[str, Any]) -> Any:
     for v in values:
@@ -248,8 +253,49 @@ def op_hash(value: Any, algo: str = "sha1", salt: Optional[str] = None, **_) -> 
     s = (salt or "") + ("" if value is None else str(value))
     return h(s.encode("utf-8")).hexdigest()
 
+def op_length(value, **_):
+    if value is None: return 0
+    if isinstance(value, (list, tuple, dict, set)): return len(value)
+    return len(str(value))
+
+def op_literal(_current, value: any, **_):
+    return value
+
+def op_regex_extract(value, pattern: str, group: int = 1, flags: str | None = None, **_):
+    if not isinstance(value, str): return None
+    if pattern is None: return None
+    if len(pattern) > 2000: raise RuntimeError("E_REGEX_GUARD: pattern too long")
+    if "(?<" in pattern: raise RuntimeError("E_REGEX_GUARD: look-behind not allowed")
+    fl = 0
+    if flags:
+        if "i" in flags: fl |= re.IGNORECASE
+        if "m" in flags: fl |= re.MULTILINE
+        if "s" in flags: fl |= re.DOTALL
+    m = re.search(pattern, value, fl)
+    return m.group(group) if m else None
+
 def eval_condition(cond: Dict[str, Any], probe: Any, globals: Dict[str, Any]) -> bool:
-    t = cond.get("type")
+    t = cond.get("type") or next(iter(cond.keys()), None)  # tolère forme courte
+    # formes courtes: {"gt": 5}, {"lt": 10}, {"contains":"abc"}, {"is_numeric": true}
+    if "gt" in cond or t == "gt":
+        try: return float(str(probe).replace(",", ".")) > float(cond.get("gt"))
+        except: return False
+    if "gte" in cond or t == "gte":
+        try: return float(str(probe).replace(",", ".")) >= float(cond.get("gte"))
+        except: return False
+    if "lt" in cond or t == "lt":
+        try: return float(str(probe).replace(",", ".")) < float(cond.get("lt"))
+        except: return False
+    if "lte" in cond or t == "lte":
+        try: return float(str(probe).replace(",", ".")) <= float(cond.get("lte"))
+        except: return False
+    if "contains" in cond or t == "contains":
+        sub = cond.get("contains", "")
+        return (sub in (probe or "")) if isinstance(probe, str) else False
+    if "is_numeric" in cond or t == "is_numeric":
+        return _parse_number(probe, globals) is not None
+
+    # existants inchangés:
     if t == "is_empty":
         return _is_null(probe, globals) or (isinstance(probe, str) and probe.strip() == "")
     if t == "is_number":
@@ -283,4 +329,7 @@ OP_REGISTRY = {
     "phonetic": op_phonetic,
     "geo_parse": op_geo_parse,
     "hash": op_hash,
+    "length": op_length,
+    "literal": op_literal,
+    "regex_extract": op_regex_extract,
 }

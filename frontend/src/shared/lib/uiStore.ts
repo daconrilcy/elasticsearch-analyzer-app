@@ -10,6 +10,7 @@ export interface UIState {
   setActivePanel: (panel: Panel) => void;
   setSelectedNodeId: (nodeId: string | null) => void;
   togglePanel: (panel: 'nodes' | 'config' | 'results') => void;
+  resetUI: () => void; // Nouvelle fonction pour réinitialiser
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -31,5 +32,9 @@ export const useUIStore = create<UIState>((set, get) => ({
   togglePanel: (panel) => {
     const { activePanel } = get();
     set({ activePanel: activePanel === panel ? '' : panel });
+  },
+
+  resetUI: () => {
+    set({ activePanel: 'nodes', selectedNodeId: null });
   }
 }));

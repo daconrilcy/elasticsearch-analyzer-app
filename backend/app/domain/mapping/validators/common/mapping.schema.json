@@ -1,16 +1,38 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ton-org/mapping-dsl/1-0.schema.json",
-  "title": "Elasticsearch Mapping DSL Schema",
-  "description": "Schéma pour la validation du DSL de mapping CSV/JSON vers index Elasticsearch",
+  "$id": "https://ton-org/mapping-dsl/2-0.schema.json",
+  "title": "Elasticsearch Mapping DSL Schema V2",
+  "description": "Schéma V2 pour la validation du DSL de mapping CSV/JSON vers index Elasticsearch avec support des containers (object/nested) et opérations array-aware",
   "type": "object",
   "required": ["index", "globals", "id_policy", "fields", "dsl_version"],
   "properties": {
     "dsl_version": {
       "type": "string",
-      "description": "Version du DSL (ex: '1.0', '1.1')",
+      "description": "Version du DSL (ex: '1.0', '1.1', '2.0')",
       "pattern": "^\\d+\\.\\d+$",
-      "default": "1.0"
+      "default": "2.0"
+    },
+    "containers": {
+      "type": "array",
+      "description": "Définition des containers (object/nested) pour la structure ES",
+      "items": {
+        "type": "object",
+        "required": ["path", "type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Chemin du container (ex: 'contacts[]', 'address')",
+            "pattern": "^[a-zA-Z0-9_]+(\\[\\])?(\\.[a-zA-Z0-9_]+(\\[\\])?)*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["object", "nested"],
+            "description": "Type Elasticsearch du container"
+          }
+        },
+        "additionalProperties": false
+      },
+      "default": []
     },
     "index": {
       "type": "string",
@@ -118,16 +140,25 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["kind", "name"],
+              "required": ["kind"],
               "properties": {
                 "kind": {
                   "type": "string",
-                  "enum": ["column", "constant", "expression"],
+                  "enum": ["column", "literal", "jsonpath"],
                   "description": "Type d'entrée"
                 },
                 "name": {
                   "type": "string",
-                  "description": "Nom de la colonne ou valeur constante"
+                  "description": "Nom de la colonne (pour kind: column)"
+                },
+                "value": {
+                  "type": ["string", "number", "boolean"],
+                  "description": "Valeur littérale (pour kind: literal)"
+                },
+                "expr": {
+                  "type": "string",
+                  "maxLength": 1000,
+                  "description": "Expression JSONPath (pour kind: jsonpath)"
                 }
               }
             }
@@ -140,12 +171,39 @@
               "properties": {
                 "op": {
                   "type": "string",
-                  "enum": ["trim", "lowercase", "uppercase", "split", "replace", "parse_date", "parse_geo", "parse_number", "parse_boolean"],
+                  "enum": [
+                    "trim", "lower", "lowercase", "upper", "uppercase", "split", "regex_replace", "replace", "date_parse", 
+                    "geo_parse", "cast", "map", "take", "join", "flatten", 
+                    "length", "literal", "regex_extract"
+                  ],
                   "description": "Opération de transformation"
                 },
                 "params": {
                   "type": "object",
                   "description": "Paramètres de l'opération"
+                },
+                "then": {
+                  "type": "array",
+                  "description": "Sous-pipeline pour l'opération 'map'",
+                  "items": {
+                    "type": "object",
+                    "required": ["op"],
+                    "properties": {
+                      "op": {"type": "string"},
+                      "params": {"type": "object"}
+                    }
+                  }
+                },
+                "which": {
+                  "oneOf": [
+                    {"enum": ["first", "last"]},
+                    {"type": "integer", "minimum": 0}
+                  ],
+                  "description": "Sélecteur pour l'opération 'take' (first, last, ou index)"
+                },
+                "sep": {
+                  "type": "string",
+                  "description": "Séparateur pour l'opération 'join'"
                 }
               }
             }
@@ -175,7 +233,7 @@
                 },
                 "type": {
                   "type": "string",
-                  "enum": ["text", "keyword", "long", "double", "date", "boolean"],
+                  "enum": ["text", "keyword", "integer", "long", "double", "date", "boolean", "ip", "geo_point", "geo_shape"],
                   "description": "Type du sous-champ"
                 },
                 "analyzer": {
@@ -224,6 +282,178 @@
           }
         }
       }
+    }
+  },
+  "definitions": {
+    "OpTrim": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "trim"}
+      },
+      "additionalProperties": false
+    },
+    "OpLower": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "lower"}
+      },
+      "additionalProperties": false
+    },
+    "OpUpper": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "upper"}
+      },
+      "additionalProperties": false
+    },
+    "OpSplit": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "split"},
+        "sep": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "OpRegexReplace": {
+      "type": "object",
+      "required": ["op", "pattern", "repl"],
+      "properties": {
+        "op": {"const": "regex_replace"},
+        "pattern": {"type": "string", "maxLength": 2000},
+        "repl": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "OpDateParse": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "date_parse"},
+        "formats": {"type": "array", "items": {"type": "string"}},
+        "assume_tz": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "OpGeoParse": {
+      "type": "object",
+      "required": ["op", "format"],
+      "properties": {
+        "op": {"const": "geo_parse"},
+        "format": {"enum": ["latlon"]}
+      },
+      "additionalProperties": false
+    },
+    "OpNumberParse": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "cast"},
+        "to": {"enum": ["long", "double"]}
+      },
+      "additionalProperties": false
+    },
+    "OpBooleanParse": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "cast"},
+        "to": {"const": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "OpMap": {
+      "type": "object",
+      "required": ["op", "then"],
+      "properties": {
+        "op": {"const": "map"},
+        "then": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {"$ref": "#/definitions/OpTrim"},
+              {"$ref": "#/definitions/OpLower"},
+              {"$ref": "#/definitions/OpUpper"},
+              {"$ref": "#/definitions/OpSplit"},
+              {"$ref": "#/definitions/OpRegexReplace"},
+              {"$ref": "#/definitions/OpDateParse"},
+              {"$ref": "#/definitions/OpGeoParse"},
+              {"$ref": "#/definitions/OpNumberParse"},
+              {"$ref": "#/definitions/OpBooleanParse"},
+              {"$ref": "#/definitions/OpMap"},
+              {"$ref": "#/definitions/OpTake"},
+              {"$ref": "#/definitions/OpJoin"},
+              {"$ref": "#/definitions/OpFlatten"},
+              {"$ref": "#/definitions/OpLength"},
+              {"$ref": "#/definitions/OpLiteral"},
+              {"$ref": "#/definitions/OpRegexExtract"}
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "OpTake": {
+      "type": "object",
+      "required": ["op", "which"],
+      "properties": {
+        "op": {"const": "take"},
+        "which": {
+          "oneOf": [
+            {"enum": ["first", "last"]},
+            {"type": "integer", "minimum": 0}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "OpJoin": {
+      "type": "object",
+      "required": ["op", "sep"],
+      "properties": {
+        "op": {"const": "join"},
+        "sep": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "OpFlatten": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "flatten"}
+      },
+      "additionalProperties": false
+    },
+    "OpLength": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": {"const": "length"}
+      },
+      "additionalProperties": false
+    },
+    "OpLiteral": {
+      "type": "object",
+      "required": ["op", "value"],
+      "properties": {
+        "op": {"const": "literal"},
+        "value": {}
+      },
+      "additionalProperties": false
+    },
+    "OpRegexExtract": {
+      "type": "object",
+      "required": ["op", "pattern"],
+      "properties": {
+        "op": {"const": "regex_extract"},
+        "pattern": {"type": "string", "maxLength": 2000},
+        "group": {"type": "integer", "minimum": 0, "default": 1},
+        "flags": {"type": "string", "pattern": "^[ims]*$"}
+      },
+      "additionalProperties": false
     }
   }
 }

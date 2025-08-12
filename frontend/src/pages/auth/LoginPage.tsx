@@ -18,11 +18,22 @@ export const LoginPage = ({ onSwitchToRegister }: LoginPageProps) => {
       toast.error('Veuillez remplir tous les champs.');
       return;
     }
+    
     try {
       await login({ username, password });
       toast.success('Connexion réussie !');
+      // Nettoyer les champs après une connexion réussie
+      setUsername('');
+      setPassword('');
     } catch (error) {
-      toast.error((error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion';
+      toast.error(errorMessage);
+      
+      // En cas d'erreur 401 (session expirée), nettoyer les champs
+      if (error instanceof Error && error.message.includes('Session expirée')) {
+        setUsername('');
+        setPassword('');
+      }
     }
   };
 

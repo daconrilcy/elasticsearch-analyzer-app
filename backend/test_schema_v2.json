@@ -1,0 +1,107 @@
+{
+  "dsl_version": "2.0",
+  "index": "users_v2",
+  "globals": {
+    "nulls": [],
+    "bool_true": [],
+    "bool_false": [],
+    "decimal_sep": ",",
+    "thousands_sep": " ",
+    "date_formats": ["yyyy-MM-dd"],
+    "default_tz": "Europe/Paris",
+    "empty_as_null": true,
+    "preview": {
+      "sample_size": 10,
+      "seed": 1
+    }
+  },
+  "id_policy": {
+    "from": ["id"],
+    "op": "concat",
+    "sep": ":",
+    "on_conflict": "error"
+  },
+  "containers": [
+    {
+      "path": "contacts[]",
+      "type": "nested"
+    },
+    {
+      "path": "address",
+      "type": "object"
+    }
+  ],
+  "fields": [
+    {
+      "target": "contacts.phone",
+      "type": "keyword",
+      "input": [
+        {
+          "kind": "jsonpath",
+          "expr": "$.contacts[*].phone"
+        }
+      ],
+      "pipeline": [
+        {
+          "op": "map",
+          "then": [
+            {
+              "op": "trim"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "tags_first",
+      "type": "keyword",
+      "input": [
+        {
+          "kind": "jsonpath",
+          "expr": "$.tags[*]"
+        }
+      ],
+      "pipeline": [
+        {
+          "op": "take",
+          "which": "first"
+        }
+      ]
+    },
+    {
+      "target": "tags_joined",
+      "type": "keyword",
+      "input": [
+        {
+          "kind": "jsonpath",
+          "expr": "$.tags[*]"
+        }
+      ],
+      "pipeline": [
+        {
+          "op": "join",
+          "sep": "|"
+        }
+      ]
+    },
+    {
+      "target": "flat_numbers",
+      "type": "keyword",
+      "input": [
+        {
+          "kind": "literal",
+          "value": [[1, 2], [3]]
+        }
+      ],
+      "pipeline": [
+        {
+          "op": "flatten"
+        },
+        {
+          "op": "join",
+          "sep": ","
+        }
+      ]
+    }
+  ]
+}

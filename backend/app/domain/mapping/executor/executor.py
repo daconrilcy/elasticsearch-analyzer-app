@@ -4,6 +4,99 @@ from .ops import (
     ExecIssue, OP_REGISTRY, eval_condition, _coalesce, _is_null
 )
 
+# mapping alias -> canonique
+OP_ALIAS = {
+    "lowercase": "lower",
+    "uppercase": "upper",
+    "replace": "regex_replace"
+}
+
+def _compile_pipeline(pipeline):
+    """Compile un pipeline en plan d'exécution optimisé."""
+    plan = []
+    for op in (pipeline or []):
+        name = OP_ALIAS.get(op.get("op"), op.get("op"))
+        plan.append((name, {k:v for k,v in op.items() if k not in ("op","then","else")}, op))
+    return plan
+
+def _compile_mapping(mapping: dict):
+    """Compile un mapping en plan d'exécution optimisé."""
+    if "__compiled__" in mapping:
+        return mapping["__compiled__"]
+    
+    compiled = []
+    for f in mapping.get("fields", []):
+        compiled.append({
+            "target": f["target"],
+            "input": f.get("input", []),
+            "plan": _compile_pipeline(f.get("pipeline", []))
+        })
+    
+    mapping["__compiled__"] = compiled
+    return compiled
+
+def _build_container_index(mapping: dict) -> dict:
+    """Construit un index des containers pour le placement des valeurs."""
+    idx = {}
+    for c in mapping.get("containers") or []:
+        path = c["path"]
+        clean = path.replace("[]", "")
+        idx[clean] = {"array": "[]" in path or c["type"] == "nested", "type": c["type"]}
+    return idx
+
+def _place_value(doc: dict, target: str, value: Any, container_idx: dict):
+    """Place une valeur dans le document en respectant les containers."""
+    parts = target.split(".")
+    
+    # Trouve le premier préfixe qui est un container
+    prefix = []
+    array_at = None
+    for i, p in enumerate(parts):
+        prefix.append(p)
+        key = ".".join(prefix)
+        if key in container_idx and container_idx[key]["array"]:
+            array_at = i
+            break
+    
+    if array_at is None:
+        # V1: placement simple
+        node = doc
+        for p in parts[:-1]:
+            node = node.setdefault(p, {})
+        node[parts[-1]] = value
+        return
+    
+    # On a un container array (nested)
+    container_key = ".".join(parts[:array_at+1])
+    leaf_path = parts[array_at+1:]
+    leaf = leaf_path[-1] if leaf_path else None
+    
+    # Structure du tableau d'objets
+    arr = doc.setdefault(container_key.split(".")[0], [])
+    
+    # Si value est une liste de scalaires -> [{leaf: v}, ...]
+    if isinstance(value, list) and (leaf is not None):
+        # Assure la taille
+        while len(arr) < len(value):
+            arr.append({})
+        for i, v in enumerate(value):
+            if i >= len(arr):
+                arr.append({})
+            arr[i][leaf] = v
+        return
+    
+    # value scalaire -> un seul objet
+    if leaf is not None:
+        if not arr:
+            arr.append({})
+        arr[0][leaf] = value
+        return
+    
+    # sinon, fallback
+    if not arr:
+        arr.append({})
+    arr[0].update(value if isinstance(value, dict) else {"value": value})
+
 def _get_input_values(row, inputs):
     vals: List[Any] = []
     for inp in inputs:
@@ -17,54 +110,121 @@ def _get_input_values(row, inputs):
                 from jsonpath_ng import parse
                 expr = parse(inp.get("expr"))
                 matches = [m.value for m in expr.find(row)]
-                vals.append(matches if len(matches) > 1 else (matches[0] if matches else None))
+                # Pour JSONPath, on prend le premier match (qui peut être une liste)
+                result = matches[0] if matches else []
+                
+                # Si le résultat est une liste et qu'on veut tous les éléments individuels
+                # (comme pour $.tags qui retourne [['tag1', 'tag2']] mais on veut ['tag1', 'tag2'])
+                if isinstance(result, list) and len(result) == 1 and isinstance(result[0], list):
+                    result = result[0]
+                
+                vals.append(result)
             except Exception:
-                vals.append(None)
+                vals.append([])
         else:
             vals.append(None)
+    
+    # Si on a un seul input, on retourne directement la valeur au lieu d'une liste
+    if len(vals) == 1:
+        return vals[0]
     return vals
 
-def _apply_pipeline(globals_cfg, dictionaries, current, pipeline, field, row_idx, issues):
-    cur: Any = current
+def _run_branch(globals_cfg, dictionaries, cur, branch_ops, field, row_idx, issues):
+    """Exécute une branche conditionnelle."""
+    return _apply_compiled(globals_cfg, dictionaries, cur, _compile_pipeline(branch_ops), field, row_idx, issues)
+
+def _apply_compiled(globals_cfg, dictionaries, current, plan, field, row_idx, issues):
+    """Exécute un pipeline compilé avec support des ops array-aware."""
+    cur = current
     budget = 0
-    MAX_OPS_PER_ROW = 200  # Budget d'opérations par ligne
+    MAX_OPS_PER_ROW = 200
     
-    for op in pipeline:
+    for name, kwargs, raw in plan:
         budget += 1
         if budget > MAX_OPS_PER_ROW:
             issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_BUDGET_EXCEEDED", msg=f"op budget per row exceeded ({budget} > {MAX_OPS_PER_ROW})"))
             return None
-            
-        name = op.get("op")
-        if name == "when":
-            cond = op.get("cond", {})
-            probe = _coalesce(cur if isinstance(cur, list) else [cur], globals_cfg)
-            branch = op.get("then", []) if eval_condition(cond, probe, globals_cfg) else op.get("else", [])
-            cur = _apply_pipeline(globals_cfg, dictionaries, cur, branch, field, row_idx, issues)
+        
+        # --- OPS ARRAY-AWARE ---
+        if name == "map":
+            then = raw.get("then", [])
+            if isinstance(cur, list):
+                out = []
+                for i, x in enumerate(cur):
+                    try:
+                        result = _run_branch(globals_cfg, dictionaries, x, then, field, row_idx, issues)
+                        out.append(result)
+                    except Exception as e:
+                        issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_EXEC", msg=f"map failed: {e}"))
+                        out.append(None)
+                cur = out
+            else:
+                # scalar -> applique la sous-pipeline à l'élément
+                cur = _run_branch(globals_cfg, dictionaries, cur, then, field, row_idx, issues)
             continue
-
+        
+        if name == "take":
+            which = raw.get("which", "first")
+            if isinstance(cur, list):
+                if which == "first":
+                    cur = cur[0] if cur else None
+                elif which == "last":
+                    cur = cur[-1] if cur else None
+                elif isinstance(which, int):
+                    cur = cur[which] if 0 <= which < len(cur) else None
+            continue
+        
+        if name == "join":
+            sep = raw.get("sep", ", ")
+            if isinstance(cur, list):
+                cur = sep.join("" if v is None else str(v) for v in cur)
+            else:
+                cur = "" if cur is None else str(cur)
+            continue
+        
+        if name == "flatten":
+            if isinstance(cur, list):
+                flat = []
+                for v in cur:
+                    if isinstance(v, list):
+                        flat.extend(v)
+                    else:
+                        flat.append(v)
+                cur = flat
+            continue
+        
+        if name == "when":
+            probe = _coalesce(cur if isinstance(cur, list) else [cur], globals_cfg)
+            branch = raw.get("then", []) if eval_condition(raw.get("cond", {}), probe, globals_cfg) else raw.get("else", [])
+            cur = _run_branch(globals_cfg, dictionaries, cur, branch, field, row_idx, issues)
+            continue
+        
+        # --- OPS SCALAIRES / DÉFAUT ---
         fn = OP_REGISTRY.get(name)
         if not fn:
             issues.append(ExecIssue(row=row_idx, field=field, code="W_OP_UNKNOWN", msg=f"unknown op '{name}'"))
             continue
-
-        kwargs = {k:v for k,v in op.items() if k not in ("op","then","else")}
-        kwargs["globals"] = globals_cfg
-        kwargs["dictionaries"] = dictionaries
-
+        
+        k = {**kwargs, "globals": globals_cfg, "dictionaries": dictionaries}
+        
         if name in ("concat", "coalesce"):
             arg = cur if isinstance(cur, list) else [cur]
-            cur = fn(arg, **kwargs)  # type: ignore
+            try:
+                cur = fn(arg, **k)  # type: ignore
+            except Exception as e:
+                issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_EXEC", msg=f"{name} failed: {e}"))
+                cur = None
             continue
-
+        
         if isinstance(cur, list):
             cur = _coalesce(cur, globals_cfg)
-
+        
         try:
-            cur = fn(cur, **kwargs)  # type: ignore
+            cur = fn(cur, **k)  # type: ignore
         except Exception as e:
             issues.append(ExecIssue(row=row_idx, field=field, code="E_OP_EXEC", msg=f"{name} failed: {e}"))
             cur = None
+    
     return cur
 
 def execute_document(mapping, row, row_idx):
@@ -92,19 +252,18 @@ def execute_document(mapping, row, row_idx):
     
     dictionaries = mapping["__normalized_dicts__"]
 
-    for field in mapping.get("fields", []):
-        tgt = field.get("target")
-        inputs = field.get("input") or []
+    # Compilation et index des containers
+    container_idx = _build_container_index(mapping)
+    compiled = _compile_mapping(mapping)
+    
+    for f in compiled:
+        tgt, inputs, plan = f["target"], f["input"], f["plan"]
         values = _get_input_values(row, inputs)
-        cur: Any = values
-        pipeline = field.get("pipeline") or []
-        result = _apply_pipeline(globals_cfg, dictionaries, cur, pipeline, tgt, row_idx, issues)
-
-        node = doc
-        parts = tgt.split(".")
-        for p in parts[:-1]:
-            node = node.setdefault(p, {})
-        node[parts[-1]] = result
+        cur = values
+        result = _apply_compiled(globals_cfg, dictionaries, cur, plan, tgt, row_idx, issues)
+        
+        # Placement des valeurs avec support des containers
+        _place_value(doc, tgt, result, container_idx)
 
     idp = mapping.get("id_policy")
     if idp:

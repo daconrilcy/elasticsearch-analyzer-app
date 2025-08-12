@@ -18,6 +18,7 @@ interface AuthState {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>; // Logout est maintenant une opération asynchrone
   checkAuth: () => Promise<void>;
+  forceLogout: () => void; // Nouvelle fonction pour forcer la déconnexion
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -26,11 +27,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true, // L'application commence en état de chargement
 
   login: async (credentials: AuthCredentials) => {
-    // 1. Appelle l'API de login. Le backend s'occupe de poser le cookie.
-    await apiLogin(credentials);
-    // 2. Récupère les informations de l'utilisateur pour mettre à jour l'état de l'UI.
-    const user = await getCurrentUser();
-    set({ user, isAuthenticated: true });
+    try {
+      // 1. Appelle l'API de login. Le backend s'occupe de poser le cookie.
+      await apiLogin(credentials);
+      // 2. Récupère les informations de l'utilisateur pour mettre à jour l'état de l'UI.
+      const user = await getCurrentUser();
+      set({ user, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      // En cas d'erreur, on s'assure que l'état est propre
+      set({ user: null, isAuthenticated: false, isLoading: false });
+      throw error;
+    }
   },
 
   register: async (credentials: RegisterCredentials) => {
@@ -40,10 +47,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    // Appelle le backend pour qu'il supprime le cookie HttpOnly.
-    await apiLogout();
-    // Met à jour l'état de l'application pour refléter la déconnexion.
-    set({ user: null, isAuthenticated: false });
+    try {
+      // Appelle le backend pour qu'il supprime le cookie HttpOnly.
+      await apiLogout();
+    } catch (error) {
+      // Même si l'API échoue, on force la déconnexion côté client
+      console.warn('Erreur lors de la déconnexion API:', error);
+    } finally {
+      // Met à jour l'état de l'application pour refléter la déconnexion.
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  },
+
+  forceLogout: () => {
+    // Force la déconnexion sans appeler l'API (utile en cas d'erreur 401)
+    set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
   checkAuth: async () => {
@@ -52,14 +70,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Tente de récupérer l'utilisateur. Si l'utilisateur a un cookie valide,
       // cette requête réussira.
       const user = await getCurrentUser();
-      set({ user, isAuthenticated: true });
+      set({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
       // Si la requête échoue (ex: 401 Unauthorized), cela signifie que l'utilisateur
       // n'est pas connecté. On s'assure que l'état est propre.
-      set({ user: null, isAuthenticated: false });
-    } finally {
-      // Dans tous les cas, le chargement initial est terminé.
-      set({ isLoading: false });
+      set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 }));

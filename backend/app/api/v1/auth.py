@@ -59,7 +59,14 @@ async def login(
 @router.post("/logout")
 async def logout(response: Response):
     """Déconnecte l'utilisateur en supprimant le cookie d'authentification."""
-    response.delete_cookie(key="access_token")
+    # Supprime le cookie avec tous les paramètres pour s'assurer qu'il est bien supprimé
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        samesite="lax",
+        # secure=False,  # À activer en production (HTTPS)
+        # domain=None,   # Laissez à None pour localhost
+    )
     return {"message": "Déconnexion réussie"}
 
 

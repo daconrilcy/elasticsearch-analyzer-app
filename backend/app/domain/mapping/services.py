@@ -120,6 +120,23 @@ class MappingService:
         return schemas.ValidateOut(errors=[], warnings=[], field_stats=[], compiled=None)
 
     @staticmethod
+    def _apply_containers(props: dict, containers: list[dict]) -> None:
+        """Applique la définition des containers (object/nested) au mapping ES."""
+        for c in containers or []:
+            path = c["path"]  # ex: "contacts[]" ou "address"
+            ctype = c["type"]  # "nested" | "object"
+            parts = path.replace("[]", "").split(".")
+            
+            node = props
+            for p in parts[:-1]:
+                node = node.setdefault(p, {}).setdefault("properties", {})
+            
+            leaf = parts[-1]
+            node.setdefault(leaf, {}).setdefault("properties", {})
+            # Si [] présent → type nested, sinon object
+            node[leaf]["type"] = "nested" if "[]" in path or ctype == "nested" else "object"
+
+    @staticmethod
     def compile(mapping: Dict[str, Any], include_plan: bool = False) -> schemas.CompileOut:
         """Compile un mapping DSL en mapping Elasticsearch exploitable."""
         start_time = time.time()
@@ -127,6 +144,10 @@ class MappingService:
         
         # Compilation ES minimale (types + multi-fields). Les analyzers/normalizers sont passés tels quels.
         props: Dict[str, Any] = {}
+        
+        # Appliquer d'abord les containers (object/nested)
+        MappingService._apply_containers(props, mapping.get("containers") or [])
+        
         for f in mapping["fields"]:
             field_def: Dict[str, Any] = {"type": f["type"]}
             if f.get("format"): 
@@ -160,8 +181,9 @@ class MappingService:
         plan = [{"target": f["target"], "input": f["input"], "ops": f.get("pipeline", [])} for f in mapping["fields"]] if include_plan else None
         
         # Calcul du hash du DSL normalisé pour idempotence
-        mapping.setdefault("dsl_version", "1.0")
-        normalized = _normalized_dsl(mapping)
+        dsl = dict(mapping)  # Copie défensive
+        dsl.setdefault("dsl_version", "2.0")  # Version V2 par défaut
+        normalized = _normalized_dsl(dsl)
         compiled_hash = _sha256(normalized)
         
         # ⚠️ stocke compiled_hash quand tu persistes MappingVersion

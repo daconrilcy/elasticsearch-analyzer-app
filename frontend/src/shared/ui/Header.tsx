@@ -44,9 +44,14 @@ export function Header() {
         createNewProject();
     };
 
-    const handleLogout = () => {
-        logout();
-        toast.success("Vous avez été déconnecté.");
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast.success("Vous avez été déconnecté.");
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+            toast.error("Erreur lors de la déconnexion. Veuillez réessayer.");
+        }
     };
 
     return (
