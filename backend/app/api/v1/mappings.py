@@ -21,6 +21,7 @@ from ...domain.mapping.schemas import (
     MappingVersionCreate, MappingVersionUpdate, MappingVersionOut,
     InferTypesOut, EstimateSizeOut, CheckIdsOut
 )
+from ...domain.mapping.validators.common.mapping import get_schema
 from prometheus_client import Counter
 from ...core.db import get_db
 from ...core.es_client import get_es_client
@@ -97,6 +98,31 @@ def dry_run_mapping_test(body: Dict[str, Any]):
     body["globals"] = body.get("globals") or {}  # sécurité
     sample = {"rows": rows}
     return MappingService.dry_run(body, sample)
+
+@router.get("/schema")
+async def get_mapping_schema(request: Request, user=Depends(get_current_user)):
+    """Récupère le schéma JSON du DSL Mapping (source de vérité pour le frontend)."""
+    from ...domain.mapping.validators.common.mapping import get_schema
+    
+    # Support ETag pour le cache
+    etag = f'"v2.2.0-{hash(get_schema())}"'
+    if_none_match = request.headers.get("if-none-match")
+    if if_none_match == etag:
+        from fastapi.responses import Response
+        return Response(status_code=304)
+    
+    # Retourne le schéma avec ETag
+    from fastapi.responses import JSONResponse
+    response = JSONResponse(content=get_schema())
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = "public, max-age=3600"  # 1 heure
+    return response
+
+@router.get("/schema/test")
+def get_mapping_schema_test():
+    """Version de test sans authentification."""
+    from ...domain.mapping.validators.common.mapping import get_schema
+    return get_schema()
 
 
 @router.post("/check-ids", response_model=CheckIdsOut)

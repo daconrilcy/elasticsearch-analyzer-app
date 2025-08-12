@@ -91,57 +91,34 @@ def _build_container_index(mapping: dict) -> dict:
     return idx
 
 def _place_value(doc: dict, target: str, value: Any, container_idx: dict):
-    """Place une valeur dans le document en respectant les containers."""
+    """Place une valeur dans le document en respectant les containers (V2.2 amélioré)."""
     parts = target.split(".")
+    node = doc
     
-    # Trouve le premier préfixe qui est un container
-    prefix = []
-    array_at = None
     for i, p in enumerate(parts):
-        prefix.append(p)
-        key = ".".join(prefix)
-        if key in container_idx and container_idx[key]["array"]:
-            array_at = i
-            break
-    
-    if array_at is None:
-        # V1: placement simple
-        node = doc
-        for p in parts[:-1]:
-            node = node.setdefault(p, {})
-        node[parts[-1]] = value
-        return
-    
-    # On a un container array (nested)
-    container_key = ".".join(parts[:array_at+1])
-    leaf_path = parts[array_at+1:]
-    leaf = leaf_path[-1] if leaf_path else None
-    
-    # Structure du tableau d'objets
-    arr = doc.setdefault(container_key.split(".")[0], [])
-    
-    # Si value est une liste de scalaires -> [{leaf: v}, ...]
-    if isinstance(value, list) and (leaf is not None):
-        # Assure la taille
-        while len(arr) < len(value):
-            arr.append({})
-        for i, v in enumerate(value):
-            if i >= len(arr):
-                arr.append({})
-            arr[i][leaf] = v
-        return
-    
-    # value scalaire -> un seul objet
-    if leaf is not None:
-        if not arr:
-            arr.append({})
-        arr[0][leaf] = value
-        return
-    
-    # sinon, fallback
-    if not arr:
-        arr.append({})
-    arr[0].update(value if isinstance(value, dict) else {"value": value})
+        is_array = p.endswith("[]")
+        key = p[:-2] if is_array else p
+        last = (i == len(parts) - 1)
+        
+        if is_array:
+            node.setdefault(key, [])
+            if last:
+                # value est liste d'objets/valeurs → étaler
+                if isinstance(value, list):
+                    node[key] = value
+                else:
+                    node[key] = [value]
+                return
+            else:
+                # descendre dans chaque item si value est liste de dicts synchronisés
+                if not node[key]:
+                    node[key].append({})
+                node = node[key][0]  # V2.2: placement à plat; V2.3: index-sync
+        else:
+            if last:
+                node[key] = value
+                return
+            node = node.setdefault(key, {})
 
 def _get_input_values(row, inputs, mapping=None):
     vals: List[Any] = []
