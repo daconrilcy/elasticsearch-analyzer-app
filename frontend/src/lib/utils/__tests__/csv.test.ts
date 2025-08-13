@@ -1,7 +1,47 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { bytesFmt, toCSV, downloadCSV } from '../csv';
 
 describe('csv utils', () => {
+  // Mocks pour les APIs du navigateur
+  beforeEach(() => {
+    // Mock document.createElement
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      const element = {
+        setAttribute: vi.fn(),
+        click: vi.fn(),
+        download: '',
+        href: '',
+        style: { visibility: '' },
+        // Simuler un vrai Node DOM
+        nodeType: 1,
+        nodeName: tagName.toUpperCase(),
+        parentNode: null,
+        childNodes: [],
+        appendChild: vi.fn(),
+        removeChild: vi.fn(),
+      } as any;
+      return element;
+    });
+
+    // Mock URL.createObjectURL
+    global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+    
+    // Mock URL.revokeObjectURL
+    global.URL.revokeObjectURL = vi.fn();
+    
+    // Mock document.body
+    Object.defineProperty(document, 'body', {
+      value: {
+        appendChild: vi.fn(),
+        removeChild: vi.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   describe('bytesFmt', () => {
     it('devrait formater 0 bytes', () => {

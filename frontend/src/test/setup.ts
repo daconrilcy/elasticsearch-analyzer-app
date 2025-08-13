@@ -1,21 +1,14 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
-// Mock CSS modules
-vi.mock('*.module.scss', () => ({
-  default: {
-    filePreviewPanel: 'filePreviewPanel',
-    fileHeader: 'fileHeader',
-    toolbar: 'toolbar',
-    dataContainer: 'dataContainer',
-    chunkError: 'chunkError',
-    loadingState: 'loadingState',
-    errorState: 'errorState',
-    // Add other CSS class names as needed
-  }
+// Mock des APIs globales du navigateur
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }))
 
-// Configuration globale pour les tests
+// Mock de matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
@@ -30,54 +23,23 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-// Mock pour EventSource
-const MockEventSource = vi.fn().mockImplementation(() => ({
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  close: vi.fn(),
-  readyState: 1,
-  url: '',
-  withCredentials: false,
-})) as any
+// Mock de fetch global
+global.fetch = vi.fn()
 
-MockEventSource.CONNECTING = 0
-MockEventSource.OPEN = 1
-MockEventSource.CLOSED = 2
-
-global.EventSource = MockEventSource
-
-// Mock pour URL.createObjectURL
-Object.defineProperty(global, 'URL', {
-  value: {
-    createObjectURL: vi.fn(() => 'mocked-blob-url'),
-    revokeObjectURL: vi.fn(),
-  },
-  writable: true,
-})
-
-// Mock pour Blob
-global.Blob = vi.fn().mockImplementation((content, options) => ({
-  size: content.length,
-  type: options?.type || 'application/octet-stream',
-}))
-
-// Mock pour document.createElement pour les tests CSV
-const originalCreateElement = document.createElement
-vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-  const element = originalCreateElement.call(document, tagName)
-  if (tagName === 'a') {
-    const anchor = element as HTMLAnchorElement
-    anchor.click = vi.fn()
-    anchor.setAttribute = vi.fn()
-    anchor.style = { visibility: 'hidden' } as any
-    anchor.download = ''
-    anchor.href = ''
+// Mock de console.error pour éviter le bruit dans les tests
+const originalError = console.error
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: ReactDOM.render is no longer supported')
+    ) {
+      return
+    }
+    originalError.call(console, ...args)
   }
-  return element
 })
 
-// S'assurer que document.body existe et peut recevoir des éléments
-if (!document.body) {
-  const body = document.createElement('body');
-  document.appendChild(body);
-}
+afterAll(() => {
+  console.error = originalError
+})

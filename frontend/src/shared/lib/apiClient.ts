@@ -22,6 +22,7 @@ import type {
 // ReactFlowEdge est importé depuis le fichier de types partagés, pas directement de la bibliothèque.
 import type { AnalyzerGraph, CustomNode, ReactFlowEdge } from "@shared/types/analyzer.d.ts";
 import { ApiError } from "@shared/lib";
+import { useAuthStore } from "./heavy";
 
 // --- CONFIGURATION CENTRALE ---
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -60,16 +61,14 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}): Pr
             if (!isHandling401) {
                 isHandling401 = true;
                 
-                // Import dynamique pour éviter les dépendances circulaires
-                import('@shared/lib').then(({ useAuthStore }) => {
-                    const { forceLogout } = useAuthStore.getState();
-                    forceLogout();
-                    
-                    // Réinitialiser le flag après un délai
-                    setTimeout(() => {
-                        isHandling401 = false;
-                    }, 1000);
-                }).catch(console.error);
+                // Utilisation directe du store importé
+                const { forceLogout } = useAuthStore.getState();
+                forceLogout();
+                
+                // Réinitialiser le flag après un délai
+                setTimeout(() => {
+                    isHandling401 = false;
+                }, 1000);
             }
             
             throw new ApiError('Session expirée. Veuillez vous reconnecter.', 401);

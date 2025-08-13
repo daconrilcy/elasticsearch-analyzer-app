@@ -3,7 +3,7 @@ import { type Connection } from 'reactflow';
 import toast from 'react-hot-toast';
 import { useGraphStore } from '@shared/lib';
 import { NODE_ORDER } from '@shared/constants/graph';
-import { isFilterCompatible } from '@shared/lib';
+import { isFilterCompatible } from '@shared/lib/heavy';
 import { Kind } from '@shared/types/analyzer.d';
 
 export function useConnectionValidation() {

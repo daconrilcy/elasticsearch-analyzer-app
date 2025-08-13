@@ -1,5 +1,5 @@
-[33mba0ddc3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;33mtag: [m[1;33mv2.2.0[m[33m)[m feat: Implémentation complète du Mapping DSL V2.2
-[33mbb7c606[m[33m ([m[1;33mtag: [m[1;33mv2.1.1[m[33m, [m[1;31morigin/master[m[33m)[m feat: Mapping DSL V2.1 - Advanced array operations and production-ready features
-[33mcfe324a[m[33m ([m[1;33mtag: [m[1;33mv2.1.0[m[33m)[m feat: Mapping DSL V2.1.0 - Nouvelles opérations zip/objectify, cache JSONPath ultra-rapide, et génération automatique ILM+Ingest
-[33mc9e8ee3[m docs: Documentation de clôture V2.0.1 complète
-[33m85df3c9[m[33m ([m[1;33mtag: [m[1;33mv2.0.1[m[33m)[m feat: Mapping DSL V2.0.1 - Production Ready
+v2.0.1
+v2.1.0
+v2.1.1
+v2.2.0
+v2.2.1

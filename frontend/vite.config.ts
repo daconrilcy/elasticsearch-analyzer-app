@@ -28,5 +28,42 @@ export default defineConfig({
       },
     },
   },
+  
+  // 🚀 Optimisation des chunks pour réduire la taille du bundle principal
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Séparer les dépendances principales
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react';
+            }
+            if (id.includes('@tanstack')) {
+              return 'query';
+            }
+            if (id.includes('reactflow')) {
+              return 'reactflow';
+            }
+            if (id.includes('lodash')) {
+              return 'lodash';
+            }
+            // Regrouper les autres dépendances
+            return 'vendor';
+          }
+          
+          // Séparer les composants lourds
+          if (id.includes('src/features/mappings/components')) {
+            return 'mappings';
+          }
+          if (id.includes('src/features/analyzers/components')) {
+            return 'analyzers';
+          }
+        },
+      },
+    },
+    // Relever le seuil d'alerte pour les chunks
+    chunkSizeWarningLimit: 800,
+  },
 
 })

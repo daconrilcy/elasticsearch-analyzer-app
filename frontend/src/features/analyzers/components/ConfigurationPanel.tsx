@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { useGraphStore, useUIStore, findComponentDefinition } from '@shared/lib';
+import { useGraphStore, useUIStore } from '@shared/lib';
+import { findComponentDefinition } from '@shared/lib/heavy';
 import { FormField } from '@shared/ui';
 import { FormExclusiveChoice } from './form/FormExclusiveChoice';
 import { type CustomNode } from '@shared/types';

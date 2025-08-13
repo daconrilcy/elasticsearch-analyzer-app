@@ -1,0 +1,288 @@
+.mappingValidator {
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #fff;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1e5e9;
+    background: #f8f9fa;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .headerActions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .validationSummary {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+
+        .summaryItem {
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: #e9ecef;
+          color: #6c757d;
+
+          &.hasErrors {
+            background: #f8d7da;
+            color: #721c24;
+          }
+
+          &.hasWarnings {
+            background: #fff3cd;
+            color: #856404;
+          }
+        }
+      }
+
+      .expandButton {
+        background: none;
+        border: none;
+        font-size: 18px;
+        font-weight: bold;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #e9ecef;
+          color: #495057;
+        }
+      }
+    }
+  }
+
+  .content {
+    padding: 20px;
+
+    .info {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #6f42c1;
+
+      p {
+        margin: 0;
+        color: #495057;
+        line-height: 1.5;
+      }
+    }
+
+    .actions {
+      margin-bottom: 20px;
+      text-align: center;
+
+      .validateButton {
+        background: #6f42c1;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: #5a32a3;
+        }
+
+        &:disabled {
+          background: #6c757d;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .error {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      color: #721c24;
+
+      p {
+        margin: 0 0 8px 0;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .results {
+      .summary {
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 6px;
+        color: #0c5460;
+
+        h4 {
+          margin: 0 0 16px 0;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .summaryDetails {
+          p {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+
+            .valid {
+              color: #155724;
+              font-weight: 600;
+            }
+
+            .invalid {
+              color: #721c24;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+
+      .noIssues {
+        text-align: center;
+        padding: 40px 20px;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        color: #155724;
+
+        p {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+
+      .issues {
+        h5 {
+          margin: 0 0 16px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .issuesList {
+          .issueItem {
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+
+            &.errorSeverity {
+              border-left: 4px solid #dc3545;
+              background: #fff5f5;
+            }
+
+            &.warningSeverity {
+              border-left: 4px solid #ffc107;
+              background: #fffbf0;
+            }
+
+            &.infoSeverity {
+              border-left: 4px solid #17a2b8;
+              background: #f0f9ff;
+            }
+
+            &.unknownSeverity {
+              border-left: 4px solid #6c757d;
+              background: #f8f9fa;
+            }
+
+            .issueHeader {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 16px;
+              background: #f8f9fa;
+              border-bottom: 1px solid #e1e5e9;
+
+              .severityIcon {
+                font-size: 16px;
+              }
+
+              .severityLabel {
+                font-weight: 600;
+                font-size: 14px;
+                text-transform: uppercase;
+              }
+
+              .issueCode {
+                background: #e9ecef;
+                color: #495057;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 11px;
+                font-family: monospace;
+                font-weight: 500;
+              }
+            }
+
+            .issueMessage {
+              padding: 12px 16px;
+              color: #2c3e50;
+              line-height: 1.5;
+              font-size: 14px;
+            }
+
+            .issuePath,
+            .issueField,
+            .issueSuggestion {
+              padding: 8px 16px;
+              border-top: 1px solid #e1e5e9;
+              font-size: 13px;
+              color: #6c757d;
+
+              strong {
+                color: #495057;
+              }
+
+              code {
+                background: #e9ecef;
+                color: #495057;
+                padding: 2px 4px;
+                border-radius: 3px;
+                font-family: monospace;
+                font-size: 12px;
+              }
+            }
+
+            .issueSuggestion {
+              background: #fff3cd;
+              border-top-color: #ffeaa7;
+              color: #856404;
+
+              strong {
+                color: #856404;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

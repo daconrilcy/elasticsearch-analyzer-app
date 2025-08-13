@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import toast from 'react-hot-toast';
 import { type AnalyzerGraph } from '@shared/types/analyzer.d';
 // CORRECTION : Le chemin pointe maintenant vers le nouvel emplacement du service
-import { validateGraph } from '@shared/lib';
+import { validateGraph } from '@shared/lib/heavy';
 
 export interface AnalysisStep {
   step_name: string;

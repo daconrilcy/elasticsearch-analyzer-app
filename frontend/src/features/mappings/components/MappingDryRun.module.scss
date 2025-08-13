@@ -1,0 +1,457 @@
+.mappingDryRun {
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #fff;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1e5e9;
+    background: #f8f9fa;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .headerActions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .dryRunSummary {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+
+        .summaryItem {
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: #e9ecef;
+          color: #6c757d;
+        }
+      }
+
+      .expandButton {
+        background: none;
+        border: none;
+        font-size: 18px;
+        font-weight: bold;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #e9ecef;
+          color: #495057;
+        }
+      }
+    }
+  }
+
+  .content {
+    padding: 20px;
+
+    .info {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border-left: 4px solid #fd7e14;
+
+      p {
+        margin: 0;
+        color: #495057;
+        line-height: 1.5;
+      }
+    }
+
+    .actions {
+      margin-bottom: 20px;
+      text-align: center;
+
+      .dryRunButton {
+        background: #fd7e14;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: #e8690b;
+        }
+
+        &:disabled {
+          background: #6c757d;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .error {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 6px;
+      color: #721c24;
+
+      p {
+        margin: 0 0 8px 0;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .results {
+      .summary {
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 6px;
+        color: #0c5460;
+
+        h4 {
+          margin: 0 0 16px 0;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .summaryGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 16px;
+
+          .summaryCard {
+            background: #fff;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+
+            .summaryValue {
+              font-size: 24px;
+              font-weight: 700;
+              color: #0c5460;
+              margin-bottom: 8px;
+            }
+
+            .summaryLabel {
+              font-size: 12px;
+              color: #6c757d;
+              text-transform: uppercase;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+
+      .noIssues {
+        text-align: center;
+        padding: 40px 20px;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        color: #155724;
+        margin-bottom: 20px;
+
+        p {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+
+      .issues {
+        margin-bottom: 20px;
+
+        h5 {
+          margin: 0 0 16px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .issuesList {
+          .issueItem {
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+
+            &.errorSeverity {
+              border-left: 4px solid #dc3545;
+              background: #fff5f5;
+            }
+
+            &.warningSeverity {
+              border-left: 4px solid #ffc107;
+              background: #fffbf0;
+            }
+
+            &.infoSeverity {
+              border-left: 4px solid #17a2b8;
+              background: #f0f9ff;
+            }
+
+            &.unknownSeverity {
+              border-left: 4px solid #6c757d;
+              background: #f8f9fa;
+            }
+
+            .issueHeader {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 16px;
+              background: #f8f9fa;
+              border-bottom: 1px solid #e1e5e9;
+              flex-wrap: wrap;
+
+              .severityIcon {
+                font-size: 16px;
+              }
+
+              .severityLabel {
+                font-weight: 600;
+                font-size: 14px;
+                text-transform: uppercase;
+              }
+
+              .issueCode {
+                background: #e9ecef;
+                color: #495057;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 11px;
+                font-family: monospace;
+                font-weight: 500;
+              }
+
+              .issueCount {
+                background: #007bff;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-size: 11px;
+                font-weight: 500;
+              }
+            }
+
+            .issueMessage {
+              padding: 12px 16px;
+              color: #2c3e50;
+              line-height: 1.5;
+              font-size: 14px;
+            }
+
+            .issueExamples {
+              padding: 12px 16px;
+              border-top: 1px solid #e1e5e9;
+              background: #f8f9fa;
+
+              strong {
+                color: #495057;
+                display: block;
+                margin-bottom: 8px;
+              }
+
+              .examplesList {
+                .example {
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 8px;
+                  margin-bottom: 8px;
+                  padding: 8px;
+                  background: #fff;
+                  border-radius: 4px;
+                  border: 1px solid #e1e5e9;
+
+                  .exampleRow {
+                    background: #007bff;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                    font-weight: 500;
+                  }
+
+                  .exampleField {
+                    background: #28a745;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                    font-weight: 500;
+                  }
+
+                  .exampleValue {
+                    background: #6c757d;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                    font-family: monospace;
+                    max-width: 200px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  }
+                }
+
+                .moreExamples {
+                  color: #6c757d;
+                  font-size: 12px;
+                  font-style: italic;
+                  text-align: center;
+                  padding: 8px;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .preview {
+        margin-bottom: 20px;
+
+        .previewHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+
+          h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .previewToggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+              background: #5a6268;
+            }
+          }
+        }
+
+        .previewContent {
+          .previewTable {
+            overflow-x: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 12px;
+
+              th, td {
+                padding: 8px 12px;
+                text-align: left;
+                border-bottom: 1px solid #e1e5e9;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+
+              th {
+                background: #f8f9fa;
+                font-weight: 600;
+                color: #495057;
+              }
+
+              td {
+                color: #6c757d;
+                font-family: monospace;
+              }
+            }
+
+            .previewNote {
+              margin: 0;
+              padding: 12px;
+              background: #f8f9fa;
+              color: #6c757d;
+              font-size: 12px;
+              text-align: center;
+              border-top: 1px solid #e1e5e9;
+            }
+          }
+        }
+      }
+
+      .issuesHistogram {
+        h5 {
+          margin: 0 0 16px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .histogram {
+          display: flex;
+          align-items: flex-end;
+          gap: 8px;
+          height: 120px;
+          padding: 20px 0;
+          border-bottom: 2px solid #e1e5e9;
+
+          .histogramBar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+
+            .barFill {
+              width: 100%;
+              background: linear-gradient(to top, #007bff, #0056b3);
+              border-radius: 4px 4px 0 0;
+              min-height: 4px;
+              transition: height 0.3s ease;
+            }
+
+            .barLabel {
+              font-size: 10px;
+              color: #6c757d;
+              text-align: center;
+              writing-mode: vertical-rl;
+              text-orientation: mixed;
+              transform: rotate(180deg);
+            }
+
+            .barValue {
+              font-size: 12px;
+              font-weight: 600;
+              color: #2c3e50;
+            }
+          }
+        }
+      }
+    }
+  }
+}

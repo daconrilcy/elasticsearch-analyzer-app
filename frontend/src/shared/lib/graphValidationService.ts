@@ -1,7 +1,7 @@
 // src/services/graphValidationService.ts
 import type { AnalyzerGraph, CustomNode } from "@shared/types/analyzer.d";
 import { Kind } from "@shared/types/analyzer.d";
-import { findComponentDefinition } from "@shared/lib";
+import { findComponentDefinition } from "./componentRegistry";
 
 /**
  * Valide la structure et la configuration d'un graphe d'analyseur côté client.

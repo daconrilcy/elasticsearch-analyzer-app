@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useGraphStore } from '@shared/lib';
 import {
-  availableTokenizers, 
-  availableTokenFilters, 
+  availableTokenizers,
+  availableTokenFilters,
   availableCharFilters,
-  isFilterCompatible 
-} from '@shared/lib';
+  isFilterCompatible
+} from '@shared/lib/heavy';
 import styles from './Sidebar.module.scss'
 
 
