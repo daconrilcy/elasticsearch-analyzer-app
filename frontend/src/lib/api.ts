@@ -2,13 +2,20 @@
 const MODE = import.meta.env?.MODE;
 const RAW_BASE = import.meta.env?.VITE_API_BASE as string | undefined;
 
-// En tests, on fournit une base factice pour éviter le throw au chargement du module.
-const API_BASE = RAW_BASE ?? (MODE === 'test' ? 'http://test' : undefined);
+// En développement, utiliser localhost:8000 par défaut si VITE_API_BASE n'est pas défini
+const API_BASE = RAW_BASE ?? (MODE === 'development' ? 'http://localhost:8000' : undefined);
 
-// Validation de sécurité - fail-fast en prod/dev
+// Validation de sécurité - fail-fast en production, plus permissif en développement
 if (!API_BASE) {
-  throw new Error("VITE_API_BASE est requis pour l'API. Impossible de continuer.");
+  if (MODE === 'production') {
+    throw new Error("VITE_API_BASE est requis pour l'API en production. Impossible de continuer.");
+  } else {
+    console.warn("VITE_API_BASE non défini, utilisation de http://localhost:8000 par défaut");
+  }
 }
+
+// Fallback pour le développement
+const FINAL_API_BASE = API_BASE || 'http://localhost:8000';
 
 // Stockage du token uniquement en mémoire
 let authToken: string | null = null;
@@ -33,7 +40,7 @@ export const api = {
 
   // Méthodes HTTP avec gestion d'erreurs
   async getJson<T = any>(path: string, signal?: AbortSignal): Promise<T> {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(`${FINAL_API_BASE}${path}`, {
       method: 'GET',
       headers: this.headers(),
       signal,
@@ -47,7 +54,7 @@ export const api = {
   },
 
   async postJson<T = any>(path: string, body: any, signal?: AbortSignal): Promise<T> {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(`${FINAL_API_BASE}${path}`, {
       method: 'POST',
       headers: this.headers(),
       body: JSON.stringify(body),
@@ -69,7 +76,7 @@ export const api = {
       headers['If-None-Match'] = etag;
     }
 
-    const response = await fetch(`${API_BASE}/api/v1/mappings/schema`, {
+    const response = await fetch(`${FINAL_API_BASE}/api/v1/mappings/schema`, {
       method: 'GET',
       headers,
       signal,
@@ -111,5 +118,5 @@ export const api = {
   },
 };
 
-export { API_BASE };
+export { FINAL_API_BASE };
 export default api;
