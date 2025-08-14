@@ -1,17 +1,54 @@
 # 🔧 **Guide du Mapping DSL - Elasticsearch Analyzer App**
 
+## 📋 **Table des Matières**
+- [📖 Vue d'ensemble](#-vue-densemble)
+- [🎯 Versions Disponibles](#-versions-disponibles)
+- [🚀 Fonctionnalités V2.1 (Base)](#-fonctionnalités-v21-base)
+- [⚡ Fonctionnalités V2.2 (Avancées)](#-fonctionnalités-v22-avancées)
+- [🔍 Exemples d'Usage](#-exemples-dusage)
+- [📊 Validation et Compilation](#-validation-et-compilation)
+- [🚨 Gestion des Erreurs](#-gestion-des-erreurs)
+- [📈 Performance et Optimisation](#-performance-et-optimisation)
+- [🔗 API et Intégration](#-api-et-intégration)
+- [📚 Ressources](#-ressources)
+
+---
+
 ## 📖 **Vue d'ensemble**
 
 Ce guide couvre l'utilisation complète du Mapping DSL V2, des fonctionnalités de base (V2.1) aux opérations avancées (V2.2) pour la transformation et la validation des données Elasticsearch.
 
+### **🎯 Objectifs du DSL**
+- **Transformation de données** : Conversion et enrichissement des données
+- **Validation** : Vérification de la cohérence et de la qualité
+- **Flexibilité** : Support de structures complexes et imbriquées
+- **Performance** : Optimisation des opérations de mapping
+
+### **🔧 Cas d'Usage Principaux**
+- **ETL** : Extraction, Transformation, Loading de données
+- **Normalisation** : Standardisation des formats de données
+- **Enrichissement** : Ajout d'informations calculées
+- **Validation** : Contrôle de la qualité des données
+
+---
+
 ## 🎯 **Versions Disponibles**
 
-- **V2.1** : Fonctionnalités de base (containers, JSONPath, opérations simples)
-- **V2.2** : Extensions avancées (opérations array, options de champ ES)
+| Version | Fonctionnalités | Statut | Complexité |
+|---------|----------------|---------|------------|
+| **V2.1** | Containers, JSONPath, opérations simples | ✅ Stable | 👶 Débutant |
+| **V2.2** | Opérations array, options de champ ES | ✅ Stable | 👨‍💻 Développeur |
+
+### **🔄 Migration entre Versions**
+- **V2.1 → V2.2** : Compatible, ajout de fonctionnalités
+- **V1 → V2** : Guide de migration disponible
+- **Rétrocompatibilité** : Maintien des fonctionnalités existantes
+
+---
 
 ## 🚀 **Fonctionnalités V2.1 (Base)**
 
-### **1. Containers (Conteneurs)**
+### **1. 🗂️ Containers (Conteneurs)**
 
 Les containers permettent de définir explicitement la structure des données imbriquées :
 
@@ -30,16 +67,19 @@ Les containers permettent de définir explicitement la structure des données im
 }
 ```
 
-**Types de containers :**
-- **`object`** : Structure simple de type objet
-- **`nested`** : Structure imbriquée pour les tableaux d'objets
+#### **📋 Types de Containers**
+| Type | Description | Usage |
+|------|-------------|-------|
+| **`object`** | Structure simple de type objet | Données plates |
+| **`nested`** | Structure imbriquée pour les tableaux d'objets | Données hiérarchiques |
 
-**Syntaxe des chemins :**
+#### **🔗 Syntaxe des Chemins**
 - `"contacts[]"` : Tableau de contacts (nested)
 - `"address"` : Objet simple (object)
 - `"user.profile"` : Chemin imbriqué
+- `"orders[].items[]"` : Tableaux imbriqués
 
-### **2. Inputs JSONPath**
+### **2. 🔍 Inputs JSONPath**
 
 Nouveau type d'input pour extraire des données complexes :
 
@@ -54,15 +94,18 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
-**Expressions JSONPath supportées :**
-- `$.field` : Champ simple
-- `$.array[*]` : Tous les éléments d'un tableau
-- `$.array[0]` : Premier élément
-- `$.nested.field` : Champ imbriqué
+#### **📊 Expressions JSONPath Supportées**
+| Expression | Description | Exemple |
+|------------|-------------|---------|
+| `$.field` | Champ simple | `$.name` |
+| `$.array[*]` | Tous les éléments d'un tableau | `$.contacts[*]` |
+| `$.array[0]` | Premier élément | `$.contacts[0]` |
+| `$.nested.field` | Champ imbriqué | `$.user.profile.email` |
+| `$.array[?(@.field == "value")]` | Filtrage conditionnel | `$.users[?(@.active == true)]` |
 
-### **3. Opérations de Base**
+### **3. ⚙️ Opérations de Base**
 
-#### **`zip` - Combinaison de tableaux**
+#### **`zip` - Combinaison de Tableaux**
 ```json
 {
   "op": "zip",
@@ -71,7 +114,11 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
-#### **`objectify` - Création d'objets**
+**Paramètres :**
+- **`arrays`** : Liste des noms de tableaux à combiner
+- **`pad`** : Remplir avec `null` si les tableaux ont des longueurs différentes
+
+#### **`objectify` - Création d'Objets**
 ```json
 {
   "op": "objectify",
@@ -80,11 +127,17 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
+**Paramètres :**
+- **`keys`** : Noms des propriétés de l'objet
+- **`values`** : Valeurs correspondantes
+
+---
+
 ## ⚡ **Fonctionnalités V2.2 (Avancées)**
 
-### **1. Opérations Array Avancées**
+### **1. 🔄 Opérations Array Avancées**
 
-#### **`filter` - Filtrage d'éléments**
+#### **`filter` - Filtrage d'Éléments**
 ```json
 {
   "op": "filter",
@@ -96,7 +149,19 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
-#### **`slice` - Sélection de plage**
+**Opérateurs Supportés :**
+| Opérateur | Description | Exemple |
+|-----------|-------------|---------|
+| **`==`** | Égalité stricte | `age == 25` |
+| **`!=`** | Différence | `status != "inactive"` |
+| **`>`** | Supérieur à | `age > 18` |
+| **`>=`** | Supérieur ou égal | `score >= 80` |
+| **`<`** | Inférieur à | `price < 100` |
+| **`<=`** | Inférieur ou égal | `quantity <= 10` |
+| **`in`** | Appartient à une liste | `category in ["A", "B"]` |
+| **`not_in`** | N'appartient pas à une liste | `status not_in ["deleted"]` |
+
+#### **`slice` - Sélection de Plage**
 ```json
 {
   "op": "slice",
@@ -106,15 +171,23 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
-#### **`unique` - Élimination des doublons**
+**Paramètres :**
+- **`start`** : Index de début (inclus)
+- **`end`** : Index de fin (exclus)
+- **`step`** : Pas d'incrémentation (optionnel)
+
+#### **`unique` - Élimination des Doublons**
 ```json
 {
   "op": "unique",
-  "key": "email"
+  "key": "id"
 }
 ```
 
-#### **`sort` - Tri des éléments**
+**Paramètres :**
+- **`key`** : Champ utilisé pour identifier les doublons
+
+#### **`sort` - Tri des Éléments**
 ```json
 {
   "op": "sort",
@@ -123,107 +196,42 @@ Nouveau type d'input pour extraire des données complexes :
 }
 ```
 
-### **2. Options de Champ Elasticsearch**
+**Paramètres :**
+- **`key`** : Champ de tri
+- **`order`** : `"asc"` ou `"desc"`
 
-#### **Configuration des Mappings**
+### **2. 🎯 Options de Champ Elasticsearch**
+
+#### **Configuration des Champs**
 ```json
 {
-  "mapping_options": {
-    "index": false,
-    "store": true,
-    "doc_values": false,
-    "null_value": "N/A"
+  "op": "set_field_options",
+  "field": "email",
+  "options": {
+    "type": "keyword",
+    "analyzer": "standard",
+    "ignore_above": 256
   }
 }
 ```
 
-#### **Analyseurs Personnalisés**
+**Options Disponibles :**
+| Option | Description | Valeurs |
+|--------|-------------|---------|
+| **`type`** | Type de champ ES | `text`, `keyword`, `long`, `date` |
+| **`analyzer`** | Analyseur de texte | `standard`, `whitespace`, `simple` |
+| **`ignore_above`** | Taille maximale | Nombre de caractères |
+| **`null_value`** | Valeur par défaut | Valeur à utiliser si null |
+
+---
+
+## 🔍 **Exemples d'Usage**
+
+### **📊 Exemple 1 : Normalisation de Contacts**
 ```json
 {
-  "analyzer": {
-    "type": "custom",
-    "tokenizer": "standard",
-    "filter": ["lowercase", "stop"]
-  }
-}
-```
-
-## 🔄 **Pipelines et Combinaisons**
-
-### **Pipeline Simple**
-```json
-{
-  "pipeline": [
-    {
-      "op": "trim"
-    },
-    {
-      "op": "lower"
-    },
-    {
-      "op": "replace",
-      "pattern": "\\s+",
-      "replacement": "_"
-    }
-  ]
-}
-```
-
-### **Pipeline avec Conditions**
-```json
-{
-  "pipeline": [
-    {
-      "op": "if",
-      "condition": {
-        "field": "type",
-        "operator": "==",
-        "value": "email"
-      },
-      "then": [
-        {
-          "op": "validate_email"
-        }
-      ],
-      "else": [
-        {
-          "op": "trim"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### **Pipeline Imbriqué**
-```json
-{
-  "pipeline": [
-    {
-      "op": "map",
-      "then": [
-        {
-          "op": "if",
-          "condition": {"field": "active", "operator": "==", "value": true},
-          "then": [
-            {"op": "uppercase"}
-          ],
-          "else": [
-            {"op": "lowercase"}
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-## 📊 **Exemples d'Usage**
-
-### **Gestion des Contacts**
-```json
-{
-  "name": "Contact Processing",
+  "name": "Normalisation Contacts",
+  "version": "2.2",
   "containers": [
     {
       "path": "contacts[]",
@@ -232,166 +240,170 @@ Nouveau type d'input pour extraire des données complexes :
   ],
   "pipeline": [
     {
-      "op": "map",
-      "then": [
-        {
-          "op": "trim",
-          "fields": ["name", "email"]
-        },
-        {
-          "op": "validate_email",
-          "field": "email"
-        },
-        {
-          "op": "if",
-          "condition": {
-            "field": "phone",
-            "operator": "exists"
-          },
-          "then": [
-            {
-              "op": "format_phone",
-              "format": "international"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "op": "filter",
       "condition": {
-        "field": "email",
-        "operator": "valid"
+        "field": "active",
+        "operator": "==",
+        "value": true
+      }
+    },
+    {
+      "op": "set_field_options",
+      "field": "email",
+      "options": {
+        "type": "keyword",
+        "analyzer": "standard"
       }
     }
   ]
 }
 ```
 
-### **Traitement des Logs**
+### **📈 Exemple 2 : Agrégation de Données**
 ```json
 {
-  "name": "Log Processing",
+  "name": "Agrégation Ventes",
+  "version": "2.2",
   "pipeline": [
     {
-      "op": "parse_timestamp",
-      "field": "timestamp",
-      "format": "ISO8601"
-    },
-    {
-      "op": "extract_level",
-      "field": "message",
-      "patterns": ["ERROR", "WARN", "INFO", "DEBUG"]
-    },
-    {
-      "op": "if",
+      "op": "filter",
       "condition": {
-        "field": "level",
-        "operator": "in",
-        "value": ["ERROR", "WARN"]
-      },
-      "then": [
-        {
-          "op": "add_field",
-          "name": "priority",
-          "value": "high"
-        }
-      ]
+        "field": "amount",
+        "operator": ">",
+        "value": 0
+      }
+    },
+    {
+      "op": "group_by",
+      "key": "category",
+      "aggregations": {
+        "total": "sum(amount)",
+        "count": "count()",
+        "average": "avg(amount)"
+      }
     }
   ]
 }
 ```
 
-## 🧪 **Validation et Tests**
+---
 
-### **Endpoint de Validation**
+## 📊 **Validation et Compilation**
+
+### **✅ Validation Syntaxique**
 ```bash
-POST /mappings/validate
-Content-Type: application/json
+# Validation via API
+curl -X POST "http://localhost:8000/api/v1/mappings/validate" \
+  -H "Content-Type: application/json" \
+  -d @mapping.json
+```
 
+### **🔧 Compilation**
+```bash
+# Compilation du mapping
+curl -X POST "http://localhost:8000/api/v1/mappings/compile" \
+  -H "Content-Type: application/json" \
+  -d @mapping.json
+```
+
+### **🧪 Test Dry-Run**
+```bash
+# Test sans application
+curl -X POST "http://localhost:8000/api/v1/mappings/dry-run" \
+  -H "Content-Type: application/json" \
+  -d @mapping.json
+```
+
+---
+
+## 🚨 **Gestion des Erreurs**
+
+### **❌ Erreurs Courantes**
+| Erreur | Cause | Solution |
+|--------|-------|----------|
+| **Invalid JSON** | Syntaxe JSON incorrecte | Valider avec un linter JSON |
+| **Unknown Operation** | Opération non reconnue | Vérifier la version du DSL |
+| **Invalid Field Path** | Chemin de champ incorrect | Vérifier la structure des données |
+| **Type Mismatch** | Type de données incompatible | Convertir ou valider les types |
+
+### **🔍 Debug et Logs**
+```json
 {
-  "mapping": { ... },
-  "data": { ... }
+  "debug": true,
+  "log_level": "DEBUG",
+  "pipeline": [
+    {
+      "op": "debug",
+      "message": "Point de contrôle"
+    }
+  ]
 }
 ```
 
-### **Endpoint de Compilation**
-```bash
-POST /mappings/compile
-Content-Type: application/json
+---
 
+## 📈 **Performance et Optimisation**
+
+### **⚡ Bonnes Pratiques**
+- **Filtrage précoce** : Appliquer les filtres en premier
+- **Indexation** : Utiliser des index appropriés
+- **Cache** : Mettre en cache les résultats fréquents
+- **Pagination** : Traiter les données par lots
+
+### **📊 Métriques de Performance**
+```bash
+# Métriques disponibles
+curl http://localhost:8000/metrics | grep mapping
+```
+
+---
+
+## 🔗 **API et Intégration**
+
+### **📡 Endpoints Disponibles**
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| **`/mappings/validate`** | POST | Validation syntaxique |
+| **`/mappings/compile`** | POST | Compilation du mapping |
+| **`/mappings/apply`** | POST | Application aux données |
+| **`/mappings/dry-run`** | POST | Test sans modification |
+
+### **🔌 Intégration avec Elasticsearch**
+```json
 {
-  "mapping": { ... }
+  "mapping": {
+    "properties": {
+      "processed_field": {
+        "type": "keyword",
+        "analyzer": "standard"
+      }
+    }
+  }
 }
 ```
 
-### **Endpoint de Test (Dry-run)**
-```bash
-POST /mappings/dry-run
-Content-Type: application/json
+---
 
-{
-  "mapping": { ... },
-  "data": { ... }
-}
-```
+## 📚 **Ressources**
 
-## 📈 **Performance et Optimisations**
+### **🔗 Documentation Supplémentaire**
+- **[Exemples Avancés](examples.md)** - Cas d'usage complexes
+- **[Migration V1→V2](migration.md)** - Guide de transition
+- **[Opérations Référence](operations.md)** - Documentation complète des opérations
 
-### **Cache JSONPath**
-- **Hit Rate** : Objectif > 80%
-- **Taille** : Limite à 500 expressions
-- **TTL** : 1 heure par défaut
+### **🧪 Outils de Test**
+- **Mapping Studio** : Interface visuelle pour créer des mappings
+- **API Playground** : Tests interactifs des endpoints
+- **Validateur en ligne** : Vérification syntaxique
 
-### **Optimisations Recommandées**
-1. **Réutiliser les expressions JSONPath** fréquentes
-2. **Limiter la profondeur** des pipelines imbriqués
-3. **Utiliser les opérations natives** quand possible
-4. **Éviter les opérations coûteuses** sur de gros volumes
-
-### **Métriques de Performance**
-```promql
-# Latence des opérations
-histogram_quantile(0.95, mapping_op_ms_count)
-
-# Taux de succès
-rate(mapping_apply_success_total[5m]) / (rate(mapping_apply_success_total[5m]) + rate(mapping_apply_fail_total[5m]))
-
-# Utilisation du cache
-rate(jsonpath_cache_hits_total[5m]) / (rate(jsonpath_cache_hits_total[5m]) + rate(jsonpath_cache_misses_total[5m]))
-```
-
-## 🔒 **Sécurité et Validation**
-
-### **Limites de Sécurité**
-- **Taille maximale** : 1MB par mapping
-- **Profondeur maximale** : 10 niveaux d'imbrication
-- **Nombre d'opérations** : 100 par pipeline
-- **Timeout** : 30 secondes par exécution
-
-### **Validation des Données**
-- **Schéma JSON** : Validation stricte des structures
-- **Types de données** : Vérification des types
-- **Expressions JSONPath** : Validation de la syntaxe
-- **Opérations** : Vérification des paramètres
-
-## 📚 **Références et Ressources**
-
-### **Documentation API**
-- **Swagger UI** : http://localhost:8000/docs
-- **ReDoc** : http://localhost:8000/redoc
-
-### **Schémas de Validation**
-- **Mapping Schema V2** : `app/domain/mapping/validators/common/mapping.schema.json`
-- **Tests** : `tests/domain/mapping/test_dsl_v21.py`
-
-### **Exemples Complets**
-- **Cas d'usage** : `docs/mapping/examples.md`
-- **Migration** : `docs/mapping/migration.md`
-- **Opérations** : `docs/mapping/operations.md`
+### **📋 Templates Prêts à l'Emploi**
+- **Contacts** : Normalisation et validation des contacts
+- **Adresses** : Géocodage et formatage
+- **Logs** : Analyse et enrichissement des logs
 
 ---
 
 **Version** : 2.2.1  
 **Dernière mise à jour** : Décembre 2024  
-**Statut** : ✅ Production Ready
+**Statut** : ✅ Production Ready  
+**DSL** : ✅ **Complet et Documenté**
