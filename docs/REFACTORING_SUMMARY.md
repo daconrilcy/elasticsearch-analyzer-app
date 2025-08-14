@@ -36,6 +36,8 @@
 | **[docs/README.md](README.md)** | ✅ Refactorisé | Table des matières, structure tabulaire, navigation améliorée |
 | **[docs/monitoring/README.md](monitoring/README.md)** | ✅ Refactorisé | Table des matières, formatage cohérent, sections organisées |
 | **[docs/frontend/components/datagrid-readme.md](frontend/components/datagrid-readme.md)** | ✅ Refactorisé | Structure complète, exemples enrichis, navigation claire |
+| **[docs/deployment/README.md](deployment/README.md)** | ✅ Refactorisé | Table des matières, structure tabulaire, exemples enrichis |
+| **[docs/mapping/README.md](mapping/README.md)** | ✅ Refactorisé | Table des matières, formatage cohérent, exemples structurés |
 
 ### **📁 Nouveaux Fichiers Créés**
 | Fichier | Objectif | Contenu |
@@ -46,9 +48,9 @@
 ### **🔄 Fichiers en Attente de Refactorisation**
 | Fichier | Priorité | Raison |
 |---------|----------|---------|
-| `docs/deployment/README.md` | 🔶 Moyenne | Structure déjà correcte, améliorations mineures |
-| `docs/mapping/README.md` | 🔶 Moyenne | Contenu technique dense, formatage à améliorer |
 | `docs/frontend/README.md` | 🔶 Moyenne | Guide principal, structure à optimiser |
+| `docs/frontend/mappings/readme-v2.2.md` | 🔶 Faible | Déjà bien structuré, améliorations mineures |
+| `docs/frontend/preview/readme.md` | 🔶 Faible | Structure correcte, formatage à uniformiser |
 
 ---
 
