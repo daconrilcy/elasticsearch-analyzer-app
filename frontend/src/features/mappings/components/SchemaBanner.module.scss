@@ -1,0 +1,102 @@
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &.offline {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1px solid #f59e0b;
+    color: #92400e;
+  }
+
+  &.updated {
+    background: linear-gradient(135deg, #dbeafe, #93c5fd);
+    border: 1px solid #3b82f6;
+    color: #1e40af;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-weight: 600;
+  }
+
+  span {
+    opacity: 0.8;
+    font-size: 13px;
+  }
+}
+
+.reloadButton {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .banner {
+    margin: 12px;
+    padding: 10px 12px;
+  }
+
+  .content {
+    gap: 8px;
+  }
+
+  .message {
+    span {
+      display: none; // Masquer le message détaillé sur mobile
+    }
+  }
+
+  .reloadButton {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}

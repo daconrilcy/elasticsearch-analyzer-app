@@ -1,0 +1,105 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+    application: 'mapping-studio-v2.2'
+
+rule_files:
+  - "rules/*.yml"
+
+scrape_configs:
+  # Mapping Studio Frontend
+  - job_name: 'mapping-studio-frontend'
+    static_configs:
+      - targets: ['localhost:80']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    metrics_path: /health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}'
+
+  # Mapping Studio Backend API
+  - job_name: 'mapping-studio-backend'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}'
+
+  # Nginx Exporter
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['localhost:9113']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+
+  # Node Exporter (système)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['localhost:9187']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: /metrics
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['localhost:9121']
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+
+  # Docker Daemon
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['localhost:9323']
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+
+  # Custom Application Metrics
+  - job_name: 'mapping-studio-custom'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: /custom-metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    honor_labels: true
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'mapping_studio_(.+)'
+        target_label: metric_name
+        replacement: '${1}'
+
+# Alerting Rules
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Recording Rules
+rule_files:
+  - "rules/mapping-studio-rules.yml"
+  - "rules/infrastructure-rules.yml"

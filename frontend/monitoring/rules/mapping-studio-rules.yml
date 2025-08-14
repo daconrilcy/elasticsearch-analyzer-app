@@ -1,0 +1,169 @@
+groups:
+  - name: mapping-studio-v2.2
+    rules:
+      # Alertes de performance
+      - alert: HighResponseTime
+        expr: http_request_duration_seconds{quantile="0.95"} > 2
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.instance }}"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors/sec for {{ $labels.instance }}"
+
+      # Alertes de disponibilité
+      - alert: ServiceDown
+        expr: up{job=~"mapping-studio.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # Alertes spécifiques à l'application
+      - alert: SchemaCacheMiss
+        expr: rate(mapping_studio_schema_cache_misses_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High schema cache miss rate"
+          description: "Schema cache miss rate is {{ $value }} misses/sec"
+
+      - alert: OfflineModeActive
+        expr: mapping_studio_offline_mode_active > 0
+        for: 10m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "Application in offline mode"
+          description: "Mapping Studio has been in offline mode for more than 10 minutes"
+
+      - alert: HighRateLimitHits
+        expr: rate(mapping_studio_rate_limit_hits_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High rate limit hits"
+          description: "Rate limit hits are {{ $value }} hits/sec"
+
+      # Alertes de base de données
+      - alert: DatabaseConnectionHigh
+        expr: pg_stat_database_numbackends > 50
+        for: 2m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High database connections"
+          description: "Database has {{ $value }} active connections"
+
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration{datname="mapping_studio"}[5m]) > 30
+        for: 2m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average transaction duration is {{ $value }}s"
+
+      # Alertes Redis
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is {{ $value }}%"
+
+      - alert: RedisConnectionsHigh
+        expr: redis_connected_clients > 100
+        for: 2m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High Redis connections"
+          description: "Redis has {{ $value }} connected clients"
+
+      # Alertes de sécurité
+      - alert: HighFailedLogins
+        expr: rate(mapping_studio_failed_logins_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High failed login attempts"
+          description: "Failed login rate is {{ $value }} attempts/sec"
+
+      - alert: UnauthorizedAccess
+        expr: rate(mapping_studio_unauthorized_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "Unauthorized access attempts detected"
+          description: "Unauthorized request rate is {{ $value }} requests/sec"
+
+      # Alertes de métriques métier
+      - alert: LowMappingValidationSuccess
+        expr: rate(mapping_studio_validation_success_total[5m]) / rate(mapping_studio_validation_total[5m]) < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "Low mapping validation success rate"
+          description: "Mapping validation success rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighMappingCompilationTime
+        expr: histogram_quantile(0.95, rate(mapping_studio_compilation_duration_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          application: "mapping-studio-v2.2"
+        annotations:
+          summary: "High mapping compilation time"
+          description: "95th percentile compilation time is {{ $value }}s"

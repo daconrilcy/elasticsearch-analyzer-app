@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import api from '../../../lib/api';
 
 export interface SchemaInfo {
   schema: any;
@@ -7,15 +8,18 @@ export interface SchemaInfo {
   version: string;
   loading: boolean;
   error: string | null;
+  offline: boolean;
+  updated: boolean;
+  etag: string | null;
+  reload: (force?: boolean) => Promise<void>;
 }
 
-export async function fetchSchema(): Promise<any> {
-  const res = await fetch(`${import.meta.env.VITE_API_BASE}/mappings/schema`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch schema: ${res.status} ${res.statusText}`);
-  }
-  return res.json();
-}
+// Cache local pour le schéma
+const schemaCache = {
+  data: null as any,
+  etag: null as string | null,
+  timestamp: 0,
+};
 
 export function useSchema(): SchemaInfo {
   const [schema, setSchema] = useState<any>(null);
@@ -24,41 +28,63 @@ export function useSchema(): SchemaInfo {
   const [version, setVersion] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
+  const [updated, setUpdated] = useState(false);
+  const [etag, setEtag] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadSchema() {
-      try {
-        setLoading(true);
-        setError(null);
+  // Fonction de rechargement du schéma
+  const reload = useCallback(async (force = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setOffline(false);
+
+      // Utiliser le cache si disponible et pas de force reload
+      const currentEtag = force ? undefined : schemaCache.etag || undefined;
+      
+      const result = await api.getSchema(currentEtag);
+      
+      if (result.status === 304) {
+        // Pas de changement, utiliser le cache
+        if (schemaCache.data) {
+          setSchema(schemaCache.data);
+          setEtag(schemaCache.etag);
+          setUpdated(false);
+        }
+      } else if (result.status === 200) {
+        // Nouveau schéma
+        const newSchema = result.data;
+        const newEtag = result.etag;
         
-        const schemaData = await fetchSchema();
-        setSchema(schemaData);
+        // Mettre à jour le cache
+        schemaCache.data = newSchema;
+        schemaCache.etag = newEtag;
+        schemaCache.timestamp = Date.now();
+        
+        setSchema(newSchema);
+        setEtag(newEtag);
+        setUpdated(Boolean(currentEtag && currentEtag !== newEtag));
         
         // Extraire la version
-        const schemaVersion = schemaData?.$id?.split('/').pop()?.replace('.schema.json', '') || 'unknown';
+        const schemaVersion = newSchema?.$id?.split('/').pop()?.replace('.schema.json', '') || 'unknown';
         setVersion(schemaVersion);
         
         // Extraire les types de champs (exclure nested/object gérés via containers)
-        const allFieldTypes = schemaData?.properties?.fields?.items?.properties?.type?.enum || [];
+        const allFieldTypes = newSchema?.properties?.fields?.items?.properties?.type?.enum || [];
         const filteredFieldTypes = allFieldTypes.filter((type: string) => 
           !['nested', 'object'].includes(type)
         );
         setFieldTypes(filteredFieldTypes);
         
         // Extraire les opérations disponibles
-        const opsRefs = schemaData?.properties?.fields?.items?.properties?.pipeline?.items?.oneOf || [];
-        console.log('Opérations trouvées dans le schéma:', opsRefs);
-        
+        const opsRefs = newSchema?.properties?.fields?.items?.properties?.pipeline?.items?.oneOf || [];
         const ops = opsRefs
           .map((ref: any) => {
             const opName = ref?.$ref?.split('/').pop()?.replace('Op', '');
-            console.log('Référence d\'opération:', ref?.$ref, '→ Nom extrait:', opName);
             return opName;
           })
           .filter(Boolean)
           .map((op: string) => op.charAt(0).toLowerCase() + op.slice(1)); // camelCase
-        
-        console.log('Opérations finales extraites:', ops);
         
         // Validation et fallback des opérations
         if (ops.length === 0) {
@@ -68,17 +94,33 @@ export function useSchema(): SchemaInfo {
         } else {
           setOperations(ops);
         }
-        
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load schema');
-        console.error('Schema loading error:', err);
-      } finally {
-        setLoading(false);
       }
+    } catch (err) {
+      console.error('Schema loading error:', err);
+      
+      // Gestion offline
+      if (err instanceof Error && err.message.includes('fetch')) {
+        setOffline(true);
+        
+        // Essayer de charger depuis le cache si disponible
+        if (schemaCache.data) {
+          setSchema(schemaCache.data);
+          setEtag(schemaCache.etag);
+          setError('Mode hors ligne - schéma chargé depuis le cache');
+        } else {
+          setError('Mode hors ligne - aucun schéma en cache disponible');
+        }
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load schema');
+      }
+    } finally {
+      setLoading(false);
     }
-
-    loadSchema();
   }, []);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   return {
     schema,
@@ -86,25 +128,29 @@ export function useSchema(): SchemaInfo {
     operations,
     version,
     loading,
-    error
+    error,
+    offline,
+    updated,
+    etag,
+    reload,
   };
 }
 
 // Hook spécialisé pour les types de champs
-export function useFieldTypes(): { fieldTypes: string[]; loading: boolean; error: string | null } {
-  const { fieldTypes, loading, error } = useSchema();
-  return { fieldTypes, loading, error };
+export function useFieldTypes(): { fieldTypes: string[]; loading: boolean; error: string | null; offline: boolean } {
+  const { fieldTypes, loading, error, offline } = useSchema();
+  return { fieldTypes, loading, error, offline };
 }
 
 // Hook spécialisé pour les opérations
-export function useOperations(): { operations: string[]; loading: boolean; error: string | null } {
-  const { operations, loading, error } = useSchema();
-  return { operations, loading, error };
+export function useOperations(): { operations: string[]; loading: boolean; error: string | null; offline: boolean } {
+  const { operations, loading, error, offline } = useSchema();
+  return { operations, loading, error, offline };
 }
 
 // Hook pour la version du schéma
-export function useSchemaVersion(): { version: string; loading: boolean; error: string | null } {
-  const { version, loading, error } = useSchema();
-  return { version, loading, error };
+export function useSchemaVersion(): { version: string; loading: boolean; error: string | null; offline: boolean } {
+  const { version, loading, error, offline } = useSchema();
+  return { version, loading, error, offline };
 }
 

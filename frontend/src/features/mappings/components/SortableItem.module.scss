@@ -1,0 +1,71 @@
+.sortableItem {
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    transform: rotate(2deg);
+    z-index: 1000;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  // Indicateur de drag
+  &::before {
+    content: '⋮⋮';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+
+  // Zone de drop
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.05);
+    border: 2px dashed transparent;
+    border-radius: 6px;
+    opacity: 0;
+    transition: all 0.2s ease;
+  }
+
+  &.dragging::after {
+    opacity: 1;
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .sortableItem {
+    &::before {
+      left: 4px;
+      font-size: 10px;
+    }
+  }
+}

@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # Frontend - Mapping Studio V2.2
+  mapping-studio-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: mapping-studio-v2.2-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Configuration nginx
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Certificats SSL (si auto-générés)
+      - ./ssl:/etc/nginx/ssl:ro
+      # Logs
+      - ./logs:/var/log/nginx
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE=https://your-domain.com/api/v1
+    networks:
+      - mapping-studio-network
+    depends_on:
+      - mapping-studio-backend
+
+  # Backend API (FastAPI)
+  mapping-studio-backend:
+    image: your-registry/mapping-studio-backend:latest
+    container_name: mapping-studio-v2.2-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://user:password@db:5432/mapping_studio
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGINS=https://your-domain.com
+    volumes:
+      - ./backend-logs:/app/logs
+    networks:
+      - mapping-studio-network
+    depends_on:
+      - db
+      - redis
+
+  # Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: mapping-studio-v2.2-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=mapping_studio
+      - POSTGRES_USER=mapping_user
+      - POSTGRES_PASSWORD=secure_password_here
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - mapping-studio-network
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    container_name: mapping-studio-v2.2-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_password_here
+    volumes:
+      - redis_data:/data
+    networks:
+      - mapping-studio-network
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mapping-studio-v2.2-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - mapping-studio-network
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mapping-studio-v2.2-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password_here
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - mapping-studio-network
+    depends_on:
+      - prometheus
+
+  # Reverse proxy avec SSL (si nginx n'est pas utilisé)
+  traefik:
+    image: traefik:v2.10
+    container_name: mapping-studio-v2.2-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik
+      - ./ssl:/ssl
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=admin@your-domain.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/ssl/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+    networks:
+      - mapping-studio-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  mapping-studio-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
