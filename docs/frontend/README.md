@@ -86,6 +86,35 @@ src/
 └── types/                 # Définitions TypeScript
 ```
 
+## 🏗️ **Architecture des Mappings**
+
+Le système de mappings Elasticsearch est organisé en modules spécialisés :
+
+### **🧠 Module Intelligence**
+- **TypeInference** : Inférence automatique des types
+- **OperationSuggestions** : Suggestions IA d'opérations
+- **SizeEstimation** : Estimation de la taille des index
+- **JSONPathPlayground** : Tests et validation JSONPath
+- **DocsPreviewVirtualized** : Prévisualisation des documents
+
+### **🎨 Module Studio**
+- **PipelineDnD** : Pipeline avec drag-and-drop
+- **FieldsGrid** : Gestion complète des champs
+- **UnifiedDiffView** : Vue unifiée des différences
+- **OperationEditor** : Éditeur d'opérations
+- **VisualMappingTab** : Interface de mapping visuel
+
+### **✅ Module Validation**
+- **MappingValidator** : Validation des mappings
+- **IdPolicyEditor** : Édition des politiques d'ID
+
+### **🔄 Module Cycle de Vie**
+- **MappingDryRun** : Test des mappings
+- **MappingCompiler** : Compilation des mappings
+- **MappingApply** : Application des mappings
+
+**📚 [Voir l'architecture complète](./mappings/architecture-overview.md)**
+
 ## 🔧 **Configuration Avancée**
 
 ### **Variables d'Environnement**
@@ -370,6 +399,22 @@ logger.error('Erreur de validation', {
 - **FileUpload** : Upload avec drag & drop
 - **FilePreview** : Prévisualisation des contenus
 - **ChunkNavigation** : Navigation dans les gros fichiers
+
+## 🏗️ **Documentation Architecture**
+
+### **Architecture Globale**
+- **[Architecture Complète](./mappings/architecture-overview.md)** : Vue d'ensemble du système
+- **[Intégrations et Migrations](../mapping/integrations-and-migrations.md)** : Historique des évolutions
+
+### **Modules Spécialisés**
+- **[Module Intelligence](./mappings/intelligence-components.md)** : Composants IA et analyse
+- **[Module Studio](./mappings/studio-components.md)** : Interface avancée de création
+
+### **Composants Individuels**
+- **[TypeInference](./mappings/intelligence-components.md#typeinference---inférence-automatique-des-types)** : Inférence automatique des types
+- **[OperationEditor](./mappings/studio-components.md#operationeditor---éditeur-dopérations)** : Éditeur d'opérations
+- **[FieldsGrid](./mappings/studio-components.md#fieldsgrid---gestion-complète-des-champs)** : Gestion des champs
+- **[UnifiedDiffView](./mappings/studio-components.md#unifieddiffview---vue-unifiée-des-différences)** : Vue des différences
 
 ## 🔗 **Ressources et Liens**
 

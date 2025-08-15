@@ -21,7 +21,8 @@ import styles from './CreateMappingModal.module.scss'
 
 import { createMapping, getFileDetails } from '@shared/lib';
 import type { FileDetailOut, MappingCreate, MappingRule, FileOut } from '@shared/types';
-import { TargetNode } from './TargetNode';
+import { TargetNode } from './studio/TargetNode';
+import { OperationEditor, type Operation as OperationEditorOperation } from './studio/OperationEditor';
 // import './CreateMappingModal.scss';
 
 interface CreateMappingModalProps {
@@ -40,6 +41,8 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
     const [nodes, setNodes] = useState<Node[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
     const [mappingName, setMappingName] = useState('');
+    const [operations, setOperations] = useState<OperationEditorOperation[]>([]);
+    const [showOperations, setShowOperations] = useState(false);
 
     const { data: fileDetails, isLoading: isFileLoading } = useQuery<FileDetailOut, Error>({
         queryKey: ['fileDetails', file.id],
@@ -88,6 +91,22 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
           position: { x: 400, y: (nodes.filter(n => n.type === 'target').length) * 100 },
         };
         setNodes((nds) => [...nds, newNode]);
+    };
+
+    const handleAddOperation = () => {
+        const newOperation: OperationEditorOperation = {
+            op: 'cast',
+            to: 'string'
+        };
+        setOperations(prev => [...prev, newOperation]);
+    };
+
+    const handleOperationChange = (index: number, updatedOperation: OperationEditorOperation) => {
+        setOperations(prev => prev.map((op, i) => i === index ? updatedOperation : op));
+    };
+
+    const handleOperationRemove = (index: number) => {
+        setOperations(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSaveMapping = () => {
@@ -145,6 +164,45 @@ export const CreateMappingModal: React.FC<CreateMappingModalProps> = ({ isOpen, 
                    <button onClick={handleAddTargetNode} className={styles['add-target-button']}>
                      Ajouter un champ cible
                    </button>
+
+                   <div className={styles['operations-section']}>
+                     <div className={styles['operations-header']}>
+                       <h3>🔧 Opérations de Transformation</h3>
+                       <button 
+                         onClick={() => setShowOperations(!showOperations)}
+                         className={styles['toggle-operations-button']}
+                       >
+                         {showOperations ? 'Masquer' : 'Afficher'} les opérations
+                       </button>
+                     </div>
+                     
+                     {showOperations && (
+                       <div className={styles['operations-container']}>
+                         <button 
+                           onClick={handleAddOperation}
+                           className={styles['add-operation-button']}
+                         >
+                           ➕ Ajouter une opération
+                         </button>
+                         
+                         {operations.map((operation, index) => (
+                           <div key={index} className={styles['operation-item']}>
+                             <OperationEditor
+                               operation={operation}
+                               onOperationChange={(updatedOp) => handleOperationChange(index, updatedOp)}
+                               onRemove={() => handleOperationRemove(index)}
+                             />
+                           </div>
+                         ))}
+                         
+                         {operations.length === 0 && (
+                           <p className={styles['no-operations']}>
+                             Aucune opération configurée. Ajoutez des opérations pour transformer vos données.
+                           </p>
+                         )}
+                       </div>
+                     )}
+                   </div>
                 </main>
                 <footer className="modalFooter">
                   <button onClick={onClose} disabled={createMappingMutation.isPending}>Annuler</button>

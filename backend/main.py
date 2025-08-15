@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Imports des modules de l'application
-from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files, mappings, dictionaries
+from app.api.v1 import analyzers, projects, es_config_files, auth, datasets, files, mappings, dictionaries, demo
 from app.core.db import engine, Base, get_db
 from app.core.logging_config import setup_logging
 
@@ -52,6 +52,10 @@ tags_metadata = [
     {
         "name": "Dictionaries",
         "description": "Gestion des dictionnaires (stopwords, synonymes) avec versioning.",
+    },
+    {
+        "name": "Demo",
+        "description": "Endpoints de démonstration pour le Mapping Studio V2.2 et le Workbench.",
     },
     {
         "name": "Health Checks",
@@ -196,6 +200,9 @@ async def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+
+
+
 # --- Inclusion des routeurs de l'API ---
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(datasets.router, prefix="/api/v1/datasets", tags=["Datasets"])
@@ -205,10 +212,11 @@ app.include_router(analyzers.router, prefix="/api/v1/analyzer", tags=["Analyzer"
 app.include_router(es_config_files.router, prefix="/api/v1/es_config_files", tags=["ES Config Files"])
 app.include_router(mappings.router, prefix="/api/v1", tags=["Mappings"])
 app.include_router(dictionaries.router, prefix="/api/v1", tags=["Dictionaries"])
+app.include_router(demo.router, prefix="/api/v1/demo", tags=["Demo"])
 
 if __name__ == "__main__":
     import os
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
     print("[FastAPI] PID:", os.getpid())

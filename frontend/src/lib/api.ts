@@ -17,35 +17,39 @@ if (!API_BASE) {
 // Fallback pour le développement
 const FINAL_API_BASE = API_BASE || 'http://localhost:8000';
 
-// Stockage du token uniquement en mémoire
+// Stockage du token uniquement en mémoire (optionnel si tu utilises des cookies HttpOnly)
 let authToken: string | null = null;
 
 export const api = {
-  // Gestion du token
+  // Gestion du token (utile si tu mixes Bearer + cookies)
   setToken: (token: string | null) => {
     authToken = token;
   },
 
-  // 🔧 Toujours renvoyer un objet indexable
+  // Toujours renvoyer un objet indexable
   headers: (): Record<string, string> => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
-
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
     }
     return headers;
   },
 
-  // Méthodes HTTP avec gestion d'erreurs
+  // Méthodes HTTP avec gestion d'erreurs + cookies
   async getJson<T = any>(path: string, signal?: AbortSignal): Promise<T> {
     const response = await fetch(`${FINAL_API_BASE}${path}`, {
       method: 'GET',
       headers: this.headers(),
+      credentials: 'include', // ✅ envoie les cookies
       signal,
     });
 
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -58,9 +62,13 @@ export const api = {
       method: 'POST',
       headers: this.headers(),
       body: JSON.stringify(body),
+      credentials: 'include', // ✅ envoie les cookies
       signal,
     });
 
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -70,18 +78,17 @@ export const api = {
 
   // Méthodes spécialisées pour les mappings
   async getSchema(etag?: string, signal?: AbortSignal) {
-    // 🔧 Ici, c'est un Record<string,string>, donc indexable sans erreur TS
     const headers = this.headers();
-    if (etag) {
-      headers['If-None-Match'] = etag;
-    }
+    if (etag) headers['If-None-Match'] = etag;
 
     const response = await fetch(`${FINAL_API_BASE}/api/v1/mappings/schema`, {
       method: 'GET',
       headers,
+      credentials: 'include', // ✅ envoie les cookies
       signal,
     });
 
+    // On ne throw pas ici pour laisser le composant gérer 401/304 proprement
     return {
       status: response.status,
       data: response.status === 200 ? await response.json() : null,

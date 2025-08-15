@@ -8,7 +8,7 @@ export default defineConfig({
     globals: true, // Expose describe, it, expect, etc.
     environment: 'jsdom', // Environnement DOM pour les tests React
     setupFiles: ['./src/test/setup.ts'], // Fichier de configuration des tests
-    css: true, // Support des modules CSS
+    css: false, // Désactiver le support CSS pour les tests
   },
   resolve: {
     alias: [

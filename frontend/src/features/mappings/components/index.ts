@@ -1,37 +1,34 @@
 // Composants principaux du Mapping Studio V2.2
-export { MappingWorkbench } from './MappingWorkbench';
 export { MappingWorkbenchV2 } from './MappingWorkbenchV2';
 export { CreateMappingModal } from './CreateMappingModal';
-export { FieldsGrid } from './FieldsGrid';
-export { IdPolicyEditor } from './IdPolicyEditor';
-export { MappingValidator } from './MappingValidator';
-export { SchemaBanner } from './SchemaBanner';
+export { FieldsGrid } from './field_management/FieldsGrid';
+export { IdPolicyEditor, MappingValidator } from './validation';
+export { SchemaBanner } from './studio/SchemaBanner';
 
 // Composants des micro-itérations V2.2.1
-export { default as RichDiffView } from './RichDiffView';
-export { default as PresetsShowcase } from './PresetsShowcase';
-export { default as OperationSuggestions } from './OperationSuggestions';
-export { default as ShareableExport } from './ShareableExport';
-export { default as MicroIterationsDemo } from './MicroIterationsDemo';
+export { default as UnifiedDiffView } from './studio/UnifiedDiffView';
+export { default as PresetsShowcase } from './studio/PresetsShowcase';
+export { default as OperationSuggestions } from './intelligence/OperationSuggestions';
+export { default as ShareableExport } from './studio/ShareableExport';
+
 
 // Composants utilitaires existants
-export { MappingApply } from './MappingApply';
-export { MappingCompiler } from './MappingCompiler';
-export { MappingDryRun } from './MappingDryRun';
+export { MappingApply } from './life_cycle/MappingApply';
+export { MappingCompiler } from './life_cycle/MappingCompiler';
+export { MappingDryRun } from './life_cycle/MappingDryRun';
 export { MappingList } from './MappingList';
-export { TargetNode } from './TargetNode';
-export { TypeInference } from './TypeInference';
-export { JSONPathPlayground } from './JSONPathPlayground';
-export { OperationEditor } from './OperationEditor';
-export { SizeEstimation } from './SizeEstimation';
-export { MetricsBanner } from './MetricsBanner';
-export { DiffView } from './DiffView';
-export { TemplatesMenu } from './TemplatesMenu';
-export { PipelineDnD } from './PipelineDnD';
-export { SortableItem } from './SortableItem';
-export { DocsPreviewVirtualized } from './DocsPreviewVirtualized';
-export { ToastsContainer } from './ToastsContainer';
-export { ShortcutsHelp } from './ShortcutsHelp';
-export { MappingStudioV2Demo } from './MappingStudioV2Demo';
-export { MappingWorkbenchV2Demo } from './MappingWorkbenchV2Demo';
+export { TargetNode } from './studio/TargetNode';
+export { TypeInference } from './intelligence/TypeInference';
+export { JSONPathPlayground } from './intelligence/JSONPathPlayground';
+export { OperationEditor } from './studio/OperationEditor';
+export { SizeEstimation } from './intelligence/SizeEstimation';
+export { MetricsBanner } from './metrics/MetricsBanner';
+
+export { TemplatesMenu } from './studio/TemplatesMenu';
+export { PipelineDnD } from './studio/PipelineDnD';
+export { SortableItem } from './field_management/SortableItem';
+export { DocsPreviewVirtualized } from './intelligence/DocsPreviewVirtualized';
+export { ToastsContainer } from './interface/ToastsContainer';
+export { ShortcutsHelp } from './interface/ShortcutsHelp';
+
 

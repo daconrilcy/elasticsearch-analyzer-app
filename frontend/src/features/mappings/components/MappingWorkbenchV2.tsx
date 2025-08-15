@@ -1,17 +1,18 @@
 import { useState, useCallback } from 'react';
-import { useSchema, useToasts, useShortcuts, useAbortable } from '../hooks';
+import { useToasts, useShortcuts, useAbortable } from '../hooks';
 import { api } from '../../../lib/api';
-import { SchemaBanner, TemplatesMenu, PipelineDnD, DiffView, ShortcutsHelp, ToastsContainer } from './';
-import { TypeInference } from './TypeInference';
-import { SizeEstimation } from './SizeEstimation';
-import { MappingValidator } from './MappingValidator';
-import { IdPolicyEditor } from './IdPolicyEditor';
-import { MappingDryRun } from './MappingDryRun';
-import { MappingCompiler } from './MappingCompiler';
-import { MappingApply } from './MappingApply';
-import { MetricsBanner } from './MetricsBanner';
-import { JSONPathPlayground } from './JSONPathPlayground';
-import styles from './MappingWorkbench.module.scss';
+import { SchemaBanner, TemplatesMenu, PipelineDnD, ShortcutsHelp, ToastsContainer, FieldsGrid, OperationSuggestions, PresetsShowcase, UnifiedDiffView, ShareableExport } from './';
+import { VisualMappingTab } from './studio/VisualMappingTab';
+import { TypeInference } from './intelligence/TypeInference';
+import { SizeEstimation } from './intelligence/SizeEstimation';
+import { MappingValidator, IdPolicyEditor } from './validation';
+import { MappingDryRun } from './life_cycle/MappingDryRun';
+import { MappingCompiler } from './life_cycle/MappingCompiler';
+import { MappingApply } from './life_cycle/MappingApply';
+import { MetricsBanner } from './metrics/MetricsBanner';
+import { JSONPathPlayground } from './intelligence/JSONPathPlayground';
+import { DocsPreviewVirtualized } from './intelligence/DocsPreviewVirtualized';
+import styles from './MappingWorkbenchV2.module.scss';
 
 interface MappingWorkbenchV2Props {
   mapping: any;
@@ -24,12 +25,15 @@ export function MappingWorkbenchV2({
   sampleData,
   onMappingUpdate,
 }: MappingWorkbenchV2Props) {
-  const [activeTab, setActiveTab] = useState<'validation' | 'intelligence' | 'lifecycle' | 'studio'>('validation');
+  const [activeTab, setActiveTab] = useState<'validation' | 'intelligence' | 'lifecycle' | 'studio' | 'visual-mapping'>('validation');
   const [compiledHash, setCompiledHash] = useState<string>('');
   const [previousMapping, setPreviousMapping] = useState<any>(null);
+  const [inferredFields, setInferredFields] = useState<any[]>([]);
+  const [selectedOperation, setSelectedOperation] = useState<string | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<any>(null);
+  const [comparisonMapping, setComparisonMapping] = useState<any>(null);
 
   // Hooks V2.2
-  const { schema, fieldTypes, operations, offline, updated } = useSchema();
   const { show, success, error: showError } = useToasts();
   const { signalNext } = useAbortable();
 
@@ -59,8 +63,14 @@ export function MappingWorkbenchV2({
       }
     };
 
-    return { onRun: handleDryRun, onExport: () => console.log('Export'), onSave: handleValidation };
-  }, [mapping, signalNext, success, showError]);
+    const handleQuickExport = () => {
+      // Basculer vers l'onglet studio pour accéder à l'export
+      setActiveTab('studio');
+      show('Onglet Studio ouvert - Accédez à la section Export & Partage', 'info');
+    };
+
+    return { onRun: handleDryRun, onExport: handleQuickExport, onSave: handleValidation };
+  }, [mapping, signalNext, success, showError, setActiveTab, show]);
 
   useShortcuts(handleShortcuts());
 
@@ -92,7 +102,53 @@ export function MappingWorkbenchV2({
     [mapping, onMappingUpdate],
   );
 
-  // Callbacks “V2.2”
+  // Gestion des champs avec FieldsGrid
+  const handleAddField = useCallback(() => {
+    const newField = {
+      id: `field_${Date.now()}`,
+      target: `champ_${Date.now()}`,
+      type: 'text',
+      input: [{ kind: 'column' as const, name: '' }],
+      pipeline: [],
+    };
+
+    const newFields = [...(mapping?.fields || []), newField];
+    onMappingUpdate?.({
+      ...mapping,
+      fields: newFields,
+    });
+    show('Nouveau champ ajouté !', 'success');
+  }, [mapping, onMappingUpdate, show]);
+
+  const handleRemoveField = useCallback((fieldId: string) => {
+    const newFields = (mapping?.fields || []).filter((f: any) => f.id !== fieldId);
+    onMappingUpdate?.({
+      ...mapping,
+      fields: newFields,
+    });
+    show('Champ supprimé !', 'success');
+  }, [mapping, onMappingUpdate, show]);
+
+  const handleFieldChange = useCallback((fieldId: string, changes: any) => {
+    const newFields = (mapping?.fields || []).map((f: any) => 
+      f.id === fieldId ? { ...f, ...changes } : f
+    );
+    onMappingUpdate?.({
+      ...mapping,
+      fields: newFields,
+    });
+  }, [mapping, onMappingUpdate]);
+
+  // Réordonnancement des champs par drag & drop
+  const handleFieldsReorder = useCallback((newFields: any[]) => {
+    onMappingUpdate?.({
+      ...mapping,
+      fields: newFields,
+    });
+    show('Ordre des champs mis à jour !', 'success');
+  }, [mapping, onMappingUpdate, show]);
+
+  // Callbacks "V2.2"
   const handleTypesApplied = useCallback(
     (inferredTypes: Record<string, any>) => {
       console.log('Types appliqués:', inferredTypes);
@@ -100,6 +156,53 @@ export function MappingWorkbenchV2({
       onMappingUpdate?.(mapping);
     },
     [mapping, onMappingUpdate, show],
+  );
+
+  // Nouveau callback pour capturer les types inférés
+  const handleInferenceComplete = useCallback(
+    (inferredTypes: any[]) => {
+      console.log('🎯 handleInferenceComplete appelé avec:', inferredTypes);
+      console.log('📊 Nombre de types inférés:', inferredTypes.length);
+      setInferredFields(inferredTypes);
+      show('Types inférés avec succès !', 'success');
+    },
+    [show],
+  );
+
+  // Callback pour gérer la sélection d'opérations suggérées
+  const handleOperationSuggestion = useCallback(
+    (operation: string) => {
+      console.log('Opération suggérée sélectionnée:', operation);
+      setSelectedOperation(operation);
+      show(`Opération "${operation}" sélectionnée !`, 'success');
+      
+      // Ici on pourrait automatiquement ajouter l'opération au pipeline
+      // ou ouvrir l'OperationEditor avec cette opération pré-remplie
+    },
+    [show],
+  );
+
+  // Callback pour gérer la sélection de presets
+  const handlePresetSelect = useCallback(
+    (preset: any) => {
+      console.log('Preset sélectionné:', preset);
+      setSelectedPreset(preset);
+      show(`Template "${preset.name}" sélectionné !`, 'success');
+      
+      // Ici on pourrait automatiquement appliquer le preset au mapping
+      // ou ouvrir un assistant de configuration
+    },
+    [show],
+  );
+
+  // Callback pour gérer la sélection d'un mapping de comparaison
+  const handleComparisonMappingSelect = useCallback(
+    (mappingToCompare: any) => {
+      console.log('Mapping de comparaison sélectionné:', mappingToCompare);
+      setComparisonMapping(mappingToCompare);
+      show(`Mapping de comparaison sélectionné !`, 'success');
+    },
+    [show],
   );
 
   const handleEstimationComplete = useCallback(
@@ -194,8 +297,27 @@ export function MappingWorkbenchV2({
   const renderOperation = useCallback(
     (operation: any) => (
       <div className={styles.operationItem}>
-        <span className={styles.operationType}>{operation.type}</span>
-        <span className={styles.operationConfig}>{JSON.stringify(operation.config).slice(0, 50)}...</span>
+        <div className={styles.operationHeader}>
+          <span className={styles.operationType}>{operation.type}</span>
+          <span className={styles.operationId}>#{operation.id}</span>
+        </div>
+        <div className={styles.operationConfig}>
+          {operation.type === 'cast' && (
+            <span>→ {operation.config.to}</span>
+          )}
+          {operation.type === 'regex_replace' && (
+            <span>{operation.config.pattern} → {operation.config.replacement}</span>
+          )}
+          {operation.type === 'filter' && (
+            <span>{operation.config.condition}: {operation.config.min}-{operation.config.max}</span>
+          )}
+          {operation.type === 'trim' && (
+            <span>Supprime les espaces</span>
+          )}
+          {Object.keys(operation.config).length === 0 && (
+            <span>Aucun paramètre</span>
+          )}
+        </div>
       </div>
     ),
     [],
@@ -214,6 +336,16 @@ export function MappingWorkbenchV2({
           <p>Outils avancés avec anti-drift, performance et UX améliorée</p>
         </div>
         <div className={styles.headerRight}>
+          <button
+            className={styles.quickExportButton}
+            onClick={() => {
+              setActiveTab('studio');
+              show('Onglet Studio ouvert - Accédez à la section Export & Partage', 'info');
+            }}
+            title="Export rapide du mapping"
+          >
+            📤 Export Rapide
+          </button>
           <TemplatesMenu onApply={handleTemplateApply} />
           <ShortcutsHelp />
         </div>
@@ -243,6 +375,12 @@ export function MappingWorkbenchV2({
           onClick={() => setActiveTab('studio')}
         >
           🎨 Studio V2.2
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === 'visual-mapping' ? styles.active : ''}`}
+          onClick={() => setActiveTab('visual-mapping')}
+        >
+          🎯 Mapping Visuel
         </button>
       </div>
 
@@ -275,7 +413,96 @@ export function MappingWorkbenchV2({
             <h3>Intelligence Artificielle</h3>
             <p>Utilisez l'IA pour inférer les types et estimer la taille de votre index.</p>
 
-            <TypeInference sampleData={sampleData} onTypesApplied={handleTypesApplied} />
+            <TypeInference sampleData={sampleData} onTypesApplied={handleTypesApplied} onInferenceComplete={handleInferenceComplete} />
+
+            {/* Debug: Afficher l'état des types inférés */}
+            <div className={styles.debugSection}>
+              <h4>🔍 Debug - État de l'Inférence</h4>
+              <p>Types inférés: {inferredFields.length}</p>
+              <p>État: {inferredFields.length > 0 ? 'Types détectés' : 'Aucun type inféré'}</p>
+              
+              {/* Bouton de test pour simuler des types inférés */}
+              <button
+                onClick={() => {
+                  const testInferredFields = [
+                    {
+                      field: 'email',
+                      suggested_type: 'email',
+                      confidence: 0.95,
+                      sample_values: ['test@example.com', 'user@domain.org'],
+                      reasoning: 'Format email détecté'
+                    },
+                    {
+                      field: 'phone',
+                      suggested_type: 'phone',
+                      confidence: 0.88,
+                      sample_values: ['+33123456789', '0123456789'],
+                      reasoning: 'Format téléphone détecté'
+                    }
+                  ];
+                  console.log('🧪 Test: Simulation de types inférés:', testInferredFields);
+                  setInferredFields(testInferredFields);
+                  show('Types de test chargés !', 'success');
+                }}
+                className={styles.testButton}
+              >
+                🧪 Charger des Types de Test
+              </button>
+              
+              {inferredFields.length > 0 && (
+                <div>
+                  <p>Champs détectés:</p>
+                  <ul>
+                    {inferredFields.map((field, index) => (
+                      <li key={index}>
+                        {field.field}: {field.suggested_type} (confiance: {Math.round(field.confidence * 100)}%)
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Suggestions d'opérations intelligentes basées sur l'inférence de types */}
+            {inferredFields.length > 0 && (
+              <div className={styles.suggestionsSection}>
+                <OperationSuggestions
+                  inferredFields={inferredFields}
+                  onOperationSelect={handleOperationSuggestion}
+                />
+                
+                {selectedOperation && (
+                  <div className={styles.selectedOperation}>
+                    <h4>✅ Opération sélectionnée : {selectedOperation}</h4>
+                    <p>Cette opération peut être ajoutée à votre pipeline de transformation</p>
+                    <button
+                      onClick={() => {
+                        // Ajouter automatiquement l'opération au pipeline
+                        const newOperation = {
+                          id: `op_${Date.now()}`,
+                          type: selectedOperation,
+                          config: {}
+                        };
+                        const newMapping = {
+                          ...mapping,
+                          fields: mapping.fields?.map((field: any, index: number) => 
+                            index === 0 
+                              ? { ...field, pipeline: [...(field.pipeline || []), newOperation] }
+                              : field
+                          ) || []
+                        };
+                        onMappingUpdate?.(newMapping);
+                        setSelectedOperation(null);
+                        show(`Opération "${selectedOperation}" ajoutée au pipeline !`, 'success');
+                      }}
+                      className={styles.addOperationButton}
+                    >
+                      ➕ Ajouter au Pipeline
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <SizeEstimation
               mapping={mapping}
@@ -292,6 +519,21 @@ export function MappingWorkbenchV2({
               sampleData={sampleData}
               onPathSelect={(path) => console.log('JSONPath sélectionné:', path)}
             />
+
+            <div className={styles.previewSection}>
+              <h4>📄 Prévisualisation des Documents</h4>
+              <p>Visualisez vos données d'échantillon avec une interface performante et paginée.</p>
+              
+              <DocsPreviewVirtualized
+                documents={sampleData.map((doc, index) => ({
+                  _id: `doc_${index}`,
+                  _source: doc
+                }))}
+                height={400}
+                initialLimit={50}
+                incrementSize={25}
+              />
+            </div>
           </div>
         )}
 
@@ -359,45 +601,198 @@ export function MappingWorkbenchV2({
             <h3>🎨 Studio V2.2 - Interface Avancée</h3>
             <p>Interface moderne avec drag & drop, templates DSL et diff de versions.</p>
 
+            {/* Section des Templates Prêts à l'Emploi */}
+            <div className={styles.presetsSection}>
+              <h4>🚀 Templates Prêts à l'Emploi</h4>
+              <p>Commencez rapidement avec nos presets optimisés pour les cas d'usage courants</p>
+              
+              <PresetsShowcase
+                onPresetSelect={handlePresetSelect}
+                showHeader={false}
+              />
+              
+              {selectedPreset && (
+                <div className={styles.selectedPreset}>
+                  <h4>✅ Template sélectionné : {selectedPreset.name}</h4>
+                  <p>Ce template propose {selectedPreset.fields} champs et {selectedPreset.operations} opérations</p>
+                  <div className={styles.presetActions}>
+                    <button
+                      onClick={() => {
+                        // Ici on pourrait appliquer automatiquement le preset
+                        show(`Template "${selectedPreset.name}" sera appliqué !`, 'success');
+                        setSelectedPreset(null);
+                      }}
+                      className={styles.applyPresetButton}
+                    >
+                      ✨ Appliquer ce Template
+                    </button>
+                    <button
+                      onClick={() => setSelectedPreset(null)}
+                      className={styles.cancelPresetButton}
+                    >
+                      ❌ Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Section de Comparaison de Mappings avec RichDiffView */}
+            <div className={styles.comparisonSection}>
+              <h4>🔍 Comparaison de Mappings</h4>
+              <p>Comparez votre mapping actuel avec d'autres versions ou templates pour identifier les différences.</p>
+              
+              <div className={styles.comparisonControls}>
+                <div className={styles.comparisonMappingSelector}>
+                  <h5>📋 Mapping de Comparaison</h5>
+                  <p>Sélectionnez un mapping à comparer avec votre mapping actuel :</p>
+                  
+                  <div className={styles.mappingOptions}>
+                    <button
+                      onClick={() => {
+                        // Utiliser le mapping précédent comme comparaison
+                        if (previousMapping) {
+                          handleComparisonMappingSelect(previousMapping);
+                        } else {
+                          show('Aucun mapping précédent disponible', 'info');
+                        }
+                      }}
+                      className={styles.comparisonButton}
+                      disabled={!previousMapping}
+                    >
+                      📊 Comparer avec la version précédente
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Créer un mapping de test pour la comparaison
+                        const testMapping = {
+                          name: 'Mapping de Test',
+                          version: '2.2',
+                          fields: [
+                            {
+                              name: 'test_field',
+                              type: 'keyword',
+                              pipeline: []
+                            }
+                          ]
+                        };
+                        handleComparisonMappingSelect(testMapping);
+                      }}
+                      className={styles.comparisonButton}
+                    >
+                      🧪 Comparer avec un mapping de test
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Réinitialiser la comparaison
+                        setComparisonMapping(null);
+                        show('Comparaison réinitialisée', 'info');
+                      }}
+                      className={styles.comparisonButton}
+                      disabled={!comparisonMapping}
+                    >
+                      🔄 Réinitialiser la comparaison
+                    </button>
+                  </div>
+                </div>
+                
+                {comparisonMapping && (
+                  <div className={styles.comparisonInfo}>
+                    <h5>✅ Mapping de comparaison sélectionné</h5>
+                    <p><strong>Nom :</strong> {comparisonMapping.name}</p>
+                    <p><strong>Version :</strong> {comparisonMapping.version}</p>
+                    <p><strong>Champs :</strong> {comparisonMapping.fields?.length || 0}</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* UnifiedDiffView pour afficher les différences */}
+              {comparisonMapping && (
+                <div className={styles.richDiffContainer}>
+                  <UnifiedDiffView
+                    leftMapping={mapping}
+                    rightMapping={comparisonMapping}
+                    mode="advanced"
+                    showInline={false}
+                    showUnchanged={true}
+                    className={styles.richDiffView}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Section d'Export et Partage */}
+            <div className={styles.exportSection}>
+              <h4>📤 Export & Partage</h4>
+              <p>Exportez votre mapping dans différents formats et partagez-le facilement avec votre équipe.</p>
+              
+              <ShareableExport
+                mappingDSL={{
+                  name: mapping?.name || 'Mapping Studio V2.2',
+                  description: `Mapping créé avec Mapping Studio V2.2 - ${mapping?.fields?.length || 0} champs, ${mapping?.fields?.reduce((total: number, field: any) => total + (field.pipeline?.length || 0), 0) || 0} opérations`,
+                  mapping: mapping,
+                  operations: mapping?.fields?.reduce((ops: any[], field: any) => [...ops, ...(field.pipeline || [])], []) || [],
+                  sample_data: sampleData,
+                  metadata: {
+                    version: mapping?.version || '2.2',
+                    created_at: new Date().toISOString().split('T')[0],
+                    author: 'Mapping Studio User',
+                    tags: ['mapping-studio', 'v2.2', 'elasticsearch']
+                  }
+                }}
+                onExport={(exportData) => {
+                  console.log('Export effectué:', exportData);
+                  show('Mapping exporté avec succès !', 'success');
+                }}
+                className={styles.shareableExport}
+              />
+            </div>
+
             <div className={styles.studioGrid}>
               <div className={styles.studioLeft}>
-                <div className={styles.schemaSection}>
-                  <h4>📚 Schéma Dynamique</h4>
-                  <div className={styles.schemaInfo}>
-                    <span>Version: {schema?.version || 'Chargement...'}</span>
-                    <span>Types: {fieldTypes.length}</span>
-                    <span>Opérations: {operations.length}</span>
-                    {offline && <span className={styles.offlineBadge}>📡 Hors ligne</span>}
-                    {updated && <span className={styles.updatedBadge}>🔄 Mis à jour</span>}
-                  </div>
-
-                  <div className={styles.fieldTypes}>
-                    <h5>Types de champs disponibles</h5>
-                    <div className={styles.fieldTypeGrid}>
-                      {fieldTypes.map((type) => (
-                        <button
-                          key={type}
-                          className={styles.fieldTypeButton}
-                          onClick={() => {
-                            const newMapping = {
-                              ...mapping,
-                              fields: [...(mapping.fields || []), { name: `field_${Date.now()}`, type }],
-                            };
-                            onMappingUpdate?.(newMapping);
-                            show(`Champ ${type} ajouté !`, 'success');
-                          }}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div className={styles.fieldsSection}>
+                  <h4>📝 Gestion des Champs</h4>
+                  <p>Créez et configurez vos champs de mapping avec une interface complète.</p>
+                  
+                  <FieldsGrid
+                    fields={mapping?.fields || []}
+                    onAddField={handleAddField}
+                    onRemoveField={handleRemoveField}
+                    onFieldChange={handleFieldChange}
+                    onFieldsReorder={handleFieldsReorder}
+                  />
                 </div>
               </div>
 
               <div className={styles.studioRight}>
                 <div className={styles.pipelineSection}>
-                  <h4>🔧 Pipeline d'opérations</h4>
+                  <div className={styles.pipelineHeader}>
+                    <h4>🔧 Pipeline d'opérations</h4>
+                    <button
+                      onClick={() => {
+                        const newOperation = {
+                          id: `op_${Date.now()}`,
+                          type: 'cast',
+                          config: { to: 'string' }
+                        };
+                        const newMapping = {
+                          ...mapping,
+                          fields: mapping.fields?.map((field: any, index: number) => 
+                            index === 0 
+                              ? { ...field, pipeline: [...(field.pipeline || []), newOperation] }
+                              : field
+                          ) || []
+                        };
+                        onMappingUpdate?.(newMapping);
+                        show('Nouvelle opération ajoutée !', 'success');
+                      }}
+                      className={styles.addOperationButton}
+                    >
+                      ➕ Ajouter une opération
+                    </button>
+                  </div>
                   <PipelineDnD
                     operations={mapping?.fields?.[0]?.pipeline || []}
                     onChange={handlePipelineChange}
@@ -408,11 +803,24 @@ export function MappingWorkbenchV2({
                 {previousMapping && (
                   <div className={styles.diffSection}>
                     <h4>📊 Diff de versions</h4>
-                    <DiffView oldMapping={previousMapping} newMapping={mapping} />
+                    <UnifiedDiffView 
+                      leftMapping={previousMapping} 
+                      rightMapping={mapping}
+                      mode="simple"
+                    />
                   </div>
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'visual-mapping' && (
+          <div className={styles.tabContent}>
+            <VisualMappingTab
+              mapping={mapping}
+              onMappingChange={onMappingUpdate || (() => {})}
+            />
           </div>
         )}
       </div>
